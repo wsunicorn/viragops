@@ -1,0 +1,57 @@
+question_id,relevant_document_id,relevant_chunk_id,section,note
+q_001,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 6, Khoản 4.a",factoid
+q_002,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 6, Khoản 4.c",factoid
+q_003,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 10, Khoản 2",factoid
+q_004,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 4, Khoản 1",factoid
+q_005,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),Điều 14,procedural
+q_006,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 11, Khoản 3",factoid
+q_007,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 11, Khoản 2",factoid
+q_008,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 12, Khoản 1",factoid
+q_009,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 12, Khoản 4",factoid
+q_010,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 25, Khoản 2",factoid
+q_011,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 25, Khoản 2.c",factoid
+q_012,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 25, Khoản 2.b",factoid
+q_013,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 26, Khoản 2.a",procedural
+q_014,doc_qd610_thi_danh_gia,(pending Phase 3 chunking),"Điều 19, Khoản 3",factoid
+q_015,doc_qd610_thi_danh_gia,(pending Phase 3 chunking),"Điều 9, Khoản 2",factoid
+q_016,doc_tqa_phuc_khao,(pending Phase 3 chunking),"Điều 26, 27 (QĐ 610/QĐ-ĐHCN)",factoid
+q_017,doc_tqa_phuc_khao,(pending Phase 3 chunking),"Điều 26, 27 (QĐ 610/QĐ-ĐHCN)",factoid
+q_018,doc_tqa_phuc_khao,(pending Phase 3 chunking),"Điều 26, 27 (QĐ 610/QĐ-ĐHCN)",factoid
+q_019,doc_tqa_phuc_khao,(pending Phase 3 chunking),"Điều 26, 27 (QĐ 610/QĐ-ĐHCN)",factoid
+q_020,doc_tqa_phuc_khao,(pending Phase 3 chunking),"Điều 26, 27 (QĐ 610/QĐ-ĐHCN)",factoid
+q_021,doc_tqa_phuc_khao,(pending Phase 3 chunking),"Điều 26, 27 (QĐ 610/QĐ-ĐHCN)",multi_hop
+q_022,doc_camnang_dieu_kien_tot_nghiep,(pending Phase 3 chunking),"Điều kiện xét tốt nghiệp, mục 1.b",factoid
+q_023,doc_camnang_dieu_kien_tot_nghiep,(pending Phase 3 chunking),"Điều kiện xét tốt nghiệp, mục 1.e",factoid
+q_024,doc_camnang_dieu_kien_tot_nghiep,(pending Phase 3 chunking),"Điều kiện xét tốt nghiệp, mục 1.e",factoid
+q_025,doc_camnang_dieu_kien_tot_nghiep,(pending Phase 3 chunking),"Điều kiện xét tốt nghiệp, mục 1.e",factoid
+q_026,doc_camnang_dieu_kien_tot_nghiep,(pending Phase 3 chunking),"Điều kiện xét tốt nghiệp, Lưu ý - Trường hợp 2",factoid
+q_027,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 35, Khoản 2",procedural
+q_028,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 35, Khoản 2",multi_hop
+q_029,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 33, Khoản 2",factoid
+q_030,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 35, Khoản 4",factoid
+q_031,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 19, Khoản 1.a",factoid
+q_032,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 19, Khoản 1.c",factoid
+q_033,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 19, Khoản 2.a",factoid
+q_034,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 19, Khoản 2.d",factoid
+q_035,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 24, Khoản 2",factoid
+q_036,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 24, Khoản 2",factoid
+q_037,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 24, Khoản 3",factoid
+q_038,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 17, Khoản 1.d",factoid
+q_039,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 17, Khoản 1.d",factoid
+q_040,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 17, Khoản 1.d",factoid
+q_041,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 20, Khoản 2.c",factoid
+q_042,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 20, Khoản 2.b",procedural
+q_043,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 21, Khoản 2",factoid
+q_044,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 21, Khoản 2.a",factoid
+q_045,doc_camnang_chuan_tieng_anh,(pending Phase 3 chunking),"Quy định chuẩn tiếng Anh, Lưu ý",factoid
+q_046,doc_camnang_chuan_tieng_anh,(pending Phase 3 chunking),"Quy định chuẩn tiếng Anh, Lưu ý",factoid
+q_047,doc_camnang_bang_quy_doi_tieng_anh,(pending Phase 3 chunking),Bảng quy đổi điểm chứng chỉ tiếng Anh,factoid
+q_048,doc_camnang_bang_quy_doi_tieng_anh,(pending Phase 3 chunking),"Bảng quy đổi điểm chứng chỉ tiếng Anh, Lưu ý",factoid
+q_049,(none - refusal/out_of_scope),(pending Phase 3 chunking),,factoid
+q_050,(none - refusal/out_of_scope),(pending Phase 3 chunking),,factoid
+q_051,(none - refusal/out_of_scope),(pending Phase 3 chunking),,out_of_scope
+q_052,(none - refusal/out_of_scope),(pending Phase 3 chunking),,out_of_scope
+q_053,(none - refusal/out_of_scope),(pending Phase 3 chunking),,adversarial
+q_054,(none - refusal/out_of_scope),(pending Phase 3 chunking),,adversarial
+q_055,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),Điều 12,ambiguous
+q_056,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 19, Khoản 1 và Khoản 2.a",multi_hop

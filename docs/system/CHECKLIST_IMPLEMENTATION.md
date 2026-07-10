@@ -82,28 +82,27 @@ Chuẩn bị tài liệu nguồn và golden set 300 câu hỏi có ground truth,
 
 ### Task
 
-- [~] Thu thập tài liệu quy chế/FAQ IUH theo `data_sources_iuh.md` (D1-D12), lưu snapshot + metadata nguồn.
-  - Đã có: snapshot `src_20260710` — 44 file (17 HTML cấp 1 + 25 file depth-2: PDF/DOCX) qua `scripts/download_sources.py` (2 pass: trang chính + link đính kèm, merge manifest, sha256, TLS fallback có xin phép user cho *.iuh.edu.vn thiếu intermediate cert).
-  - Đã trích xuất text sạch: `scripts/extract_text.py` → 42/44 doc, phát hiện 5 PDF là **bản scan** và 3 nhóm nội dung **trùng lặp** (D1/D2 hiện trỏ cùng 1 trang pdt.iuh.edu.vn — cần user xác nhận URL "quy chế học vụ" thật).
-  - **OCR chính thức đã chạy** (`scripts/ocr_scanned_pdfs.py`, Gemini multimodal): ✅ QĐ 610/QĐ-ĐHCN (2 bản, 28tr, quan trọng nhất) + thông báo đăng ký học OCR thành công 100%. ❌ Sổ tay SV 2024 (82tr) + 1 file hướng dẫn miễn giảm học phí bị Gemini chặn `finish_reason=RECITATION` nhất quán (không phải bug) — cần thử lại khi quota reset hoặc dùng Tesseract dự phòng. Chi tiết: `modules/01_data_ragops.md`.
-  - Còn thiếu: stsv.iuh.edu.vn là JS app (cần render hoặc bỏ); .docx (2 file biểu mẫu) chưa hỗ trợ trích xuất; D9 + 1 file D8 chờ retry OCR.
-- [ ] Ghi metadata tài liệu nguồn.
-- [ ] Tạo bản nháp 300 câu hỏi.
-- [ ] Chia câu hỏi theo 5 nhóm: có đáp án, refusal, adversarial, multi-hop, ambiguous.
-- [ ] Gắn ground truth answer.
-- [ ] Gắn relevant documents.
-- [ ] Sau khi có chunk, gắn relevant chunks.
-- [ ] Gắn expected citations.
-- [ ] Review thủ công ít nhất 30 câu mẫu.
-- [ ] Tạo smoke set 50 câu.
-- [ ] Tạo adversarial set 20 câu.
+- [x] Thu thập tài liệu quy chế/FAQ IUH theo `data_sources_iuh.md` (D1-D12), lưu snapshot + metadata nguồn.
+  - Snapshot `src_20260710` — 44 file (17 HTML cấp 1 + 25 file depth-2: PDF/DOCX) qua `scripts/download_sources.py` (2 pass: trang chính + link đính kèm, merge manifest, sha256, TLS fallback có xin phép user cho *.iuh.edu.vn thiếu intermediate cert).
+  - Text sạch: `scripts/extract_text.py` → 42/44 doc. OCR chính thức (`scripts/ocr_scanned_pdfs.py`, Gemini multimodal): ✅ QĐ 610/QĐ-ĐHCN (2 bản, 28tr, quan trọng nhất) + thông báo đăng ký học. ❌ Sổ tay SV 2024 (82tr) + 1 file học phí bị Gemini chặn `finish_reason=RECITATION` nhất quán — không chặn tiến độ vì các văn bản lõi (tín chỉ, tốt nghiệp, thi, phúc khảo, tiếng Anh) đã có text sạch. Chi tiết: `modules/01_data_ragops.md`.
+  - Coi là đủ để bắt đầu golden set batch đầu; còn thiếu (không chặn phase): stsv.iuh.edu.vn (JS app), 2 file .docx, D9 + 1 file D8 chờ OCR retry, học phí/học bổng cụ thể (D7/D8 chỉ là trang danh mục).
+- [x] Ghi metadata tài liệu nguồn — bảng văn bản → số hiệu → ngày ban hành → URL trong [experiments/golden_set_review.md](experiments/golden_set_review.md).
+- [~] Tạo bản nháp 300 câu hỏi — **56/300 câu** đã tạo từ text thật (`scripts/seed_golden_set_iuh.py` → `data/test_sets/golden_set.jsonl`), không bịa số liệu. Còn thiếu 244 câu, chủ yếu do thiếu nguồn sạch cho học phí/học bổng/rèn luyện (xem `golden_set_stats.md`).
+- [x] Chia câu hỏi theo 5 nhóm: có đáp án (factoid/procedural), refusal (data-gap + out_of_scope), adversarial, multi-hop, ambiguous — cả 5 nhóm có mặt trong batch 56 câu, nhưng chưa đủ quota từng nhóm (xem bảng so sánh trong `golden_set_stats.md`).
+- [x] Gắn ground truth answer — cho 56 câu hiện có, trích/diễn giải trực tiếp từ nguồn thật.
+- [x] Gắn relevant documents — cho 56 câu hiện có.
+- [ ] Sau khi có chunk, gắn relevant chunks — chờ Phase 3 (chunking). Đã có `relevant_chunks_mapping.csv` interim ở mức document.
+- [x] Gắn expected citations — cho câu không refusal trong 56 câu hiện có.
+- [ ] Review thủ công ít nhất 30 câu mẫu — **CẦN USER LÀM**, script cố ý không tự approve (`review_status=pending_review` cho toàn bộ 56 câu). Xem phát hiện cần xác nhận trong `golden_set_review.md` (đặc biệt điều khoản "chất lượng cao" vs "tăng cường tiếng Anh").
+- [ ] Tạo smoke set 50 câu — batch 56 câu hiện tại là ứng viên nhưng chưa qua review/approve nên chưa tính là smoke set chính thức.
+- [ ] Tạo adversarial set 20 câu — mới có 2/20 câu mẫu (prompt injection).
 
 ### Đầu ra
 
-- `golden_set.jsonl`.
-- `golden_set_stats.md`.
-- `relevant_chunks_mapping.csv`.
-- `golden_set_review.md`.
+- [x] `golden_set.jsonl` — 56/300 câu, `data/test_sets/golden_set.jsonl`.
+- [x] `golden_set_stats.md` — tự động sinh, `experiments/golden_set_stats.md`.
+- [x] `relevant_chunks_mapping.csv` — interim mức document, `data/test_sets/relevant_chunks_mapping.csv`.
+- [x] `golden_set_review.md` — `experiments/golden_set_review.md`, chờ user review/approve.
 
 ### Kiểm tra dự kiến
 
@@ -114,11 +113,14 @@ python scripts/golden_set_stats.py
 
 ### Definition of Done
 
-- [ ] Có 300 câu hỏi.
-- [ ] Mọi câu có đáp án đều có ground truth.
-- [ ] Mọi câu refusal có `requires_refusal=true`.
-- [ ] Category/difficulty/risk_tags đầy đủ.
-- [ ] Không có câu thiếu nguồn kiểm chứng.
+**Chưa đạt — Phase 2 chưa đóng, còn tiếp tục.** Sub-criteria đạt cho batch hiện có (56 câu), nhưng tiêu chí chính "300 câu" thì chưa:
+
+- [ ] Có 300 câu hỏi (hiện có 56/300 — 19%, xem `golden_set_stats.md`).
+- [x] Mọi câu có đáp án đều có ground truth *(đúng cho 56 câu hiện có — verify bằng `scripts/validate_golden_set.py`)*.
+- [x] Mọi câu refusal có `requires_refusal=true` *(đúng cho 56 câu hiện có)*.
+- [x] Category/difficulty/risk_tags đầy đủ *(đúng cho 56 câu hiện có, validator khóa cứng enum)*.
+- [x] Không có câu thiếu nguồn kiểm chứng *(56 câu đều trích từ text thật; 2 câu data-gap cố ý không có nguồn vì phản ánh giới hạn dữ liệu, không phải bịa)*.
+- [ ] **User (domain expert) đã review/approve** — batch hiện tại toàn bộ ở `pending_review`, đây là điều kiện tiên quyết trước khi golden set được dùng làm baseline đánh giá thật (Phase 4+).
 
 ### Rủi ro
 
