@@ -1,0 +1,31 @@
+# Quality gate config — nguồn ngưỡng chuẩn: docs/system/contracts/metric_definitions.md
+gate_config_id: gate_default_v1
+eval_modes:
+  ci: smoke        # 50 câu
+  nightly: full    # 300 câu
+critical_metrics:
+  recall_at_5:
+    min: 0.85
+  faithfulness:
+    min: 0.85
+  answer_relevance:
+    min: 0.80
+  hallucination_rate:
+    max: 0.05
+  refusal_accuracy:
+    min: 0.90
+  p95_latency_seconds:
+    max: 6.0
+  error_rate:
+    max: 0.01
+warning_metrics:
+  citation_accuracy:
+    min: 0.85
+  cost_per_request_usd:
+    max: 0.005
+regression:
+  max_quality_drop: 0.03   # critical metric giảm >3% so baseline -> BLOCK
+decision:
+  deploy_if: all_critical_pass
+  warn_if: any_warning_violated
+  block_if: any_critical_violated

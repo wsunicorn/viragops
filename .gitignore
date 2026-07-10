@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Env & secrets — KHÔNG commit secret thật
+.env
+.env.local
+*.key
+
+# Data artifacts (theo dõi bằng DVC, không commit trực tiếp)
+data/raw/*
+data/processed/*
+data/chunks/*
+!data/**/.gitkeep
+!data/test_sets/
+
+# Experiment / observability local state
+mlruns/
+mlartifacts/
+*.duckdb
+
+# IDE / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+
+# Docker local overrides
+docker-compose.override.yml

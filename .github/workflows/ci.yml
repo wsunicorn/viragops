@@ -1,0 +1,38 @@
+# CI skeleton — Phase 1: lint + unit tests.
+# Phase 9 sẽ thêm job quality-gate: smoke eval 50 câu + regression check
+# (xem docs/system/modules/06_quality_gate_cicd.md).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Lint (ruff)
+        run: ruff check src tests
+
+      - name: Unit tests
+        run: pytest tests/unit -q
+
+  # quality-gate:   # Phase 9 — placeholder
+  #   needs: lint-test
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - run: python scripts/run_evaluation.py --mode smoke
+  #     - run: python scripts/check_gate.py --config config/quality_gate.yaml

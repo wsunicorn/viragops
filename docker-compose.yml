@@ -1,0 +1,72 @@
+# ============================================================
+# LLMOps RAG Platform — Docker Compose
+# Phase 1: hạ tầng lõi (api, qdrant, postgres, valkey).
+# Mở rộng theo phase (xem docs/system/operations/deployment_docker_compose.md):
+#   Phase 7  -> litellm
+#   Phase 10 -> langfuse-web/worker, clickhouse, minio, prometheus, grafana
+#   Phase 8+ -> mlflow
+# ============================================================
+
+services:
+  api:
+    build: .
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    environment:
+      - APP_ENV=${APP_ENV:-local}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-llmops}
+      - POSTGRES_USER=${POSTGRES_USER:-admin}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      - QDRANT_URL=http://qdrant:6333
+      - VALKEY_URL=redis://valkey:6379/0
+      - LITELLM_BASE_URL=http://litellm:4000
+      - LANGFUSE_HOST=http://langfuse-web:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+      valkey:
+        condition: service_healthy
+
+  qdrant:
+    image: qdrant/qdrant:v1.15.4
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  postgres:
+    image: postgres:17
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-llmops}
+      - POSTGRES_USER=${POSTGRES_USER:-admin}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-llmops}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - valkey_data:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  qdrant_data:
+  pg_data:
+  valkey_data:

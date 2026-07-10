@@ -1,0 +1,37 @@
+# Model gateway config — schema chuẩn: docs/system/contracts/config_schemas.md
+# QUY TẮC: runtime KHÔNG hard-code model. Mọi model call đi qua tier ở đây.
+# Model ID phải được pin/kiểm chứng tại thời điểm chạy thực nghiệm (Phase 7).
+gateway_config_id: gateway_default_v1
+default_timeout_seconds: 20
+budget:
+  daily_usd: 5.0
+  monthly_usd: 100.0
+routes:
+  cheap:
+    primary:
+      provider: openai
+      model: gpt-5-mini            # PIN model ID thật khi cấu hình LiteLLM
+    fallback:
+      provider: gemini
+      model: gemini-flash
+  balanced:
+    primary:
+      provider: openai
+      model: gpt-5.4-mini
+    fallback:
+      provider: anthropic
+      model: claude-sonnet
+  strong:
+    primary:
+      provider: openai
+      model: gpt-5.5
+    fallback:
+      provider: anthropic
+      model: claude-opus
+  judge:
+    primary:
+      provider: openai
+      model: gpt-5.5
+rate_limits:
+  requests_per_minute: 60
+  tokens_per_minute: 100000

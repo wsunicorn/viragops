@@ -1,0 +1,12 @@
+# Chuẩn hóa line ending: LF trong repo, tránh diff nhiễu giữa Windows/Linux/CI
+* text=auto eol=lf
+
+# Windows scripts giữ CRLF
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary
+*.png binary
+*.jpg binary
+*.pdf binary
+*.docx binary

@@ -1,0 +1,42 @@
+[project]
+name = "viragops"
+version = "0.1.0"
+description = "viRAGops — LLMOps/RAGOps platform for Vietnamese document QA (IUH regulations + student FAQ). Every change goes through the gate."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Nguyen Ngoc Lan" }]
+
+# Phase 1: chỉ giữ dependency tối thiểu cho API skeleton + config.
+# Các dependency nặng (llama-index, ragas, qdrant-client, litellm...) sẽ được
+# thêm ở đúng phase sử dụng chúng để môi trường luôn cài nhanh và sạch.
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+    "PyYAML>=6.0",
+    "httpx>=0.27",
+    "psycopg[binary]>=3.1",
+    "redis>=5.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.5",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "B", "UP"]
+ignore = ["E501"]

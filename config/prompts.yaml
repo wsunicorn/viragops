@@ -1,0 +1,20 @@
+# Prompt config — schema chuẩn: docs/system/contracts/config_schemas.md
+# Template thật nằm trong prompt registry (PostgreSQL) từ Phase 6.
+# P0-P5: p0 naive, p1 grounded, p2 citation-first, p3 refusal-aware,
+#        p4 self-check/CoVe-lite, p5 concise/cost-aware.
+prompt_id: rag_qa_vi
+active_version: p1_grounded_v1   # baseline khởi điểm; đổi qua quality gate
+domain: university_regulation_iuh
+task_type: qa
+variables:
+  - context
+  - question
+  - citation_format
+output_format:
+  answer_field: answer
+  citations_field: citations
+  refusal_field: refusal
+policy:
+  require_citation: true
+  refuse_when_context_insufficient: true
+  language: vi
