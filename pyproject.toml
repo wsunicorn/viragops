@@ -32,6 +32,7 @@ dev = [
 dataops = [
     "beautifulsoup4>=4.12",
     "pypdf>=4.3",
+    "google-genai>=0.5",   # OCR PDF scan qua Gemini multimodal, xem modules/01_data_ragops.md
 ]
 
 [tool.pytest.ini_options]

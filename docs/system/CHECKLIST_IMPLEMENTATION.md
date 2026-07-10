@@ -84,8 +84,9 @@ Chuẩn bị tài liệu nguồn và golden set 300 câu hỏi có ground truth,
 
 - [~] Thu thập tài liệu quy chế/FAQ IUH theo `data_sources_iuh.md` (D1-D12), lưu snapshot + metadata nguồn.
   - Đã có: snapshot `src_20260710` — 44 file (17 HTML cấp 1 + 25 file depth-2: PDF/DOCX) qua `scripts/download_sources.py` (2 pass: trang chính + link đính kèm, merge manifest, sha256, TLS fallback có xin phép user cho *.iuh.edu.vn thiếu intermediate cert).
-  - Đã trích xuất text sạch: `scripts/extract_text.py` → 42/44 doc, phát hiện 5 PDF là **bản scan** (QĐ 610 x2, Sổ tay SV 2024, 1 thông báo đăng ký học, 1 hướng dẫn miễn giảm học phí) và 3 nhóm nội dung **trùng lặp** (D1/D2 hiện trỏ cùng 1 trang pdt.iuh.edu.vn — cần user xác nhận URL "quy chế học vụ" thật).
-  - Còn thiếu: OCR chính thức cho 5 PDF scan (đã có proof-of-concept dùng Gemini multimodal, xem `modules/01_data_ragops.md`); stsv.iuh.edu.vn là JS app (cần render hoặc bỏ); .docx (2 file biểu mẫu) chưa hỗ trợ trích xuất.
+  - Đã trích xuất text sạch: `scripts/extract_text.py` → 42/44 doc, phát hiện 5 PDF là **bản scan** và 3 nhóm nội dung **trùng lặp** (D1/D2 hiện trỏ cùng 1 trang pdt.iuh.edu.vn — cần user xác nhận URL "quy chế học vụ" thật).
+  - **OCR chính thức đã chạy** (`scripts/ocr_scanned_pdfs.py`, Gemini multimodal): ✅ QĐ 610/QĐ-ĐHCN (2 bản, 28tr, quan trọng nhất) + thông báo đăng ký học OCR thành công 100%. ❌ Sổ tay SV 2024 (82tr) + 1 file hướng dẫn miễn giảm học phí bị Gemini chặn `finish_reason=RECITATION` nhất quán (không phải bug) — cần thử lại khi quota reset hoặc dùng Tesseract dự phòng. Chi tiết: `modules/01_data_ragops.md`.
+  - Còn thiếu: stsv.iuh.edu.vn là JS app (cần render hoặc bỏ); .docx (2 file biểu mẫu) chưa hỗ trợ trích xuất; D9 + 1 file D8 chờ retry OCR.
 - [ ] Ghi metadata tài liệu nguồn.
 - [ ] Tạo bản nháp 300 câu hỏi.
 - [ ] Chia câu hỏi theo 5 nhóm: có đáp án, refusal, adversarial, multi-hop, ambiguous.

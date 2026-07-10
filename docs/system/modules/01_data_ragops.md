@@ -59,12 +59,33 @@ Xây pipeline quản lý vòng đời tài liệu tiếng Việt từ nguồn th
 - Thêm OCR sau khi pipeline text chạy ổn.
   - **Quyết định (2026-07-10):** dùng Gemini multimodal (`gemini-3.1-flash-lite`,
     input PDF trực tiếp qua `types.Part.from_bytes`) thay vì Tesseract truyền
-    thống. Đã test thật trên QĐ 610/QĐ-ĐHCN (PDF scan, ảnh full-page, không có
-    text layer) — OCR chính xác 100% số hiệu, ngày ký, Điều 1-3, chữ ký. Lý do
-    chọn: không cần cài thêm hệ thống binary (Tesseract + language pack tiếng
-    Việt), tận dụng free tier đã verify, chất lượng OCR cao hơn Tesseract với
-    văn bản có dấu tiếng Việt. Rủi ro: phụ thuộc rate limit free tier (xem
-    `config/model_gateway.yaml`), cần retry/backoff khi xử lý batch nhiều PDF.
+    thống. Script: `scripts/ocr_scanned_pdfs.py` — tự chia batch 15 trang cho
+    tài liệu dài (dùng `pypdf.PdfWriter` cắt sub-PDF), retry per-model theo
+    thứ tự primary→fallback đọc từ `config/model_gateway.yaml`, ghi manifest
+    ngay sau mỗi document (không đợi hết batch) để không mất kết quả nếu
+    crash giữa chừng.
+  - **Kết quả thật đã chạy trên snapshot `src_20260710`:**
+    - ✅ **QĐ 610/QĐ-ĐHCN** (28 trang, quyết định thi & đánh giá KQHT — quan
+      trọng nhất) OCR thành công 100%, cả 2 bản, ~65K/64K ký tự, giữ đúng số
+      hiệu/ngày/Điều-Khoản/bảng biểu dạng markdown.
+    - ✅ Thông báo đăng ký học phần HK1 2026-2027 (D10, 2 trang) OCR sạch.
+    - ❌ **Sổ tay sinh viên 2024** (D9, 82 trang) và 1 bản PDF hướng dẫn miễn
+      giảm học phí (D8) bị Gemini chặn với `finish_reason=RECITATION` — model
+      nghi ngờ output trùng khớp verbatim với dữ liệu training, từ chối trả
+      lời. Đã thử: đổi model (flash-lite ↔ flash-preview), giảm xuống 1
+      trang/lần — vẫn bị chặn nhất quán trên nội dung này. Giả thuyết: văn
+      bản trích dẫn nhiều luật/nghị định phổ biến (NĐ 81/2021, QĐ 66/2013)
+      dễ bị flag hơn quy chế nội bộ IUH riêng biệt như QĐ 610.
+    - ⚠️ **Rate limit thật đo được:** `gemini-3-flash-preview` free tier chỉ
+      **20 request/ngày** (không phải theo phút) — dễ cạn khi dùng làm
+      fallback cho nhiều batch/retry. Cần theo dõi khi mở rộng OCR sang tài
+      liệu khác.
+  - **Việc còn lại:** D9 (Sổ tay SV) và 1 file D8 cần thử lại khi quota reset
+    (ngày hôm sau), hoặc coi là nguồn phụ — D8 đã có bản thay thế
+    (`hd02-2025-pdf.pdf`, text lấy được nhưng lỗi font encoding, đọc được
+    một phần) và D9 các trang giới thiệu thường ít giá trị citation hơn nội
+    dung quy chế. Nếu Gemini tiếp tục chặn, phương án dự phòng là Tesseract
+    + `vie` language pack cho riêng 2 tài liệu này.
 - Implement 4 chunking strategy: fixed, recursive, structure-aware, parent-child.
 - Implement quality checks: empty text, duplicate chunk, missing source, chunk quá dài/quá ngắn.
 - Implement embedding BGE-M3 hoặc provider embedding đã chọn.
