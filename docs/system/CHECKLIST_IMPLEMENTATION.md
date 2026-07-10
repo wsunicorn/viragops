@@ -82,7 +82,9 @@ Chuẩn bị tài liệu nguồn và golden set 300 câu hỏi có ground truth,
 
 ### Task
 
-- [ ] Thu thập tài liệu quy chế/FAQ IUH theo `data_sources_iuh.md` (D1-D12), lưu snapshot + metadata nguồn.
+- [~] Thu thập tài liệu quy chế/FAQ IUH theo `data_sources_iuh.md` (D1-D12), lưu snapshot + metadata nguồn.
+  - Đã có: snapshot `src_20260710` — 17 trang HTML (camnang/pdt/tqa/ctsv/iuh) + manifest sha256 + 19 link PDF/DOCX biểu mẫu phát hiện được (`scripts/download_sources.py`, manifest máy đọc `config/data_sources_iuh.yaml`).
+  - Còn thiếu: PDF quyết định gốc (QĐ 610...) nằm ở bài viết cấp 2 của pdt/tqa — cần crawl depth-2; stsv.iuh.edu.vn là JS app (cần render hoặc bỏ).
 - [ ] Ghi metadata tài liệu nguồn.
 - [ ] Tạo bản nháp 300 câu hỏi.
 - [ ] Chia câu hỏi theo 5 nhóm: có đáp án, refusal, adversarial, multi-hop, ambiguous.

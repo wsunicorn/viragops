@@ -1,0 +1,114 @@
+# ============================================================
+# Manifest nguồn dữ liệu IUH — machine-readable
+# Nguồn thiết kế: docs/system/experiments/data_sources_iuh.md (D1-D12)
+# Dùng bởi: scripts/download_sources.py
+# ============================================================
+domain: university_regulation_iuh
+snapshot_prefix: src
+user_agent: "viragops-thesis-crawler/0.1 (+https://github.com/wsunicorn/viragops; academic research)"
+request_delay_seconds: 1.5
+
+documents:
+  - id: D1
+    title: "Quy chế đào tạo theo hệ thống tín chỉ"
+    unit: camnang            # site chủ quản canonical
+    canonical: true
+    topics: [tin_chi, hoc_phan, dang_ky, hoc_lai]
+    urls:
+      - https://camnang.iuh.edu.vn/quy-che-dao-tao-theo-he-thong-tin-chi.php
+      - https://pdt.iuh.edu.vn/quy-che-dao-tao
+
+  - id: D2
+    title: "Quy chế học vụ"
+    unit: pdt
+    canonical: true
+    topics: [hoc_vu, canh_bao, buoc_thoi_hoc, bao_luu]
+    urls:
+      # pdt đổi cấu trúc URL 2026; quy chế học vụ nằm trong danh mục quy-che-dao-tao
+      - https://pdt.iuh.edu.vn/quy-che-dao-tao
+      - https://pdt.iuh.edu.vn/quy-trinh-giai-quyet-hoc-vu
+
+  - id: D3
+    title: "Quy chế quản lý công tác thi và đánh giá kết quả học tập (QĐ 610/QĐ-ĐHCN)"
+    unit: tqa
+    canonical: true
+    topics: [thi_cu, cham_diem, danh_gia_hoc_phan]
+    urls:
+      - https://tqa.iuh.edu.vn/quy-che-quan-ly-cong-tac-thi/
+      - https://tqa.iuh.edu.vn/thong-bao/quy-che-quan-ly-cong-tac-thi-va-danh-gia-ket-qua-hoc-tap-tai-truong-dai-hoc-cong-nghiep-tp-ho-chi-minh-nam-2025/
+
+  - id: D4
+    title: "Quy định phúc khảo"
+    unit: tqa
+    canonical: true
+    topics: [phuc_khao, khieu_nai_diem]
+    urls:
+      - https://tqa.iuh.edu.vn/cong-tac-khao-thi/quy-dinh-phuc-khao/
+
+  - id: D5
+    title: "Điều kiện xét tốt nghiệp"
+    unit: camnang
+    canonical: true
+    topics: [tot_nghiep, tin_chi_tich_luy]
+    urls:
+      - https://camnang.iuh.edu.vn/dieu-kien-xet-tot-nghiep.php
+
+  - id: D6
+    title: "Quy định chuẩn tiếng Anh + bảng quy đổi chứng chỉ"
+    unit: camnang
+    canonical: true
+    topics: [chuan_dau_ra, ngoai_ngu]
+    urls:
+      - https://camnang.iuh.edu.vn/quy-dinh-chuan-tieng-anh.php
+      - https://camnang.iuh.edu.vn/bang-quy-doi-diem-chung-chi-tieng-anh.php
+
+  - id: D7
+    title: "Quy định xét, cấp học bổng khuyến khích học tập"
+    unit: pdt
+    canonical: true
+    topics: [hoc_bong]
+    urls:
+      - https://pdt.iuh.edu.vn/danh-sach/quy-che-hoc-bong
+
+  - id: D8
+    title: "Chính sách miễn, giảm học phí và hỗ trợ chi phí học tập"
+    unit: ctsv
+    canonical: true
+    topics: [hoc_phi, mien_giam]
+    urls:
+      - https://ctsv.iuh.edu.vn/news.html@detail@150@602@Huong-dan-viec-thuc-hien-chinh-sach-mien,-giam-hoc-phi,-ho-tro-chi-phi-hoc-tap-nam-hoc-2025-2026-(Theo-Nghi-dinh-so-238-2025-ND-CP-ngay-03-9-2025-cua-Chinh-phu)
+      - https://iuh.edu.vn/vi/thong-bao/huong-dan-v-v-thuc-hien-chinh-sach-mien-giam-hoc-phi-va-ho-tro-chi-phi-hoc-tap-nam-hoc-2025-2026-2005.html
+
+  - id: D9
+    title: "Sổ tay sinh viên + quy chế công tác SV, điểm rèn luyện, kỷ luật"
+    unit: ctsv
+    canonical: true
+    topics: [ren_luyen, ky_luat, so_tay]
+    urls:
+      - https://ctsv.iuh.edu.vn/news.html@detail@150@592@So-tay-sinh-vien
+      - https://tqa.iuh.edu.vn/thong-bao/so-tay-sinh-vien-cua-iuh-nam-2024/
+
+  - id: D10
+    title: "Hướng dẫn đăng ký học phần"
+    unit: pdt
+    canonical: true
+    topics: [dang_ky_mon, rut_mon]
+    urls:
+      - https://pdt.iuh.edu.vn/thong-bao-vv-dang-ky-hoc-phan-va-dong-hoc-phi-hoc-ky-i-nam-hoc-2026---2027
+
+  - id: D11
+    title: "Quy trình giải quyết học vụ + biểu mẫu sinh viên"
+    unit: pdt
+    canonical: true
+    topics: [bieu_mau, bao_luu, chuyen_nganh]
+    urls:
+      - https://pdt.iuh.edu.vn/quy-trinh-giai-quyet-hoc-vu
+      - https://pdt.iuh.edu.vn/bieu-mau-tot-nghiep
+
+  - id: D12
+    title: "Sổ tay sinh viên điện tử (tổng hợp)"
+    unit: stsv
+    canonical: false          # web app, có thể cần render JS — dùng đối chiếu
+    topics: [so_tay, faq]
+    urls:
+      - https://stsv.iuh.edu.vn/
