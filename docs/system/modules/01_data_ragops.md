@@ -57,6 +57,14 @@ Xây pipeline quản lý vòng đời tài liệu tiếng Việt từ nguồn th
 - Tạo thư mục artifact cho raw, processed, chunks, manifests.
 - Implement loader cho PDF text và DOCX trước.
 - Thêm OCR sau khi pipeline text chạy ổn.
+  - **Quyết định (2026-07-10):** dùng Gemini multimodal (`gemini-3.1-flash-lite`,
+    input PDF trực tiếp qua `types.Part.from_bytes`) thay vì Tesseract truyền
+    thống. Đã test thật trên QĐ 610/QĐ-ĐHCN (PDF scan, ảnh full-page, không có
+    text layer) — OCR chính xác 100% số hiệu, ngày ký, Điều 1-3, chữ ký. Lý do
+    chọn: không cần cài thêm hệ thống binary (Tesseract + language pack tiếng
+    Việt), tận dụng free tier đã verify, chất lượng OCR cao hơn Tesseract với
+    văn bản có dấu tiếng Việt. Rủi ro: phụ thuộc rate limit free tier (xem
+    `config/model_gateway.yaml`), cần retry/backoff khi xử lý batch nhiều PDF.
 - Implement 4 chunking strategy: fixed, recursive, structure-aware, parent-child.
 - Implement quality checks: empty text, duplicate chunk, missing source, chunk quá dài/quá ngắn.
 - Implement embedding BGE-M3 hoặc provider embedding đã chọn.

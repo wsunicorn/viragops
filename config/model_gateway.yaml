@@ -1,37 +1,69 @@
 # Model gateway config — schema chuẩn: docs/system/contracts/config_schemas.md
 # QUY TẮC: runtime KHÔNG hard-code model. Mọi model call đi qua tier ở đây.
-# Model ID phải được pin/kiểm chứng tại thời điểm chạy thực nghiệm (Phase 7).
-gateway_config_id: gateway_default_v1
-default_timeout_seconds: 20
+#
+# TRẠNG THÁI HIỆN TẠI (2026-07-10): chỉ có GEMINI_API_KEY (free tier).
+# OpenAI/Anthropic chưa có key -> mọi tier tạm dùng Gemini. Khi có thêm key,
+# đổi provider/model ở đây — KHÔNG sửa code runtime.
+#
+# ĐÃ VERIFY THẬT bằng client.models.generate_content() với key hiện tại
+# (không chỉ tra docs — nhiều model "có trong danh sách" vẫn bị chặn free tier):
+#   - gemini-3.1-flash-lite : OK, nhanh (~1-2s)  -> primary cho mọi tier nhẹ
+#   - gemini-3-flash-preview: OK, chậm (~15-20s) -> dùng khi cần suy luận kỹ
+#                              hơn (strong/judge), KHÔNG dùng cho path latency-
+#                              critical (NFR-002 p95 <= 6s áp cho tier balanced)
+#   - gemini-2.5-flash-lite : lỗi 503 lặp lại (server quá tải phía Google tại
+#                              thời điểm test) -> KHÔNG đưa vào fallback chủ động
+#   - gemini-3.5-flash      : lỗi 503 tương tự -> KHÔNG đưa vào fallback chủ động
+#   - gemini-2.5-flash      : lỗi 404 "no longer available to new users"
+#   - gemini-2.0-flash(-lite): lỗi 429 quota limit=0 cho free tier (project này)
+# -> Vì chỉ có 2 model chắc chắn hoạt động, fallback tạm thời trỏ vào NHAU
+#    (khác model, không khác provider). Khi 2.5-flash-lite/3.5-flash ổn định
+#    trở lại, có thể thêm làm fallback thứ 2 — xem log Phase 7.
+gateway_config_id: gateway_gemini_free_v1
+default_timeout_seconds: 30    # gemini-3-flash-preview có thể mất ~20s
 budget:
-  daily_usd: 5.0
-  monthly_usd: 100.0
+  daily_usd: 0.0        # free tier — không phát sinh chi phí, theo dõi qua rate_limits
+  monthly_usd: 0.0
 routes:
   cheap:
     primary:
-      provider: openai
-      model: gpt-5-mini            # PIN model ID thật khi cấu hình LiteLLM
+      provider: gemini
+      model: gemini-3.1-flash-lite
     fallback:
       provider: gemini
-      model: gemini-flash
+      model: gemini-3-flash-preview
   balanced:
     primary:
-      provider: openai
-      model: gpt-5.4-mini
+      provider: gemini
+      model: gemini-3.1-flash-lite
     fallback:
-      provider: anthropic
-      model: claude-sonnet
+      provider: gemini
+      model: gemini-3-flash-preview
   strong:
     primary:
-      provider: openai
-      model: gpt-5.5
+      provider: gemini
+      model: gemini-3-flash-preview
     fallback:
-      provider: anthropic
-      model: claude-opus
+      provider: gemini
+      model: gemini-3.1-flash-lite
   judge:
     primary:
-      provider: openai
-      model: gpt-5.5
+      provider: gemini
+      model: gemini-3-flash-preview
+    fallback:
+      provider: gemini
+      model: gemini-3.1-flash-lite
 rate_limits:
-  requests_per_minute: 60
-  tokens_per_minute: 100000
+  # Free tier flash-lite: quan sát thực tế ổn định ở mức thấp; đặt bảo thủ
+  # để tránh 429 khi chạy eval batch (300 câu). Điều chỉnh khi đo throughput
+  # thật ở Phase 7-8.
+  requests_per_minute: 10
+  tokens_per_minute: 200000
+
+# --- Provider khác (chưa có key, giữ lại làm tài liệu cấu hình tương lai) ---
+# openai:
+#   cheap: gpt-5-mini
+#   balanced: gpt-5.4-mini
+#   strong/judge: gpt-5.5
+# anthropic:
+#   strong/judge: claude-sonnet / claude-opus

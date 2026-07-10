@@ -83,8 +83,9 @@ Chuẩn bị tài liệu nguồn và golden set 300 câu hỏi có ground truth,
 ### Task
 
 - [~] Thu thập tài liệu quy chế/FAQ IUH theo `data_sources_iuh.md` (D1-D12), lưu snapshot + metadata nguồn.
-  - Đã có: snapshot `src_20260710` — 17 trang HTML (camnang/pdt/tqa/ctsv/iuh) + manifest sha256 + 19 link PDF/DOCX biểu mẫu phát hiện được (`scripts/download_sources.py`, manifest máy đọc `config/data_sources_iuh.yaml`).
-  - Còn thiếu: PDF quyết định gốc (QĐ 610...) nằm ở bài viết cấp 2 của pdt/tqa — cần crawl depth-2; stsv.iuh.edu.vn là JS app (cần render hoặc bỏ).
+  - Đã có: snapshot `src_20260710` — 44 file (17 HTML cấp 1 + 25 file depth-2: PDF/DOCX) qua `scripts/download_sources.py` (2 pass: trang chính + link đính kèm, merge manifest, sha256, TLS fallback có xin phép user cho *.iuh.edu.vn thiếu intermediate cert).
+  - Đã trích xuất text sạch: `scripts/extract_text.py` → 42/44 doc, phát hiện 5 PDF là **bản scan** (QĐ 610 x2, Sổ tay SV 2024, 1 thông báo đăng ký học, 1 hướng dẫn miễn giảm học phí) và 3 nhóm nội dung **trùng lặp** (D1/D2 hiện trỏ cùng 1 trang pdt.iuh.edu.vn — cần user xác nhận URL "quy chế học vụ" thật).
+  - Còn thiếu: OCR chính thức cho 5 PDF scan (đã có proof-of-concept dùng Gemini multimodal, xem `modules/01_data_ragops.md`); stsv.iuh.edu.vn là JS app (cần render hoặc bỏ); .docx (2 file biểu mẫu) chưa hỗ trợ trích xuất.
 - [ ] Ghi metadata tài liệu nguồn.
 - [ ] Tạo bản nháp 300 câu hỏi.
 - [ ] Chia câu hỏi theo 5 nhóm: có đáp án, refusal, adversarial, multi-hop, ambiguous.
