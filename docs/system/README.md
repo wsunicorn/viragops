@@ -10,7 +10,7 @@ Tài liệu này tách nội dung từ [blueprint gốc](../llmops_thesis_bluepr
 4. Khi cần schema/API/metric, đọc `contracts/`.
 5. Khi cần chạy đánh giá và báo cáo số liệu, đọc `experiments/`.
 6. Khi triển khai, test, giám sát hoặc xử lý lỗi, đọc `operations/`.
-7. Dùng `CHECKLIST_IMPLEMENTATION.md` làm bảng điều khiển chính để thực hiện tuần tự 24 tuần — mục "Retrospective" ở cuối file đó ghi điểm đã làm tốt nên giữ nguyên, và nợ kỹ thuật cần quay lại trước khi dùng số liệu làm báo cáo chính thức, cập nhật cuối mỗi phase.
+7. Dùng `CHECKLIST_IMPLEMENTATION.md` làm bảng điều khiển chính để thực hiện tuần tự 24 tuần — mỗi phase có mục "Chưa tốt / cần cải thiện" ngay trong phase đó (sau "Rủi ro") ghi nợ kỹ thuật và phần chưa hoàn thành phát sinh khi làm phase, để quay lại xử lý trước khi dùng số liệu làm báo cáo chính thức.
 
 ## Bản đồ tài liệu
 
