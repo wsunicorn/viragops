@@ -1,0 +1,7 @@
+prompt_version,parse_ok_rate,refusal_accuracy,citation_valid_rate,grounded_citation_rate,avg_output_tokens,avg_gen_ms
+p0_naive_v1,1.0,0.5,1.0,1.0,120.8,1256.0
+p1_grounded_v1,1.0,1.0,1.0,1.0,83.4,1159.0
+p2_citation_first_v1,1.0,0.0,1.0,0.875,100.8,1237.0
+p3_refusal_aware_v1,1.0,0.75,1.0,1.0,103.6,1349.0
+p4_self_check_v1,1.0,0.5,1.0,1.0,111.8,1380.0
+p5_concise_v1,1.0,1.0,1.0,0.875,81.2,1154.0

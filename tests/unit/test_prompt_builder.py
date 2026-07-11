@@ -1,4 +1,5 @@
-from src.rag.prompt_builder import PROMPT_VERSION, build_qa_prompt, format_context
+from src.promptops.templates import SEED_PROMPTS
+from src.rag.prompt_builder import StaticPromptProvider, build_qa_prompt, format_context
 
 CHUNKS = [
     {"chunk_id": "chunk_x_001", "document_id": "doc_1", "section": "Điều 12, Khoản 2",
@@ -9,9 +10,13 @@ CHUNKS = [
      "metadata": {"document_title": "Cẩm nang"}},
 ]
 
+_P1_TEMPLATE = next(
+    s["template"] for s in SEED_PROMPTS if s["prompt_version"] == "p1_grounded_v1"
+)
+
 
 def test_prompt_contains_question_context_and_rules():
-    prompt = build_qa_prompt("Cần bao nhiêu tín chỉ?", CHUNKS)
+    prompt = build_qa_prompt("Cần bao nhiêu tín chỉ?", CHUNKS, _P1_TEMPLATE)
     assert "Cần bao nhiêu tín chỉ?" in prompt
     assert "[chunk_x_001]" in prompt
     assert "Điều 12, Khoản 2" in prompt
@@ -25,5 +30,8 @@ def test_context_truncates_long_chunks():
     assert "[chunk_y_002]" in ctx
 
 
-def test_prompt_version_constant_matches_config_naming():
-    assert PROMPT_VERSION == "p1_grounded_v1"
+def test_static_provider_returns_fixed_version():
+    provider = StaticPromptProvider(template="hỏi: {question}\n{context}", version="vX")
+    active = provider.get_active()
+    assert active.version == "vX"
+    assert "{question}" in active.template

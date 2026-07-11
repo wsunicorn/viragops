@@ -24,6 +24,7 @@ from fastapi import APIRouter, HTTPException
 
 from src.common.settings import get_settings
 from src.rag.gateway_client import GeminiGateway
+from src.rag.prompt_builder import RegistryPromptProvider
 from src.rag.schemas import QADebugResponse, QARequest, QAResponse
 from src.rag.service import RagService
 
@@ -34,7 +35,11 @@ logger = logging.getLogger(__name__)
 @lru_cache(maxsize=1)
 def get_service() -> RagService:
     settings = get_settings()
-    return RagService(gateway=GeminiGateway(), qdrant_url=settings.qdrant_url)
+    return RagService(
+        gateway=GeminiGateway(),
+        qdrant_url=settings.qdrant_url,
+        prompt_provider=RegistryPromptProvider(settings.postgres_dsn),
+    )
 
 
 async def _answer(req: QARequest) -> QAResponse | QADebugResponse:

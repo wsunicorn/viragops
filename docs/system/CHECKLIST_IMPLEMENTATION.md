@@ -495,37 +495,65 @@ Quản lý prompt versions, prompt diff, comparison và active prompt policy.
 
 ### Task
 
-- [ ] Tạo prompt registry schema.
-- [ ] Implement CRUD prompt.
-- [ ] Tạo 6 prompt variants P0-P5.
-- [ ] Implement prompt renderer.
-- [ ] Implement prompt diff.
-- [ ] Implement prompt comparison runner.
-- [ ] Integrate active prompt vào runtime.
-- [ ] Log prompt version trong trace.
+- [x] Tạo prompt registry schema — bảng `prompts` trong `sql/schema.sql` (13 field metadata + partial unique index "1 active/prompt_id").
+- [x] Implement CRUD prompt — `src/promptops/registry.py` + API routes `/prompts` (create/versions/diff/activate).
+- [x] Tạo 6 prompt variants P0-P5 — `src/promptops/templates.py` seed vào registry (`scripts/seed_prompts.py`, idempotent); cùng biến + cùng JSON contract để mọi variant đi qua chung citation parser.
+- [x] Implement prompt renderer — `src/promptops/renderer.py` (str.format + validate biến khai báo vs biến dùng thật, chặn từ lúc ghi registry).
+- [x] Implement prompt diff — `src/promptops/diff.py` (unified diff) + endpoint.
+- [x] Implement prompt comparison runner — `scripts/run_prompt_comparison.py`: retrieval chạy 1 lần/câu dùng chung mọi version, embed bổ sung câu smoke thiếu cache, gán `eval_result_id` ngược vào registry.
+- [x] Integrate active prompt vào runtime — `RagService` nhận `PromptProvider` (production: `RegistryPromptProvider` đọc DB; test: `StaticPromptProvider`) — **prompt hard-code trong `prompt_builder.py` đã gỡ**.
+- [x] Log prompt version trong trace — verify chuỗi registry → runtime → trace bằng test thật.
 
 ### Đầu ra
 
-- Prompt registry.
-- 6 prompt variants.
-- Prompt comparison report.
+- [x] Prompt registry — PostgreSQL, 6 version, p1 active.
+- [x] 6 prompt variants — P0 naive / P1 grounded / P2 citation-first / P3 refusal-aware / P4 self-check / P5 concise.
+- [x] Prompt comparison report — `experiments/results_prompt_comparison.md` + CSV (run `promptcmp_20260711_1408`, chạy THẬT 6×12 câu qua Gemini).
 
 ### Kiểm tra dự kiến
 
 ```bash
-python scripts/run_prompt_comparison.py --set smoke
-pytest tests/unit/test_prompt_renderer.py
+python scripts/seed_prompts.py
+python scripts/run_prompt_comparison.py            # 12 câu smoke cố định
+pytest tests/unit/test_prompt_renderer.py tests/integration/test_prompt_registry.py
 ```
 
 ### Definition of Done
 
-- [ ] Runtime không dùng prompt hard-code.
-- [ ] Prompt version xuất hiện trong trace.
-- [ ] Có prompt comparison report.
+- [x] Runtime không dùng prompt hard-code — template resolve từ registry lúc khởi động; activation bị chặn nếu chưa có eval_result_id (trừ override có log).
+- [x] Prompt version xuất hiện trong trace — `trace.prompt_version` lấy từ registry.
+- [x] Có prompt comparison report — kết quả: **p1_grounded_v1 thắng** (refusal 1.00, grounded 1.00, 83.4 token TB), activate theo số liệu thay bootstrap override.
 
 ### Rủi ro
 
-- Prompt registry quá phức tạp: bắt đầu bằng PostgreSQL table + templates.
+- Prompt registry quá phức tạp: bắt đầu bằng PostgreSQL table + templates. *(Đúng như vậy — 1 bảng + 1 module, không thêm framework.)*
+
+### Chưa tốt / cần cải thiện
+
+**Làm tốt, nên giữ nguyên cách làm:** activation policy enforce trong
+code (không activate được nếu thiếu eval evidence, override phải có log);
+mọi variant chung JSON contract nên so sánh được công bằng qua cùng
+parser; phát hiện phản trực giác từ số liệu thật (citation-first làm HỎNG
+refusal 0.00; refusal-aware 0.75 thua grounded thường 1.00) — đúng tinh
+thần "chọn bằng số liệu, không cảm tính", và là material tốt cho báo cáo.
+
+**Còn thiếu, cần quay lại:**
+- **Smoke set 12 câu là quá nhỏ để kết luận chắc** — khoảng tin cậy rộng
+  (refusal chỉ có 4 câu → 1 câu sai = 25%). Kết quả đủ để chọn baseline
+  p1 nhưng Phase 8 (Evaluation Engine, LLM-judge + full set) phải chạy
+  lại 6 variant trước khi kết luận trong báo cáo.
+- **Comparison chưa đo faithfulness/answer-relevance** (cần LLM-judge,
+  Phase 8) — grounded_citation_rate mới là proxy (citation trúng
+  relevant_chunks), chưa đánh giá nội dung answer đúng/sai.
+- **`POST /prompts/{id}/compare` (contract) chưa có dạng HTTP** — chạy
+  offline qua script vì 72 lượt LLM không hợp request đồng bộ; thành job
+  async khi có eval engine (Phase 8).
+- **RegistryPromptProvider cache active prompt đến khi restart server** —
+  activate version mới cần restart để runtime nhận; chấp nhận được ở dev,
+  Phase 9 (quality gate + deploy flow) nên thêm reload/TTL.
+- **prompts.yaml `active_version` giờ chỉ mang tính tài liệu** — có rủi
+  ro lệch với registry nếu quên cập nhật tay; cân nhắc bỏ hẳn field này
+  hoặc thêm check đồng bộ trong CI.
 
 ---
 

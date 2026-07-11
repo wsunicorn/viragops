@@ -35,7 +35,7 @@ from src.dataops.sparse_bm25 import BM25Sparse
 from src.dataops.vietnamese_normalizer import normalize_for_search
 from src.rag.citation import parse_model_output
 from src.rag.gateway_client import Gateway
-from src.rag.prompt_builder import PROMPT_VERSION, build_qa_prompt
+from src.rag.prompt_builder import PromptProvider, build_qa_prompt
 from src.rag.schemas import (
     ModelInfo,
     QADebugResponse,
@@ -58,10 +58,19 @@ class RagService:
     """Loads all versioned assets once at startup; per-request work is
     embed(1 query) -> qdrant -> gateway."""
 
-    def __init__(self, gateway: Gateway, qdrant_url: str, embed_fn=None) -> None:
+    def __init__(
+        self,
+        gateway: Gateway,
+        qdrant_url: str,
+        prompt_provider: PromptProvider,
+        embed_fn=None,
+    ) -> None:
         self._gateway = gateway
         self._client = QdrantClient(url=qdrant_url)
         self._traces = TraceStore()
+        # Phase 6: prompt lấy từ registry (Module 4), KHÔNG hard-code —
+        # provider injectable để test không cần Postgres.
+        self._prompt = prompt_provider.get_active()
         # embed_fn injectable: integration tests thay bằng vector giả để
         # không tốn quota Gemini cho mỗi lần chạy test.
         self._embed_fn = embed_fn or self._embed_query
@@ -127,7 +136,7 @@ class RagService:
             "data_version": self.data_version,
             "index_version": self.index_version,
             "retrieval_config_id": self.retrieval_config_id,
-            "prompt_version": PROMPT_VERSION,
+            "prompt_version": self._prompt.version,
             "retrieval_ms": retrieval_ms,
             "retrieved": [
                 {"chunk_id": c["chunk_id"], "score": round(c["score"], 4)} for c in chunks
@@ -147,7 +156,7 @@ class RagService:
                 chunks=chunks,
             )
 
-        prompt = build_qa_prompt(req.question, chunks)
+        prompt = build_qa_prompt(req.question, chunks, self._prompt.template)
         gen = self._gateway.generate(tier=req.mode, prompt=prompt)
         parsed = parse_model_output(gen.text, chunks, require_citation=self._require_citation)
 
@@ -211,7 +220,7 @@ class RagService:
                 )
                 for c in chunks
             ],
-            prompt_version=PROMPT_VERSION,
+            prompt_version=self._prompt.version,
             retrieval_config_id=self.retrieval_config_id,
             data_version=self.data_version,
             index_version=self.index_version,

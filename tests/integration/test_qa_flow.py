@@ -12,7 +12,9 @@ from __future__ import annotations
 import httpx
 import pytest
 
+from src.promptops.templates import SEED_PROMPTS
 from src.rag.gateway_client import MockGateway
+from src.rag.prompt_builder import StaticPromptProvider
 from src.rag.schemas import QARequest
 from src.rag.service import RagService
 
@@ -28,6 +30,11 @@ def _qdrant_ready() -> bool:
 
 pytestmark = pytest.mark.skipif(not _qdrant_ready(), reason="Qdrant not running")
 
+# Template thật của p1 từ seed source (không cần Postgres cho test này —
+# registry integration test riêng ở tests/integration/test_prompt_registry.py)
+_P1 = next(s for s in SEED_PROMPTS if s["prompt_version"] == "p1_grounded_v1")
+_PROVIDER = StaticPromptProvider(template=_P1["template"], version="p1_grounded_v1")
+
 
 def _fake_embed(question: str) -> list[float]:
     # Vector giả chiều 768 — dense branch trả kết quả vô nghĩa nhưng hợp lệ;
@@ -37,7 +44,10 @@ def _fake_embed(question: str) -> list[float]:
 
 @pytest.fixture(scope="module")
 def service() -> RagService:
-    return RagService(gateway=MockGateway(), qdrant_url=QDRANT_URL, embed_fn=_fake_embed)
+    return RagService(
+        gateway=MockGateway(), qdrant_url=QDRANT_URL,
+        prompt_provider=_PROVIDER, embed_fn=_fake_embed,
+    )
 
 
 def test_in_domain_question_returns_answer_with_citation(service):
@@ -63,7 +73,8 @@ def test_debug_mode_returns_retrieved_chunks_and_versions(service):
 
 def test_model_refusal_passes_through(service):
     refusing = RagService(
-        gateway=MockGateway(refuse=True), qdrant_url=QDRANT_URL, embed_fn=_fake_embed
+        gateway=MockGateway(refuse=True), qdrant_url=QDRANT_URL,
+        prompt_provider=_PROVIDER, embed_fn=_fake_embed,
     )
     resp = refusing.answer(QARequest(question="Quy định về ký túc xá sao Hỏa?"))
     assert resp.refusal

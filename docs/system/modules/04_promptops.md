@@ -83,14 +83,49 @@ Mỗi prompt version cần có:
 | Prompt dài gây cost cao | Template quá nhiều instruction | Có cost-aware prompt và token report |
 | LLM không trích dẫn | Output format không rõ | Citation-first prompt |
 
+## Kết quả thật (Phase 6, 2026-07-11)
+
+- **Registry**: bảng `prompts` (PostgreSQL, sql/schema.sql) đủ metadata
+  bắt buộc; partial unique index đảm bảo mỗi prompt_id chỉ 1 version
+  active kể cả khi ghi đua. Template validate với `variables` khai báo
+  ngay lúc ghi (renderer.validate_template) — data hỏng không tới runtime.
+- **Activation policy enforce trong code**: không có `eval_result_id` thì
+  không activate được, trừ override tường minh có ghi log (actor + lý do
+  nối vào change_summary). Bootstrap p1 lúc seed dùng chính cơ chế
+  override-logged này, sau đó được THAY bằng activation theo số liệu.
+- **Comparison thật (run `promptcmp_20260711_1408`)**: 6 variant × 12 câu
+  smoke (8 có đáp án + 2 out-of-scope + 2 adversarial), retrieval dùng
+  chung, ~72 lượt gọi flash-lite. Kết quả
+  (`experiments/results_prompt_comparison.md`):
+  **p1_grounded_v1 thắng** — refusal 1.00, grounded-citation 1.00,
+  83.4 token TB (rẻ nhì). Phát hiện đáng chú ý cho báo cáo:
+  - `p2_citation_first` refusal **0.00** — quy trình "chọn nguồn trước
+    rồi viết" khiến model luôn tìm được *gì đó* để cite và trả lời cả
+    câu ngoài phạm vi/adversarial → citation-first tăng grounding cho câu
+    trả lời được nhưng PHẢN TÁC DỤNG với refusal.
+  - `p3_refusal_aware` chỉ 0.75 refusal — thua p1 dù được thiết kế chuyên
+    cho refusal; instruction dài hơn không đồng nghĩa tốt hơn.
+  - `p5_concise` refusal 1.00, token rẻ nhất (81.2) nhưng grounded 0.875
+    — ứng viên cost-aware nếu Phase 8 xác nhận chất lượng đầy đủ.
+  - `p0_naive` đúng vai baseline thấp: refusal 0.50.
+- **Runtime không còn prompt hard-code**: `RagService` nhận
+  `PromptProvider`; production dùng `RegistryPromptProvider` (resolve
+  active từ DB lúc khởi động), test dùng `StaticPromptProvider`. Trace ghi
+  `prompt_version` lấy từ registry — verify thật chuỗi registry → runtime
+  → trace.
+- **API**: POST /prompts, GET /prompts/{id}/versions, GET /prompts/{id}/diff,
+  POST /prompts/{id}/activate. `POST /compare` chạy offline qua
+  `scripts/run_prompt_comparison.py` (72 lượt LLM không hợp HTTP đồng bộ;
+  thành job async khi có eval engine Phase 8).
+
 ## Checklist hoàn tất
 
-- [ ] Prompt registry schema có đủ metadata.
-- [ ] CRUD prompt hoạt động.
-- [ ] Prompt rendering hoạt động.
-- [ ] Prompt diff hoạt động.
-- [ ] Có 6 prompt variants.
-- [ ] Prompt comparison chạy được.
-- [ ] Active prompt policy hoạt động.
-- [ ] Prompt version xuất hiện trong trace.
+- [x] Prompt registry schema có đủ metadata — 13 field theo bảng trên + activated_at/by.
+- [x] CRUD prompt hoạt động — registry Python + API routes; integration test 5 case trên Postgres thật.
+- [x] Prompt rendering hoạt động — `src/promptops/renderer.py`, validate biến lúc ghi, test 6/6 template render sạch.
+- [x] Prompt diff hoạt động — unified diff, endpoint GET /prompts/{id}/diff.
+- [x] Có 6 prompt variants — P0-P5 seed vào registry, cùng JSON contract để citation parser dùng chung.
+- [x] Prompt comparison chạy được — chạy THẬT 6×12, report + CSV, eval_result_id gán ngược vào registry.
+- [x] Active prompt policy hoạt động — enforce eval-hoặc-override-logged; p1 active theo số liệu comparison.
+- [x] Prompt version xuất hiện trong trace — verify chuỗi registry → runtime → trace.
 

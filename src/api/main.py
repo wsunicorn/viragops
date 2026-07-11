@@ -11,7 +11,7 @@ import logging
 
 from fastapi import FastAPI
 
-from src.api.routes import health, qa
+from src.api.routes import health, prompts, qa
 from src.common.settings import APP_VERSION, get_settings
 
 
@@ -30,6 +30,7 @@ def create_app() -> FastAPI:
     )
     app.include_router(health.router)
     app.include_router(qa.router)
+    app.include_router(prompts.router)
     return app
 
 

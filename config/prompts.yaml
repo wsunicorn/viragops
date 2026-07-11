@@ -1,9 +1,13 @@
 # Prompt config — schema chuẩn: docs/system/contracts/config_schemas.md
-# Template thật nằm trong prompt registry (PostgreSQL) từ Phase 6.
+# TỪ PHASE 6: template + trạng thái active nằm trong PROMPT REGISTRY
+# (PostgreSQL bảng `prompts`, seed qua scripts/seed_prompts.py) — runtime
+# resolve active version từ registry, KHÔNG đọc từ file này.
+# `active_version` dưới đây chỉ mang tính tài liệu/bootstrap; nguồn sự
+# thật là registry (xem src/rag/prompt_builder.py::RegistryPromptProvider).
 # P0-P5: p0 naive, p1 grounded, p2 citation-first, p3 refusal-aware,
 #        p4 self-check/CoVe-lite, p5 concise/cost-aware.
 prompt_id: rag_qa_vi
-active_version: p1_grounded_v1   # baseline khởi điểm; đổi qua quality gate
+active_version: p1_grounded_v1   # thắng comparison promptcmp_20260711_1408 (xem results_prompt_comparison.md)
 domain: university_regulation_iuh
 task_type: qa
 variables:
