@@ -110,8 +110,10 @@ def main() -> int:
         "- Mở rộng câu hỏi cho category vẫn còn thiếu nguồn sạch: `hoc_phi` theo ngành/năm cụ thể "
         "(chưa có bảng học phí chi tiết), thang điểm rèn luyện đầy đủ (Xuất sắc/Tốt/Khá/TB/Yếu/Kém theo "
         "khoảng điểm — chưa tìm thấy trong nguồn hiện có). Xem `golden_set_review.md` mục việc còn lại.",
-        "- Domain expert (người thực hiện khóa luận) review và approve từng câu — đặc biệt các con số "
-        "tín chỉ/điểm số/phần trăm đã trích xuất, trước khi dùng làm baseline đánh giá.",
+        "- Batch hiện tại đã approve qua AI self-review (theo yêu cầu trực tiếp của user, xem "
+        "`golden_set_review.md` mục audit trail) — không phải domain-expert review đầy đủ. Khuyến nghị "
+        "domain expert spot-check trước khi dùng làm baseline chính thức cho báo cáo khóa luận, đặc biệt "
+        "các con số tín chỉ/điểm số/phần trăm.",
         "- Sau khi có chunking thật (Phase 3), gắn `relevant_chunks` cụ thể thay vì để trống.",
         "- Bổ sung thêm câu multi-hop cần tổng hợp từ ≥2 văn bản khác nhau (đã có 1 câu mẫu qua 2 văn bản "
         "thật — dùng helper `qm()` trong seed script — phần lớn còn lại vẫn gộp nhiều khoản trong cùng "

@@ -203,6 +203,30 @@ QUESTIONS = [
       "hoạch của Nhà trường; đối với số lượng đề thi nhiều hoặc thi tập trung, phải bàn giao trước ít nhất 14 "
       "ngày.",
       QD610, "Điều 9, Khoản 2", "factoid", "medium", ["thi_cu"]),
+    q("q_070", "Phòng Khảo thí và Đảm bảo Chất lượng của IUH lưu trữ đầu phách bài thi kết thúc học phần trong bao lâu?",
+      "Phòng KT&ĐBCL quản lý, lưu trữ đầu phách bài thi kết thúc học phần trong thời gian 06 năm tính từ ngày "
+      "tổ chức thi.",
+      QD610, "Điều 20, Khoản 2", "factoid", "medium", ["thi_cu"]),
+    q("q_071", "Việc đánh phách bài thi kết thúc học phần tại IUH phải hoàn thành trong bao lâu kể từ khi nhận bài thi?",
+      "Việc đánh phách phải được hoàn thành trong vòng 04 ngày kể từ ngày nhận được bài thi.",
+      QD610, "Điều 20, Khoản 3", "factoid", "medium", ["thi_cu"]),
+    q("q_072", "Bài thi tự luận kết thúc học phần tại IUH được chấm theo quy trình mấy vòng độc lập và bởi bao nhiêu giảng viên?",
+      "Chủ nhiệm bộ môn chịu trách nhiệm phân công 02 giảng viên chấm thi cho mỗi bài thi. Việc chấm thi được tổ "
+      "chức 02 vòng độc lập.",
+      QD610, "Điều 21, Khoản 1", "factoid", "medium", ["thi_cu", "cham_diem"]),
+    q("q_073", "Khi hai cán bộ chấm thi tự luận tại IUH không thống nhất được điểm, quy trình xử lý tiếp theo là gì?",
+      "Nếu hai cán bộ không thống nhất được điểm, sẽ mời cán bộ chấm thi thứ ba chấm bằng bút đỏ, dựa theo điểm "
+      "thành phần đã ghi trong đáp án; sau đó Trưởng ban chấm thi tổ chức họp để xử lý.",
+      QD610, "Điều 21, Khoản 2.b", "factoid", "hard", ["thi_cu", "cham_diem"]),
+    q("q_074", "Tổng thời gian trình bày và trả lời câu hỏi của một sinh viên khi thi vấn đáp tại IUH tối đa là bao lâu?",
+      "Tổng thời gian trình bày và trả lời câu hỏi của người học không quá 15 phút/người học dự thi (thời gian "
+      "chuẩn bị sau khi bốc thăm đề là 10 phút).",
+      QD610, "Điều 23, Khoản 3", "factoid", "medium", ["thi_cu"]),
+    q("q_075", "Khi chấm tiểu luận, đồ án cuối kỳ tại IUH, nếu kết quả chấm giữa 2 giảng viên chênh lệch dưới 2 điểm thì tính điểm cho sinh viên như thế nào?",
+      "Nếu kết quả chấm thi giữa 02 giảng viên chênh lệch dưới 02 điểm thì điểm của người học là trung bình cộng "
+      "kết quả chấm của cả hai giảng viên; nếu chênh lệch từ 02 điểm trở lên, hai giảng viên thảo luận thống "
+      "nhất, không thống nhất được thì báo Chủ nhiệm bộ môn xem xét quyết định.",
+      QD610, "Điều 24, Khoản 3", "factoid", "hard", ["thi_cu", "cham_diem"]),
 
     # --- Phúc khảo ---
     q("q_016", "Sinh viên IUH có bao nhiêu ngày kể từ khi điểm thi được công bố để nộp đơn phúc khảo?",
@@ -386,6 +410,11 @@ QUESTIONS = [
       "(không nằm trong nhóm đạt học bổng loại A), có kết quả học tập từ loại giỏi trở lên và rèn luyện từ loại "
       "tốt trở lên.",
       HOCBONG, "Trích Điều 7 (áp dụng từ khóa 2024)", "factoid", "hard", ["hoc_bong"]),
+    q("q_076", "Ngoài học bổng Khuyến khích học tập, IUH còn giới thiệu học bổng doanh nghiệp với giá trị lên tới bao nhiêu và do những đơn vị nào tài trợ?",
+      "Sổ tay Sinh viên IUH 2024 giới thiệu nhiều suất học bổng doanh nghiệp có giá trị lên tới 15 triệu đồng "
+      "dành cho sinh viên xuất sắc, sinh viên nghèo, vượt khó, hiếu học, được tài trợ bởi các Quỹ học bổng của "
+      "Tập đoàn Lotte, Nitori, Toyota, VP Bank, Sanden, LKIC, Lương Văn Can.",
+      SOTAY, "Mục Học bổng doanh nghiệp, Sổ tay Sinh viên IUH 2024", "factoid", "easy", ["hoc_bong"]),
 
     # --- Học phí / miễn giảm (dữ liệu thật, thay cho câu data_gap học bổng cũ) ---
     q("q_064", "Sinh viên IUH là người dân tộc thiểu số (không thuộc nhóm rất ít người) cư trú tại thôn/bản đặc biệt khó khăn được giảm bao nhiêu phần trăm học phí?",

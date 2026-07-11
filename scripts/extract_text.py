@@ -114,7 +114,28 @@ def process_entry(entry: dict, snapshot_dir: Path, out_dir: Path) -> dict | None
 
     text = normalize_whitespace(text)
     txt_filename = f"{stem}.txt"
-    (out_dir / txt_filename).write_text(text, encoding="utf-8")
+    txt_path = out_dir / txt_filename
+
+    # Lớp bảo vệ thứ 2 (độc lập với logic "preserve ocr_applied" ở main()):
+    # KHÔNG BAO GIỜ ghi đè 1 file .txt đã có nội dung bằng bản trích xuất ít
+    # hơn hẳn — đây chính xác là cách OCR của D3/D8/D9 từng bị xóa mất
+    # (2026-07-10/11). Áp dụng bất kể cờ ocr_applied có đồng bộ đúng hay không.
+    if txt_path.exists():
+        existing_text = txt_path.read_text(encoding="utf-8")
+        if len(existing_text) > len(text) * 2 and len(existing_text) > 500:
+            print(f"    [SKIP-OVERWRITE] {txt_filename}: file hien co {len(existing_text)} ky tu, "
+                  f"trich xuat moi chi {len(text)} ky tu -> giu nguyen file cu, khong ghi de")
+            return {
+                **result,
+                "extract_status": "ok",
+                "txt_file": txt_filename,
+                "char_count": len(existing_text),
+                "sha256": hashlib.sha256(existing_text.encode("utf-8")).hexdigest(),
+                "needs_ocr": False,
+                "ocr_applied": True,  # suy luận: file cũ dài hơn nhiều -> khả năng cao là bản OCR
+            }
+
+    txt_path.write_text(text, encoding="utf-8")
 
     result.update(
         extract_status="ok",
