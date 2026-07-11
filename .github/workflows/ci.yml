@@ -22,7 +22,9 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install -e ".[dev]"
+        # dataops/ragops cần cho tests/unit/test_chunker.py, test_sparse_bm25.py
+        # (tiktoken, mmh3) từ Phase 3 — .[dev] một mình không đủ nữa.
+        run: pip install -e ".[dev,dataops,ragops]"
 
       - name: Lint (ruff)
         run: ruff check src tests

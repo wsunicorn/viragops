@@ -11,6 +11,7 @@ Tài liệu này tách nội dung từ [blueprint gốc](../llmops_thesis_bluepr
 5. Khi cần chạy đánh giá và báo cáo số liệu, đọc `experiments/`.
 6. Khi triển khai, test, giám sát hoặc xử lý lỗi, đọc `operations/`.
 7. Dùng `CHECKLIST_IMPLEMENTATION.md` làm bảng điều khiển chính để thực hiện tuần tự 24 tuần.
+8. Cuối mỗi phase, đọc/cập nhật `RETROSPECTIVE.md` — điểm đã làm tốt nên giữ nguyên, và nợ kỹ thuật cần quay lại trước khi dùng số liệu làm báo cáo chính thức.
 
 ## Bản đồ tài liệu
 
