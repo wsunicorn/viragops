@@ -36,6 +36,10 @@ q_034,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 19, Khoản
 q_035,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 24, Khoản 2",factoid
 q_036,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 24, Khoản 2",factoid
 q_037,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 24, Khoản 3",factoid
+q_057,doc_sotay_2024,(pending Phase 3 chunking),"Trích Điều 11, Quy chế Công tác sinh viên (QĐ 2008/QĐ-ĐHCN, 24/8/2023)",factoid
+q_058,doc_sotay_2024,(pending Phase 3 chunking),"Trích Điều 11, Quy chế Công tác sinh viên (QĐ 2008/QĐ-ĐHCN, 24/8/2023)",factoid
+q_059,doc_sotay_2024,(pending Phase 3 chunking),"Trích Điều 11, Quy chế Công tác sinh viên (QĐ 2008/QĐ-ĐHCN, 24/8/2023)",factoid
+q_060,doc_sotay_2024,(pending Phase 3 chunking),"Trích Điều 3, Nội quy học đường (QĐ 589/QĐ-ĐHCN, 27/4/2021)",factoid
 q_038,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 17, Khoản 1.d",factoid
 q_039,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 17, Khoản 1.d",factoid
 q_040,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 17, Khoản 1.d",factoid
@@ -48,7 +52,17 @@ q_046,doc_camnang_chuan_tieng_anh,(pending Phase 3 chunking),"Quy định chuẩ
 q_047,doc_camnang_bang_quy_doi_tieng_anh,(pending Phase 3 chunking),Bảng quy đổi điểm chứng chỉ tiếng Anh,factoid
 q_048,doc_camnang_bang_quy_doi_tieng_anh,(pending Phase 3 chunking),"Bảng quy đổi điểm chứng chỉ tiếng Anh, Lưu ý",factoid
 q_049,(none - refusal/out_of_scope),(pending Phase 3 chunking),,factoid
-q_050,(none - refusal/out_of_scope),(pending Phase 3 chunking),,factoid
+q_050,doc_faet_hoc_bong_2024,(pending Phase 3 chunking),Trích Điều 7 (áp dụng từ khóa 2024),factoid
+q_061,doc_faet_hoc_bong_2024,(pending Phase 3 chunking),Trích Điều 5 (áp dụng từ khóa 2024),factoid
+q_062,doc_faet_hoc_bong_2024,(pending Phase 3 chunking),Trích Điều 5 (áp dụng từ khóa 2024),factoid
+q_063,doc_faet_hoc_bong_2024,(pending Phase 3 chunking),Trích Điều 7 (áp dụng từ khóa 2024),factoid
+q_064,doc_hd05_mien_giam_hp,(pending Phase 3 chunking),"Mục III.1, Hướng dẫn 05/HD-ĐHCN, 18/09/2025",factoid
+q_065,doc_hd05_mien_giam_hp,(pending Phase 3 chunking),"Mục III.2, Hướng dẫn 05/HD-ĐHCN, 18/09/2025",factoid
+q_066,doc_hd05_mien_giam_hp,(pending Phase 3 chunking),"Mục I, Hướng dẫn 05/HD-ĐHCN, 18/09/2025",factoid
+q_067,doc_sotay_2024,(pending Phase 3 chunking),"Trích Điều 11, mục đánh giá rèn luyện, Sổ tay Sinh viên IUH 2024",factoid
+q_068,doc_sotay_2024,(pending Phase 3 chunking),"Trích Điều 11, mục đánh giá rèn luyện, Sổ tay Sinh viên IUH 2024",factoid
+q_069,doc_sotay_2024,(pending Phase 3 chunking),"Trích Điều 11, mục đánh giá rèn luyện",multi_hop
+q_069,doc_qd1482_quy_che_tin_chi,(pending Phase 3 chunking),"Điều 35, Khoản 2",multi_hop
 q_051,(none - refusal/out_of_scope),(pending Phase 3 chunking),,out_of_scope
 q_052,(none - refusal/out_of_scope),(pending Phase 3 chunking),,out_of_scope
 q_053,(none - refusal/out_of_scope),(pending Phase 3 chunking),,adversarial

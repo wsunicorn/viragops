@@ -112,3 +112,18 @@ documents:
     topics: [so_tay, faq]
     urls:
       - https://stsv.iuh.edu.vn/
+
+  # Thêm 2026-07-11: pdt.iuh.edu.vn là SPA (React/Vue) — mọi URL con trả về
+  # cùng 1 "app shell" ~482KB, không lấy được nội dung thật qua HTTP GET tĩnh
+  # (xác nhận bằng cách so hash: /quy-che-hoc-vu/ trả byte-size giống hệt các
+  # trang pdt khác). D2 (quy chế học vụ) do đó KHÔNG có URL riêng lấy được tự
+  # động — cần headless browser (Playwright) hoặc tải thủ công, ngoài scope
+  # hiện tại. D13 dùng bản mirror ở site khoa (CMS server-rendered, không SPA)
+  # làm nguồn thay thế cho quy định học bổng.
+  - id: D13
+    title: "Quy định về việc cấp xét học bổng (áp dụng từ khóa 2024) — bản mirror Khoa Công nghệ Động lực"
+    unit: faet
+    canonical: true           # pdt.iuh.edu.vn/quy-che-xet-hoc-bong/ là SPA, không crawl được; dùng bản mirror này làm canonical
+    topics: [hoc_bong]
+    urls:
+      - "https://faet.iuh.edu.vn/news.html@detail@271@585@Quy-dinh-ve-viec-cap-xet-hoc-bong-(Ap-dung-tu-khoa-2024)-"

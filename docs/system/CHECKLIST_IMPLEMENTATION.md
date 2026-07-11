@@ -82,24 +82,25 @@ Chuẩn bị tài liệu nguồn và golden set 300 câu hỏi có ground truth,
 
 ### Task
 
-- [x] Thu thập tài liệu quy chế/FAQ IUH theo `data_sources_iuh.md` (D1-D12), lưu snapshot + metadata nguồn.
-  - Snapshot `src_20260710` — 44 file (17 HTML cấp 1 + 25 file depth-2: PDF/DOCX) qua `scripts/download_sources.py` (2 pass: trang chính + link đính kèm, merge manifest, sha256, TLS fallback có xin phép user cho *.iuh.edu.vn thiếu intermediate cert).
-  - Text sạch: `scripts/extract_text.py` → 42/44 doc. OCR chính thức (`scripts/ocr_scanned_pdfs.py`, Gemini multimodal): ✅ QĐ 610/QĐ-ĐHCN (2 bản, 28tr, quan trọng nhất) + thông báo đăng ký học. ❌ Sổ tay SV 2024 (82tr) + 1 file học phí bị Gemini chặn `finish_reason=RECITATION` nhất quán — không chặn tiến độ vì các văn bản lõi (tín chỉ, tốt nghiệp, thi, phúc khảo, tiếng Anh) đã có text sạch. Chi tiết: `modules/01_data_ragops.md`.
-  - Coi là đủ để bắt đầu golden set batch đầu; còn thiếu (không chặn phase): stsv.iuh.edu.vn (JS app), 2 file .docx, D9 + 1 file D8 chờ OCR retry, học phí/học bổng cụ thể (D7/D8 chỉ là trang danh mục).
+- [x] Thu thập tài liệu quy chế/FAQ IUH theo `data_sources_iuh.md` (D1-D13), lưu snapshot + metadata nguồn.
+  - Snapshot `src_20260710` — 46 file (18 HTML cấp 1 + 25 file depth-2 + D13 bổ sung) qua `scripts/download_sources.py` (2 pass: trang chính + link đính kèm, merge manifest, sha256, TLS fallback có xin phép user cho *.iuh.edu.vn thiếu intermediate cert).
+  - Text sạch: `scripts/extract_text.py` → 43/46 doc. **OCR chính thức hoàn tất cho toàn bộ 5 PDF scan phát hiện được** (`scripts/ocr_scanned_pdfs.py`, Gemini multimodal, quota reset 2026-07-11): QĐ 610/QĐ-ĐHCN (2 bản, 28tr), thông báo đăng ký học, HD 05/HD-ĐHCN miễn giảm học phí (5tr), **Sổ tay SV 2024 (82tr, 87K ký tự, 6 batch)**. Chi tiết + bug đã fix (extract_text.py từng ghi đè kết quả OCR khi rerun): `modules/01_data_ragops.md`.
+  - **Phát hiện kỹ thuật quan trọng:** pdt.iuh.edu.vn là SPA (React/Vue), không crawl tĩnh được — dùng bản mirror site khoa (D13) làm nguồn thay thế cho học bổng. Xem `data_sources_iuh.md` mục 7.
+  - Còn thiếu (không chặn phase): stsv.iuh.edu.vn (JS app), 2 file .docx, học phí cụ thể theo ngành/năm, thang điểm rèn luyện đầy đủ, "quy chế học vụ" riêng biệt (D2, chặn bởi SPA).
 - [x] Ghi metadata tài liệu nguồn — bảng văn bản → số hiệu → ngày ban hành → URL trong [experiments/golden_set_review.md](experiments/golden_set_review.md).
-- [~] Tạo bản nháp 300 câu hỏi — **56/300 câu** đã tạo từ text thật (`scripts/seed_golden_set_iuh.py` → `data/test_sets/golden_set.jsonl`), không bịa số liệu. Còn thiếu 244 câu, chủ yếu do thiếu nguồn sạch cho học phí/học bổng/rèn luyện (xem `golden_set_stats.md`).
-- [x] Chia câu hỏi theo 5 nhóm: có đáp án (factoid/procedural), refusal (data-gap + out_of_scope), adversarial, multi-hop, ambiguous — cả 5 nhóm có mặt trong batch 56 câu, nhưng chưa đủ quota từng nhóm (xem bảng so sánh trong `golden_set_stats.md`).
-- [x] Gắn ground truth answer — cho 56 câu hiện có, trích/diễn giải trực tiếp từ nguồn thật.
-- [x] Gắn relevant documents — cho 56 câu hiện có.
+- [~] Tạo bản nháp 300 câu hỏi — **69/300 câu** đã tạo từ text thật (`scripts/seed_golden_set_iuh.py` → `data/test_sets/golden_set.jsonl`), không bịa số liệu. Còn thiếu 231 câu (xem `golden_set_stats.md`).
+- [x] Chia câu hỏi theo 5 nhóm: có đáp án (factoid/procedural), refusal (data-gap + out_of_scope), adversarial, multi-hop, ambiguous — cả 5 nhóm có mặt trong batch 69 câu, gồm 1 multi-hop THẬT qua 2 văn bản khác nhau (helper `qm()`), nhưng chưa đủ quota từng nhóm (xem bảng so sánh trong `golden_set_stats.md`).
+- [x] Gắn ground truth answer — cho 69 câu hiện có, trích/diễn giải trực tiếp từ nguồn thật.
+- [x] Gắn relevant documents — cho 69 câu hiện có.
 - [ ] Sau khi có chunk, gắn relevant chunks — chờ Phase 3 (chunking). Đã có `relevant_chunks_mapping.csv` interim ở mức document.
-- [x] Gắn expected citations — cho câu không refusal trong 56 câu hiện có.
-- [ ] Review thủ công ít nhất 30 câu mẫu — **CẦN USER LÀM**, script cố ý không tự approve (`review_status=pending_review` cho toàn bộ 56 câu). Xem phát hiện cần xác nhận trong `golden_set_review.md` (đặc biệt điều khoản "chất lượng cao" vs "tăng cường tiếng Anh").
-- [ ] Tạo smoke set 50 câu — batch 56 câu hiện tại là ứng viên nhưng chưa qua review/approve nên chưa tính là smoke set chính thức.
+- [x] Gắn expected citations — cho câu không refusal trong 69 câu hiện có.
+- [ ] Review thủ công ít nhất 30 câu mẫu — **CẦN USER LÀM**, script cố ý không tự approve (`review_status=pending_review` cho toàn bộ 69 câu). Xem phát hiện cần xác nhận trong `golden_set_review.md` (đặc biệt: "chất lượng cao" vs "tăng cường tiếng Anh"; số QĐ học bổng bị thiếu trong bản mirror D13).
+- [ ] Tạo smoke set 50 câu — batch 69 câu hiện tại vượt 50 nhưng chưa qua review/approve nên chưa tính là smoke set chính thức.
 - [ ] Tạo adversarial set 20 câu — mới có 2/20 câu mẫu (prompt injection).
 
 ### Đầu ra
 
-- [x] `golden_set.jsonl` — 56/300 câu, `data/test_sets/golden_set.jsonl`.
+- [x] `golden_set.jsonl` — 69/300 câu, `data/test_sets/golden_set.jsonl`.
 - [x] `golden_set_stats.md` — tự động sinh, `experiments/golden_set_stats.md`.
 - [x] `relevant_chunks_mapping.csv` — interim mức document, `data/test_sets/relevant_chunks_mapping.csv`.
 - [x] `golden_set_review.md` — `experiments/golden_set_review.md`, chờ user review/approve.
@@ -113,13 +114,13 @@ python scripts/golden_set_stats.py
 
 ### Definition of Done
 
-**Chưa đạt — Phase 2 chưa đóng, còn tiếp tục.** Sub-criteria đạt cho batch hiện có (56 câu), nhưng tiêu chí chính "300 câu" thì chưa:
+**Chưa đạt — Phase 2 chưa đóng, còn tiếp tục.** Sub-criteria đạt cho batch hiện có (69 câu), nhưng tiêu chí chính "300 câu" thì chưa:
 
-- [ ] Có 300 câu hỏi (hiện có 56/300 — 19%, xem `golden_set_stats.md`).
-- [x] Mọi câu có đáp án đều có ground truth *(đúng cho 56 câu hiện có — verify bằng `scripts/validate_golden_set.py`)*.
-- [x] Mọi câu refusal có `requires_refusal=true` *(đúng cho 56 câu hiện có)*.
-- [x] Category/difficulty/risk_tags đầy đủ *(đúng cho 56 câu hiện có, validator khóa cứng enum)*.
-- [x] Không có câu thiếu nguồn kiểm chứng *(56 câu đều trích từ text thật; 2 câu data-gap cố ý không có nguồn vì phản ánh giới hạn dữ liệu, không phải bịa)*.
+- [ ] Có 300 câu hỏi (hiện có 69/300 — 23%, xem `golden_set_stats.md`).
+- [x] Mọi câu có đáp án đều có ground truth *(đúng cho 69 câu hiện có — verify bằng `scripts/validate_golden_set.py`)*.
+- [x] Mọi câu refusal có `requires_refusal=true` *(đúng cho 69 câu hiện có)*.
+- [x] Category/difficulty/risk_tags đầy đủ *(đúng cho 69 câu hiện có, validator khóa cứng enum)*.
+- [x] Không có câu thiếu nguồn kiểm chứng *(69 câu đều trích từ text thật; 1 câu data-gap cố ý không có nguồn vì phản ánh giới hạn dữ liệu học phí theo ngành/năm, không phải bịa)*.
 - [ ] **User (domain expert) đã review/approve** — batch hiện tại toàn bộ ở `pending_review`, đây là điều kiện tiên quyết trước khi golden set được dùng làm baseline đánh giá thật (Phase 4+).
 
 ### Rủi ro

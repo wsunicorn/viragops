@@ -107,14 +107,15 @@ def main() -> int:
         "",
         "## Việc còn lại để đạt full set 300 câu",
         "",
-        "- Mở rộng câu hỏi cho các category còn thiếu nguồn sạch: `hoc_phi` (học phí theo ngành/năm), "
-        "`hoc_bong` (mức % học bổng cụ thể), `ren_luyen`/`so_tay` (điểm rèn luyện — chờ OCR Sổ tay SV "
-        "82 trang, xem `modules/01_data_ragops.md`).",
+        "- Mở rộng câu hỏi cho category vẫn còn thiếu nguồn sạch: `hoc_phi` theo ngành/năm cụ thể "
+        "(chưa có bảng học phí chi tiết), thang điểm rèn luyện đầy đủ (Xuất sắc/Tốt/Khá/TB/Yếu/Kém theo "
+        "khoảng điểm — chưa tìm thấy trong nguồn hiện có). Xem `golden_set_review.md` mục việc còn lại.",
         "- Domain expert (người thực hiện khóa luận) review và approve từng câu — đặc biệt các con số "
-        "tín chỉ/điểm số đã trích xuất, trước khi dùng làm baseline đánh giá.",
+        "tín chỉ/điểm số/phần trăm đã trích xuất, trước khi dùng làm baseline đánh giá.",
         "- Sau khi có chunking thật (Phase 3), gắn `relevant_chunks` cụ thể thay vì để trống.",
-        "- Bổ sung thêm câu multi-hop cần tổng hợp từ ≥2 văn bản khác nhau (hiện tại phần lớn multi-hop "
-        "trong batch này gộp nhiều khoản trong cùng một văn bản).",
+        "- Bổ sung thêm câu multi-hop cần tổng hợp từ ≥2 văn bản khác nhau (đã có 1 câu mẫu qua 2 văn bản "
+        "thật — dùng helper `qm()` trong seed script — phần lớn còn lại vẫn gộp nhiều khoản trong cùng "
+        "một văn bản).",
     ]
 
     STATS_OUT_PATH.write_text("\n".join(lines), encoding="utf-8")

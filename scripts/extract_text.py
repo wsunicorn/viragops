@@ -140,9 +140,30 @@ def main() -> int:
     out_dir = PROCESSED_DIR / args.snapshot
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    # Bảo toàn kết quả OCR đã chạy trước đó (scripts/ocr_scanned_pdfs.py) —
+    # KHÔNG re-extract/ghi đè .txt cho document đã có ocr_applied=True. Bug
+    # thật đã xảy ra 2026-07-11: rerun extract_text.py để xử lý 1 doc mới đã
+    # xóa sạch 84K+10K ký tự OCR của D9/D8 vì ghi đè vô điều kiện.
+    existing_processed_path = out_dir / "processed_manifest.json"
+    existing: dict = {}
+    ocr_preserved: dict[str, dict] = {}
+    if existing_processed_path.exists():
+        existing = json.loads(existing_processed_path.read_text(encoding="utf-8"))
+        for d in existing.get("documents", []):
+            if d.get("ocr_applied"):
+                key = f"{d.get('doc_id')}::{d.get('source_file')}"
+                ocr_preserved[key] = d
+
     all_entries = manifest.get("documents", []) + manifest.get("discovered_documents", [])
     results = []
     for entry in all_entries:
+        key = f"{entry.get('doc_id')}::{entry.get('file', '')}"
+        if key in ocr_preserved:
+            r = ocr_preserved[key]
+            results.append(r)
+            print(f"  [ PRESERVED ] {r.get('doc_id', '?'):5} {r.get('source_file', ''):55} "
+                  f"chars={r.get('char_count', '-')} (giữ nguyên kết quả OCR trước đó)")
+            continue
         r = process_entry(entry, snapshot_dir, out_dir)
         if r is None:
             continue
@@ -167,6 +188,10 @@ def main() -> int:
         },
         "documents": results,
         "duplicate_groups": duplicates,
+        # Giữ lại lịch sử OCR từ lần chạy trước (nếu có) — không tự tạo mới ở
+        # đây, scripts/ocr_scanned_pdfs.py là nơi duy nhất ghi các field này.
+        "ocr_runs": existing.get("ocr_runs", []),
+        "ocr_failures": existing.get("ocr_failures", []),
     }
     (out_dir / "processed_manifest.json").write_text(
         json.dumps(processed_manifest, ensure_ascii=False, indent=2), encoding="utf-8"

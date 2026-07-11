@@ -58,6 +58,22 @@ DOCS = {
         "title": "Bảng quy đổi điểm chứng chỉ tiếng Anh (Cẩm nang người học)",
         "source_file": "d6_1_quy-inh-chuan-tieng-anh-bang-quy-oi-chung-chi.txt",
     },
+    # --- Batch 2 (2026-07-11): D8 OCR retry thành công + D9 (Sổ tay SV 82tr) OCR
+    # thành công sau khi quota Gemini reset + tìm thêm nguồn học bổng thật ---
+    "doc_hd05_mien_giam_hp": {
+        "title": "Hướng dẫn thực hiện chính sách miễn, giảm học phí và hỗ trợ chi phí học tập "
+                 "năm học 2025-2026 (Hướng dẫn số 05/HD-ĐHCN, 18/09/2025)",
+        "source_file": "d8_hu-e1-bb-9bng-20-20d-e1-ba-abn-20mghp-20nam-202025-2026-20theo-20ngh-e1-bb-8b-20d-e1-bb-8b.txt",
+    },
+    "doc_sotay_2024": {
+        "title": "Sổ tay Sinh viên IUH 2024",
+        "source_file": "d9_so-tay-sinh-vien-iuh-2024-2-pdf.txt",
+    },
+    "doc_faet_hoc_bong_2024": {
+        "title": "Quy định về việc cấp xét học bổng (áp dụng từ khóa 2024) — bản mirror "
+                 "Khoa Công nghệ Động lực (faet.iuh.edu.vn), xem D13 trong data_sources_iuh.yaml",
+        "source_file": "d13_0_quy-inh-ve-viec-cap-xet-hoc-bong-ap-dung-tu-khoa-2024-ban-mirror-khoa-cong-nghe-.txt",
+    },
 }
 
 
@@ -91,11 +107,39 @@ def q(
     }
 
 
+def qm(
+    qid: str,
+    question: str,
+    ground_truth: str,
+    citations: list[tuple[str, str]],  # [(doc_id, section), ...] — multi_hop THẬT qua nhiều văn bản
+    category: str,
+    difficulty: str,
+    risk_tags: list[str],
+) -> dict:
+    return {
+        "id": qid,
+        "question": question,
+        "ground_truth": ground_truth,
+        "relevant_chunks": [],
+        "relevant_documents": [d for d, _ in citations],
+        "expected_citations": [{"document_id": d, "section": s} for d, s in citations],
+        "category": category,
+        "difficulty": difficulty,
+        "requires_refusal": False,
+        "requires_clarification": False,
+        "risk_tags": risk_tags,
+        "review_status": "pending_review",
+    }
+
+
 QD1482 = "doc_qd1482_quy_che_tin_chi"
 QD610 = "doc_qd610_thi_danh_gia"
 PHUCKHAO = "doc_tqa_phuc_khao"
 TOTNGHIEP = "doc_camnang_dieu_kien_tot_nghiep"
 TIENGANH = "doc_camnang_chuan_tieng_anh"
+MIENGIAMHP = "doc_hd05_mien_giam_hp"
+SOTAY = "doc_sotay_2024"
+HOCBONG = "doc_faet_hoc_bong_2024"
 QUYDOI = "doc_camnang_bang_quy_doi_tieng_anh"
 
 QUESTIONS = [
@@ -248,6 +292,25 @@ QUESTIONS = [
       "Người học sử dụng hồ sơ, văn bằng, chứng chỉ giả làm điều kiện trúng tuyển hoặc điều kiện xét tốt nghiệp "
       "sẽ bị buộc thôi học; văn bằng tốt nghiệp nếu đã được cấp sẽ bị thu hồi, huỷ bỏ.",
       QD1482, "Điều 24, Khoản 3", "factoid", "medium", ["ky_luat", "tot_nghiep"]),
+    q("q_057", "IUH có bao nhiêu mức kỷ luật sinh viên và đó là những mức nào?",
+      "IUH có 4 mức kỷ luật sinh viên theo Quy chế Công tác sinh viên: (1) Khiển trách, (2) Cảnh cáo, (3) Đình "
+      "chỉ học tập 01 năm, (4) Buộc thôi học.",
+      SOTAY, "Trích Điều 11, Quy chế Công tác sinh viên (QĐ 2008/QĐ-ĐHCN, 24/8/2023)", "factoid", "medium",
+      ["ky_luat"]),
+    q("q_058", "Mức kỷ luật Cảnh cáo tại IUH được áp dụng trong trường hợp nào?",
+      "Cảnh cáo áp dụng đối với sinh viên đã bị khiển trách mà tái phạm hoặc vi phạm ở mức độ nhẹ nhưng có tính "
+      "chất thường xuyên, hoặc mới vi phạm lần đầu nhưng mức độ tương đối nghiêm trọng.",
+      SOTAY, "Trích Điều 11, Quy chế Công tác sinh viên (QĐ 2008/QĐ-ĐHCN, 24/8/2023)", "factoid", "medium",
+      ["ky_luat"]),
+    q("q_059", "Sinh viên IUH đang trong thời gian bị đình chỉ học tập mà tiếp tục vi phạm kỷ luật thì bị xử lý thế nào?",
+      "Sinh viên đang trong thời gian bị đình chỉ học tập mà vẫn tiếp tục vi phạm kỷ luật sẽ bị buộc thôi học.",
+      SOTAY, "Trích Điều 11, Quy chế Công tác sinh viên (QĐ 2008/QĐ-ĐHCN, 24/8/2023)", "factoid", "medium",
+      ["ky_luat"]),
+    q("q_060", "Nội quy học đường của IUH quy định gì về trang phục khi sinh viên hệ chính quy đến trường học tập?",
+      "Sinh viên đến Trường học tập trang phục phải nghiêm túc; riêng hệ chính quy phải mặc đồng phục theo mẫu "
+      "Nhà trường quy định.",
+      SOTAY, "Trích Điều 3, Nội quy học đường (QĐ 589/QĐ-ĐHCN, 27/4/2021)", "factoid", "easy",
+      ["so_tay"]),
 
     # --- Bảo lưu / nghỉ học tạm thời ---
     q("q_038", "Sinh viên IUH xin nghỉ học tạm thời vì nhu cầu cá nhân được Nhà trường giải quyết tối đa bao nhiêu lần cho một chương trình học?",
@@ -304,11 +367,59 @@ QUESTIONS = [
       "Tài liệu hiện có không chứa mức học phí cụ thể theo tín chỉ/ngành cho năm học 2026-2027; cần bổ sung "
       "nguồn dữ liệu học phí chính thức trước khi có thể trả lời.",
       None, "", "factoid", "hard", ["hoc_phi", "data_gap"], requires_refusal=True),
-    q("q_050", "Sinh viên đạt học bổng khuyến khích học tập loại A tại IUH được miễn giảm bao nhiêu phần trăm học phí?",
-      "Tài liệu hiện có (trang danh mục quy chế học bổng) chỉ liệt kê tiêu đề các quyết định học bổng theo năm, "
-      "chưa có nội dung chi tiết mức miễn giảm; cần tải văn bản quyết định học bổng đầy đủ trước khi có thể trả "
-      "lời chính xác.",
-      None, "", "factoid", "hard", ["hoc_bong", "data_gap"], requires_refusal=True),
+
+    # --- Học bổng (dữ liệu thật, thay cho câu data_gap cũ q_050 sau khi tìm được nguồn) ---
+    q("q_050", "Sinh viên IUH đạt học bổng Khuyến khích học tập loại A được nhận mức học bổng bằng bao nhiêu phần trăm học phí bình quân một học kỳ?",
+      "Mức học bổng loại A (học bổng loại xuất sắc) bằng 130% học phí bình quân của mỗi học kỳ, áp dụng cho "
+      "sinh viên có kết quả học tập và rèn luyện loại xuất sắc, thuộc nhóm 1,5% sinh viên có điểm trung bình "
+      "chung học kỳ cao nhất của khóa học, bậc học và đơn vị đào tạo.",
+      HOCBONG, "Trích Điều 7 (áp dụng từ khóa 2024)", "factoid", "medium", ["hoc_bong"]),
+    q("q_061", "Điều kiện tối thiểu về số tín chỉ tích lũy trong học kỳ để sinh viên IUH được xét học bổng Khuyến khích học tập là bao nhiêu?",
+      "Số tín chỉ sinh viên tích lũy trong học kỳ xét, cấp học bổng tối thiểu là 15 tín chỉ (không tính các học "
+      "phần Giáo dục thể chất, Giáo dục quốc phòng, tiếng Anh).",
+      HOCBONG, "Trích Điều 5 (áp dụng từ khóa 2024)", "factoid", "medium", ["hoc_bong", "tin_chi"]),
+    q("q_062", "Học kỳ đầu và học kỳ cuối của khóa học tại IUH có được xét học bổng Khuyến khích học tập không?",
+      "Không. Học kỳ xét, cấp học bổng không bao gồm học kỳ đầu và học kỳ cuối của khóa học.",
+      HOCBONG, "Trích Điều 5 (áp dụng từ khóa 2024)", "factoid", "easy", ["hoc_bong"]),
+    q("q_063", "Sinh viên IUH thuộc nhóm bao nhiêu phần trăm điểm trung bình chung học kỳ cao nhất thì đủ điều kiện xét học bổng loại B?",
+      "Sinh viên thuộc nhóm 4% có điểm trung bình chung học kỳ cao nhất của khóa học, bậc học và đơn vị đào tạo "
+      "(không nằm trong nhóm đạt học bổng loại A), có kết quả học tập từ loại giỏi trở lên và rèn luyện từ loại "
+      "tốt trở lên.",
+      HOCBONG, "Trích Điều 7 (áp dụng từ khóa 2024)", "factoid", "hard", ["hoc_bong"]),
+
+    # --- Học phí / miễn giảm (dữ liệu thật, thay cho câu data_gap học bổng cũ) ---
+    q("q_064", "Sinh viên IUH là người dân tộc thiểu số (không thuộc nhóm rất ít người) cư trú tại thôn/bản đặc biệt khó khăn được giảm bao nhiêu phần trăm học phí?",
+      "Được giảm 70% học phí, áp dụng cho sinh viên là người dân tộc thiểu số (ngoài đối tượng dân tộc thiểu số "
+      "rất ít người) mà bản thân và cha hoặc mẹ có nơi thường trú tại thôn/bản đặc biệt khó khăn, xã khu vực "
+      "III vùng đồng bào dân tộc và miền núi, hoặc xã đặc biệt khó khăn vùng bãi ngang, ven biển, hải đảo.",
+      MIENGIAMHP, "Mục III.1, Hướng dẫn 05/HD-ĐHCN, 18/09/2025", "factoid", "medium", ["hoc_phi", "mien_giam"]),
+    q("q_065", "Sinh viên IUH là con của cán bộ, công chức bị tai nạn lao động hoặc mắc bệnh nghề nghiệp được hưởng trợ cấp thường xuyên thì được giảm bao nhiêu phần trăm học phí?",
+      "Được giảm 50% học phí.",
+      MIENGIAMHP, "Mục III.2, Hướng dẫn 05/HD-ĐHCN, 18/09/2025", "factoid", "medium", ["hoc_phi", "mien_giam"]),
+    q("q_066", "Chính sách miễn, giảm học phí tại IUH có áp dụng cho sinh viên đang học lại hoặc học cải thiện điểm không?",
+      "Không. Không áp dụng chế độ miễn, giảm học phí, hỗ trợ chi phí học tập đối với sinh viên học kéo dài, "
+      "nghỉ học tạm thời, bị kỷ luật ngừng học hoặc buộc thôi học, học lại, học bổ sung, học cải thiện, học "
+      "ngành thứ 2.",
+      MIENGIAMHP, "Mục I, Hướng dẫn 05/HD-ĐHCN, 18/09/2025", "factoid", "medium", ["hoc_phi", "mien_giam", "hoc_lai"]),
+
+    # --- Rèn luyện (dữ liệu thật, mới) ---
+    q("q_067", "Sinh viên IUH bị xếp loại rèn luyện Yếu, Kém trong hai học kỳ liên tiếp thì bị xử lý như thế nào?",
+      "Sinh viên bị xếp loại rèn luyện Yếu, Kém trong hai học kỳ liên tiếp phải tạm ngừng học ít nhất một học "
+      "kỳ ở học kỳ tiếp theo; nếu bị xếp loại Yếu, Kém hai học kỳ liên tiếp lần thứ hai thì sẽ bị buộc thôi học.",
+      SOTAY, "Trích Điều 11, mục đánh giá rèn luyện, Sổ tay Sinh viên IUH 2024", "factoid", "hard", ["ren_luyen"]),
+    q("q_068", "Kết quả đánh giá rèn luyện của sinh viên IUH được sử dụng làm căn cứ cho những việc gì?",
+      "Kết quả đánh giá rèn luyện được sử dụng làm căn cứ để xét tốt nghiệp, làm khóa luận tốt nghiệp, xét học "
+      "bổng, xét khen thưởng - kỷ luật, xét lưu trú ở ký túc xá, xét giới thiệu việc làm thêm và các ưu tiên "
+      "khác theo quy định của Nhà trường.",
+      SOTAY, "Trích Điều 11, mục đánh giá rèn luyện, Sổ tay Sinh viên IUH 2024", "factoid", "medium",
+      ["ren_luyen", "tot_nghiep", "hoc_bong"]),
+    qm("q_069", "Nếu một sinh viên IUH vừa bị xếp loại rèn luyện Kém hai học kỳ liên tiếp, vừa từng bị kỷ luật ở mức đình chỉ học tập trong thời gian học, thì hai hệ quả này ảnh hưởng thế nào đến việc học tiếp và hạng tốt nghiệp sau này?",
+       "Về việc học tiếp: xếp loại rèn luyện Kém hai học kỳ liên tiếp buộc sinh viên phải tạm ngừng học ít nhất "
+       "một học kỳ; nếu tái diễn lần thứ hai sẽ bị buộc thôi học (Sổ tay Sinh viên IUH 2024). Về hạng tốt "
+       "nghiệp: nếu sinh viên vẫn tốt nghiệp được, hạng tốt nghiệp loại Xuất sắc hoặc Giỏi sẽ bị giảm một mức "
+       "do đã bị kỷ luật từ mức cảnh cáo trở lên trong thời gian học (Quy chế đào tạo tín chỉ, Điều 35).",
+       [(SOTAY, "Trích Điều 11, mục đánh giá rèn luyện"), (QD1482, "Điều 35, Khoản 2")],
+       "multi_hop", "hard", ["ren_luyen", "ky_luat", "tot_nghiep"]),
 
     # --- Ngoài phạm vi domain (out_of_scope thật sự) ---
     q("q_051", "Trường Đại học Công nghiệp TP.HCM có cho phép sinh viên nuôi thú cưng trong ký túc xá không?",

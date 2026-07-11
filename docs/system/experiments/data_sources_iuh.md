@@ -89,6 +89,7 @@ Cập nhật danh mục category trong [golden_set_design.md](golden_set_design.
 | Bản quyền / điều khoản sử dụng | Thấp-TB | Tài liệu công khai, dùng cho nghiên cứu học thuật; ghi nguồn + ngày truy cập; không phát tán lại bản gốc ngoài demo |
 | Trộn nhầm văn bản Bộ GD&ĐT với văn bản IUH | Trung bình | Citation chỉ trỏ văn bản IUH; ghi tham chiếu thông tư gốc ở metadata, không ở citation |
 | Nội dung site khoa lỗi thời | Thấp | Chỉ dùng đối chiếu, không index làm canonical |
+| **pdt.iuh.edu.vn là SPA (React/Vue)** — xác nhận 2026-07-11: mọi URL con (`/quy-che-hoc-vu/`, `/quy-che-dao-tao`, `/danh-sach/*`...) trả về cùng một "app shell" HTML ~482KB qua HTTP GET tĩnh, không chứa nội dung bài viết thật (client-side render). Đây là lý do D1/D2 từng bị ghi nhận trùng nội dung. | Cao (chặn crawl tự động cho toàn bộ pdt.iuh.edu.vn) | Không dùng httpx GET tĩnh cho pdt.iuh.edu.vn sub-page. Phương án: (a) headless browser (Playwright) — chưa triển khai, ngoài scope hiện tại; (b) dùng bản mirror server-rendered ở site khoa (faet.iuh.edu.vn, ce.iuh.edu.vn...) làm nguồn thay thế khi có — đã áp dụng cho D13 (học bổng); (c) tài liệu quyết định gốc dạng PDF vẫn tải được bình thường qua link trực tiếp (không qua SPA routing). |
 
 ## 8. Checklist thu thập (bổ sung cho Phase 2)
 
