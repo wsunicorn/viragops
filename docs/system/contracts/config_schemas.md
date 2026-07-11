@@ -123,6 +123,55 @@ decision:
   block_if: any_critical_violated
 ```
 
+## Ingest config
+
+```yaml
+ingest_config_id: ingest_iuh_v1
+source:
+  snapshot: src_20260710
+  processed_dir: data/processed/iuh/src_20260710
+chunking:
+  default_strategy: structure_aware   # fixed | recursive | structure_aware | parent_child
+  strategies:
+    fixed:
+      chunk_size_tokens: 300
+      overlap_tokens: 50
+    recursive:
+      chunk_size_tokens: 400
+      overlap_tokens: 60
+      separators: ["\n\n", "\n", ". ", " "]
+    structure_aware:
+      unit: dieu
+      max_tokens: 600
+    parent_child:
+      parent_unit: dieu
+      child_unit: khoan
+      max_child_tokens: 250
+quality_thresholds:
+  min_chunk_tokens: 15
+  max_chunk_tokens: 1200
+embedding:
+  dense:
+    provider: gemini
+    model_ref: gemini-embedding-001   # model thật lấy từ model_gateway.yaml route "embedding"
+    output_dimensionality: 768
+    batch_size: 80
+    batch_delay_seconds: 65
+  sparse:
+    provider: custom_bm25_hashing   # tự viết, hashing-trick qua mmh3 — xem src/dataops/sparse_bm25.py
+    vocab_size: 2097152
+    k1: 1.5
+    b: 0.75
+qdrant:
+  collection_prefix: viragops_iuh
+  dense_vector_name: dense
+  sparse_vector_name: sparse
+  distance: cosine
+postgres:
+  documents_table: documents
+  chunks_table: chunks
+```
+
 ## Experiment config
 
 ```yaml

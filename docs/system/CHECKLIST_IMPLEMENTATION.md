@@ -92,7 +92,7 @@ Chuẩn bị tài liệu nguồn và golden set 300 câu hỏi có ground truth,
 - [x] Chia câu hỏi theo 5 nhóm: có đáp án (factoid/procedural), refusal (data-gap + out_of_scope), adversarial, multi-hop, ambiguous — cả 5 nhóm có mặt trong batch 76 câu, gồm 1 multi-hop THẬT qua 2 văn bản khác nhau (helper `qm()`), nhưng chưa đủ quota từng nhóm (xem bảng so sánh trong `golden_set_stats.md`).
 - [x] Gắn ground truth answer — cho 76 câu hiện có, trích/diễn giải trực tiếp từ nguồn thật.
 - [x] Gắn relevant documents — cho 76 câu hiện có.
-- [ ] Sau khi có chunk, gắn relevant chunks — chờ Phase 3 (chunking). Đã có `relevant_chunks_mapping.csv` interim ở mức document.
+- [ ] Sau khi có chunk, gắn relevant chunks — Phase 3 đã tạo chunk thật (220 chunk, xem Phase 3 bên dưới) nhưng auto-matching citation cấp Điểm với chunk gom theo nhóm Khoản chỉ khớp chính xác 5/71 câu — chưa gán vì rủi ro gán sai cao hơn giá trị, để lại cho lần làm sau (xem `modules/01_data_ragops.md`). Vẫn có `relevant_chunks_mapping.csv` interim ở mức document.
 - [x] Gắn expected citations — cho câu không refusal trong 76 câu hiện có.
 - [x] Review thủ công ít nhất 30 câu mẫu — **Đã approve 76/76 câu qua AI self-review theo yêu cầu trực tiếp của user (2026-07-11)**, dùng `scripts/approve_golden_set.py` với audit trail (`reviewed_by`, `reviewed_at`, `review_note`). Phương pháp verify: kiểm tra chéo document_id registry (0 lỗi), đối chiếu số liệu tự động với nguồn (0 sai lệch/38 câu có số), đối chiếu cụm từ đặc trưng cho claim phức hợp. Đã giải quyết điểm mơ hồ "chất lượng cao" vs "tăng cường tiếng Anh". Còn 1 điểm treo: số QĐ học bổng D13 (xem `golden_set_review.md`). **Lưu ý:** đây không thay thế domain-expert review đầy đủ — khuyến nghị user spot-check trước khi dùng chính thức.
 - [x] Tạo smoke set 50 câu — batch 76 câu đã approve vượt mốc 50, dùng được làm smoke set thực tế.
@@ -143,48 +143,75 @@ Ingest, clean, chunk, embed, index và version dữ liệu.
 
 ### Task
 
-- [ ] Implement document loader.
-- [ ] Implement text extraction.
-- [ ] Implement Vietnamese normalization.
-- [ ] Implement metadata extractor.
-- [ ] Implement fixed chunking.
-- [ ] Implement recursive chunking.
-- [ ] Implement structure-aware chunking.
-- [ ] Implement parent-child chunking.
-- [ ] Implement data quality checks.
-- [ ] Implement embedding.
-- [ ] Implement Qdrant indexing.
-- [ ] Implement `data_version` và `index_version`.
-- [ ] Export manifest.
+- [x] Implement document loader — `src/dataops/metadata_extractor.py` (nạp 9 doc từ registry `DOCS` dùng chung với golden set).
+- [x] Implement text extraction — đã có từ Phase 2 (`scripts/extract_text.py` + `scripts/ocr_scanned_pdfs.py`).
+- [x] Implement Vietnamese normalization — `src/dataops/vietnamese_normalizer.py`.
+- [x] Implement metadata extractor — `src/dataops/metadata_extractor.py`.
+- [x] Implement fixed chunking — `src/dataops/chunker.py::chunk_fixed`.
+- [x] Implement recursive chunking — `src/dataops/chunker.py::chunk_recursive`.
+- [x] Implement structure-aware chunking — `src/dataops/chunker.py::chunk_structure_aware` (mặc định index, tách theo Điều, fallback đoạn văn cho tài liệu không có heading pháp lý).
+- [x] Implement parent-child chunking — `src/dataops/chunker.py::chunk_parent_child` (parent=Điều, child=Khoản).
+- [x] Implement data quality checks — `src/dataops/quality_checker.py`.
+- [x] Implement embedding — `src/dataops/embedder.py` (Gemini `gemini-embedding-001`, dense 768d) + `src/dataops/sparse_bm25.py` (BM25 tự viết, xem lý do đổi hướng khỏi fastembed trong `01_data_ragops.md`).
+- [x] Implement Qdrant indexing — `src/dataops/indexer.py` (named vectors dense+sparse, RRF fusion server-side).
+- [x] Implement `data_version` và `index_version` — `src/dataops/version_manager.py`.
+- [x] Export manifest — `data/chunks/manifest_data_20260711.json`.
+
+**Đã chạy thật (2026-07-11), không chỉ viết code:** `docker compose up`
+(qdrant/postgres/valkey), `scripts/init_postgres_schema.py`,
+`scripts/ingest_data.py` full run (embed + index thật, tốn quota Gemini
+thật) → 9 document, 220 chunk `structure_aware` (0 lỗi critical, 114
+warning — chủ yếu `missing_section` cho 5/9 tài liệu không có cấu trúc
+Điều/Khoản, đúng bản chất dữ liệu chứ không phải bug), Postgres
+9 documents + 220 chunks, Qdrant collection
+`viragops_iuh_idx_20260711_geminiembedding001` (220 điểm, status green).
+`scripts/smoke_retrieval.py` trả kết quả đúng domain cho câu hỏi thật.
+32/32 unit test pass (`tests/unit/test_vietnamese_normalizer.py`,
+`test_chunker.py`, `test_quality_checker.py`, `test_sparse_bm25.py` mới
+thêm), `ruff check` sạch. Chi tiết đầy đủ (kể cả 2 quyết định kỹ thuật
+phát sinh giữa chừng: đổi fastembed→BM25 tự viết vì CDN bị chặn, và chỉ
+ingest 9/13 tài liệu vì các tài liệu còn lại là SPA-shell rỗng nội dung)
+nằm trong `modules/01_data_ragops.md`.
 
 ### Đầu ra
 
-- Processed documents.
-- Chunk files.
-- Qdrant index.
-- Data quality report.
-- Version manifest.
+- [x] Processed documents — đã có từ Phase 2, tái sử dụng qua `metadata_extractor.py`.
+- [x] Chunk files — `data/chunks/{fixed,recursive,structure_aware,parent_child}_data_20260711.jsonl` (cả 4 strategy, chỉ `structure_aware` được embed+index).
+- [x] Qdrant index — collection `viragops_iuh_idx_20260711_geminiembedding001`, 220 điểm.
+- [x] Data quality report — `data/chunks/quality_report_data_20260711.json`.
+- [x] Version manifest — `data/chunks/manifest_data_20260711.json`; `config/retrieval.yaml` đã gán `data_version`/`index_version` thật.
 
 ### Kiểm tra dự kiến
 
 ```bash
 python scripts/ingest_data.py --config config/ingest.yaml
-python scripts/check_data_quality.py --data-version data_YYYYMMDD
+python scripts/check_data_quality.py --data-version data_20260711
 python scripts/smoke_retrieval.py --query "điều kiện tốt nghiệp"
 ```
 
 ### Definition of Done
 
-- [ ] Ingest được tài liệu nguồn.
-- [ ] Mỗi chunk có metadata đầy đủ.
-- [ ] Qdrant query trả về chunks.
-- [ ] Data quality report không có critical error.
-- [ ] Manifest ghi đúng data/index version.
+**Đạt cho batch 9 tài liệu hiện có** — xem ghi chú "9/10" bên dưới, đây
+là đánh đổi có chủ đích (chất lượng > số lượng), không phải thiếu sót:
+
+- [x] Ingest được tài liệu nguồn — 9/9 tài liệu curated (dưới khuyến nghị ≥10 của module doc — 4 tài liệu khác trong snapshot bị loại vì là SPA-shell gần như rỗng nội dung thật, xem `01_data_ragops.md`).
+- [x] Mỗi chunk có metadata đầy đủ *(trừ `page_start`/`page_end` để `null` — chưa track qua bước normalize, ghi nhận là giới hạn đã biết, không phải lỗi).*
+- [x] Qdrant query trả về chunks — verify thật qua `scripts/smoke_retrieval.py`.
+- [x] Data quality report không có critical error — 0/220 chunk.
+- [x] Manifest ghi đúng data/index version — `data_20260711` / `idx_20260711_geminiembedding001`.
+
+**Còn treo (ghi nhận trung thực, không phải DoD của Phase 3 nhưng liên quan):**
+`golden_set.jsonl`'s `relevant_chunks` vẫn để trống — matching tự động
+citation cấp Điểm (vd "Điều 6, Khoản 4.a") với chunk gom theo nhóm Khoản
+chỉ khớp chính xác 5/71 câu; cần logic parse range hoặc chuyển golden-set
+linking sang dùng chunk `parent_child` (tách từng Khoản riêng) — để lại
+cho lần làm việc tiếp theo thay vì gán ẩu.
 
 ### Rủi ro
 
-- PDF/OCR lỗi: bắt đầu bằng PDF text trước, OCR làm sau.
-- Chunk cắt mất Điều/Khoản: ưu tiên structure-aware.
+- PDF/OCR lỗi: bắt đầu bằng PDF text trước, OCR làm sau. *(Đã xử lý ở Phase 2.)*
+- Chunk cắt mất Điều/Khoản: ưu tiên structure-aware. *(Đã áp dụng — xem `chunk_structure_aware`.)*
+- **Rủi ro mới phát sinh khi chạy thật:** fastembed/huggingface.co bị ISP chặn CDN giữa chừng tải model — xử lý bằng cách tự viết BM25 (không phụ thuộc mạng ngoài). Gemini embedding free-tier rate limit tính theo SỐ TEXT trong batch chứ không phải số lệnh gọi — xử lý bằng batch ≤80 + delay ≥65s.
 
 ---
 

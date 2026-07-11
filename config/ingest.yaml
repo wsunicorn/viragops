@@ -1,0 +1,84 @@
+# Ingest config — schema chuẩn: docs/system/contracts/config_schemas.md
+# Phase 3 (Module 1 DataOps/RAGOps): điều khiển scripts/ingest_data.py.
+# Model/provider vẫn tham chiếu config/model_gateway.yaml (route "embedding"),
+# KHÔNG hard-code lại ở đây — chỉ khai báo tham số chunking/quality/index.
+ingest_config_id: ingest_iuh_v1
+
+source:
+  snapshot: src_20260710
+  processed_dir: data/processed/iuh/src_20260710
+  # DOCS registry (document_id -> title/source_file) hiện đang nằm trong
+  # scripts/seed_golden_set_iuh.py — ingest_data.py import lại registry đó
+  # để không duplicate danh sách tài liệu ở 2 nơi.
+
+chunking:
+  default_strategy: structure_aware
+  # 4 strategy bắt buộc theo modules/01_data_ragops.md — implement đủ cả 4
+  # trong src/dataops/chunker.py, nhưng chỉ `default_strategy` được embed +
+  # index vào Qdrant ở Phase 3. 3 strategy còn lại dùng cho so sánh ở Phase 4
+  # (Retrieval Experiment).
+  strategies:
+    fixed:
+      chunk_size_tokens: 300
+      overlap_tokens: 50
+    recursive:
+      chunk_size_tokens: 400
+      overlap_tokens: 60
+      separators: ["\n\n", "\n", ". ", " "]
+    structure_aware:
+      # Văn bản quy chế IUH có cấu trúc Chương > Điều > Khoản > Điểm.
+      # Đơn vị chunk = 1 Điều (giữ nguyên mọi Khoản/Điểm bên trong) để khớp
+      # với expected_citations trong golden set (vd "Điều 6, Khoản 4.a").
+      # Điều quá dài (hiếm) mới cắt tiếp theo Khoản.
+      unit: dieu
+      max_tokens: 600
+    parent_child:
+      # parent = toàn bộ Điều (ngữ cảnh đầy đủ cho generation), child = từng
+      # Khoản (độ chính xác cao hơn cho retrieval/citation). parent_chunk_id
+      # trên child trỏ về chunk_id của parent.
+      parent_unit: dieu
+      child_unit: khoan
+      max_child_tokens: 250
+
+quality_thresholds:
+  min_chunk_tokens: 15
+  max_chunk_tokens: 1200
+  # Chunk ngoài khoảng này bị gắn cờ trong quality report nhưng KHÔNG tự động
+  # loại bỏ — quality_checker chỉ chặn ingest khi có lỗi "critical" thật sự
+  # (text rỗng, thiếu document_id/section).
+
+embedding:
+  dense:
+    provider: gemini
+    # Model thật lấy từ model_gateway.yaml route "embedding" — khai lại tên
+    # ở đây chỉ để đặt index_version, không phải nguồn sự thật.
+    model_ref: gemini-embedding-001
+    output_dimensionality: 768
+    task_type_document: RETRIEVAL_DOCUMENT
+    task_type_query: RETRIEVAL_QUERY
+    # Đo thật (2026-07-11, xem model_gateway.yaml): free tier 100
+    # request-item/phút. Batch <=80 + chờ >=65s giữa các batch để có biên an
+    # toàn.
+    batch_size: 80
+    batch_delay_seconds: 65
+  sparse:
+    # Gemini không có sẵn sparse vector. Định dùng fastembed (Qdrant/bm25)
+    # nhưng huggingface.co resolve-endpoint bị ISP chặn (2026-07-11, cùng
+    # dạng lỗi CDN đã gặp với Docker Hub) -> tự viết BM25 hashing-trick
+    # (src/dataops/sparse_bm25.py), không phụ thuộc mạng ngoài.
+    provider: custom_bm25_hashing
+    vocab_size: 2097152   # 2**21, giảm va chạm hash cho hashing-trick
+    k1: 1.5
+    b: 0.75
+
+qdrant:
+  collection_prefix: viragops_iuh
+  # Tên collection thật = "{collection_prefix}_{index_version}" — mỗi lần
+  # đổi data/embedding tạo collection MỚI thay vì ghi đè, cho phép rollback.
+  dense_vector_name: dense
+  sparse_vector_name: sparse
+  distance: cosine
+
+postgres:
+  documents_table: documents
+  chunks_table: chunks

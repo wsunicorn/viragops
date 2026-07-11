@@ -34,6 +34,18 @@ dataops = [
     "pypdf>=4.3",
     "google-genai>=0.5",   # OCR PDF scan qua Gemini multimodal, xem modules/01_data_ragops.md
 ]
+# Phase 3: chunking/embedding/indexing (Module 1 DataOps/RAGOps).
+# LƯU Ý (2026-07-11): ban đầu định dùng fastembed's Qdrant/bm25 cho sparse
+# vector, nhưng huggingface.co resolve-endpoint bị ISP chặn/reset kết nối
+# (cùng dạng lỗi CDN đã gặp với Docker Hub CloudFront ở Phase 1) — không tải
+# được model. Thay bằng BM25 tự viết (hashing-trick qua mmh3, xem
+# src/dataops/sparse_bm25.py): không phụ thuộc mạng ngoài, phù hợp corpus
+# nhỏ (~vài trăm chunk) của domain IUH.
+ragops = [
+    "qdrant-client>=1.10",   # Query API + RRF fusion server-side (khớp qdrant server v1.15.4)
+    "mmh3>=4.0",              # hashing-trick cho sparse BM25 tự viết
+    "tiktoken>=0.7",         # đếm token cho chunk sizing (xấp xỉ, không phải tokenizer thật của Gemini)
+]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

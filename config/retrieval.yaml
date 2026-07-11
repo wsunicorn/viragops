@@ -1,8 +1,13 @@
 # Retrieval config — schema chuẩn: docs/system/contracts/config_schemas.md
 # Baseline Phase 4 sẽ bắt đầu bằng dense; hybrid + rerank là ứng viên chính.
 retrieval_config_id: hybrid_rrf_rerank_v1
-data_version: null          # gán khi có ingest thật (vd data_20260715)
-index_version: null         # gán khi có index thật (vd idx_20260715_bge_m3)
+# Gán thật sau khi chạy scripts/ingest_data.py (2026-07-11) trên snapshot
+# src_20260710, 9 tài liệu, 220 chunk (structure_aware) — xem
+# data/chunks/manifest_data_20260711.json. Dense = gemini-embedding-001
+# (768d), sparse = BM25 tự viết (src/dataops/sparse_bm25.py, không phải
+# bge_m3 như ví dụ cũ trong config/README.md — xem model_gateway.yaml).
+data_version: data_20260711
+index_version: idx_20260711_geminiembedding001
 query_normalization: true
 retrieval:
   type: hybrid              # dense | sparse | hybrid
@@ -10,7 +15,7 @@ retrieval:
     provider: qdrant
     top_k: 20
   sparse:
-    provider: qdrant_sparse
+    provider: qdrant_sparse   # thực thi qua src/dataops/indexer.py hybrid_search() (RRF server-side)
     top_k: 20
   fusion:
     method: rrf             # rrf | dbsf

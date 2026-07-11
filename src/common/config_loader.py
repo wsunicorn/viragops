@@ -16,6 +16,7 @@ _ID_FIELDS = {
     "prompts.yaml": "prompt_id",
     "model_gateway.yaml": "gateway_config_id",
     "quality_gate.yaml": "gate_config_id",
+    "ingest.yaml": "ingest_config_id",
 }
 
 

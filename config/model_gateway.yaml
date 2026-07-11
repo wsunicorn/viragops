@@ -53,12 +53,29 @@ routes:
     fallback:
       provider: gemini
       model: gemini-3.1-flash-lite
+  # Phase 3: embedding cho chunk/query — model riêng (không phải generation
+  # model), verify thật bằng client.models.embed_content() (2026-07-11).
+  embedding:
+    primary:
+      provider: gemini
+      model: gemini-embedding-001
+    fallback:
+      provider: gemini
+      model: gemini-embedding-001   # chưa có model embedding thứ 2 để fallback thật
 rate_limits:
   # Free tier flash-lite: quan sát thực tế ổn định ở mức thấp; đặt bảo thủ
   # để tránh 429 khi chạy eval batch (300 câu). Điều chỉnh khi đo throughput
   # thật ở Phase 7-8.
   requests_per_minute: 10
   tokens_per_minute: 200000
+  # Đo thật (2026-07-11): quota free tier gemini-embedding-001 là
+  # "EmbedContentRequestsPerMinutePerUserPerProjectPerModel-FreeTier",
+  # quotaValue=100 — MỖI text trong 1 lệnh gọi batch tính là 1 request, không
+  # phải 1 lệnh gọi = 1 request. Batch 100 text lấp đầy quota ngay lập tức;
+  # gọi tiếp trong cùng phút bị 429 kèm retryDelay tăng dần (13s -> 40s khi
+  # gọi dồn dập). Script ingest dùng batch <=80 + chờ >=65s giữa các batch.
+  embedding_requests_per_minute: 100
+  embedding_batch_size: 80
 
 # --- Provider khác (chưa có key, giữ lại làm tài liệu cấu hình tương lai) ---
 # openai:

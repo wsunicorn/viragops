@@ -11,6 +11,7 @@ def test_all_sample_configs_load_with_ids():
     assert ids["prompts.yaml"] == "rag_qa_vi"
     assert ids["model_gateway.yaml"] == "gateway_gemini_free_v1"
     assert ids["quality_gate.yaml"] == "gate_default_v1"
+    assert ids["ingest.yaml"] == "ingest_iuh_v1"
     assert "missing" not in ids.values()
 
 
