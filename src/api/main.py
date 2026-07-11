@@ -1,7 +1,8 @@
 """FastAPI application entrypoint.
 
-Phase 1: health endpoints only. QA/ingest/eval/feedback routers are added in
-their own phases — see docs/system/CHECKLIST_IMPLEMENTATION.md.
+Phase 1: health endpoints. Phase 5: QA endpoints (/qa/query, /qa/debug,
+/qa/traces). Ingest/eval/feedback routers are added in their own phases —
+see docs/system/CHECKLIST_IMPLEMENTATION.md.
 
 Run local:  uvicorn src.api.main:app --reload --port 8000
 """
@@ -10,7 +11,7 @@ import logging
 
 from fastapi import FastAPI
 
-from src.api.routes import health
+from src.api.routes import health, qa
 from src.common.settings import APP_VERSION, get_settings
 
 
@@ -28,6 +29,7 @@ def create_app() -> FastAPI:
         version=APP_VERSION,
     )
     app.include_router(health.router)
+    app.include_router(qa.router)
     return app
 
 

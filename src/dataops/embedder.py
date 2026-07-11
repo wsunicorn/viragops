@@ -26,11 +26,19 @@ class EmbeddingError(RuntimeError):
     pass
 
 
-def _client() -> genai.Client:
-    api_key = os.environ.get("GEMINI_API_KEY", "")
-    if not api_key:
+def _clients() -> list[genai.Client]:
+    """Primary key + optional GEMINI_API_KEY_2 fallback.
+
+    The free-tier DAILY quota (1000 request-items/project, measured
+    2026-07-11 — see CHECKLIST Phase 4 "Chưa tốt") exhausts mid-workload;
+    a second key from a different Google project has its own budget, so
+    on 429 the next key is tried before backing off.
+    """
+    keys = [os.environ.get("GEMINI_API_KEY", ""), os.environ.get("GEMINI_API_KEY_2", "")]
+    clients = [genai.Client(api_key=k) for k in keys if k]
+    if not clients:
         raise EmbeddingError("GEMINI_API_KEY not set (check .env is loaded into environment)")
-    return genai.Client(api_key=api_key)
+    return clients
 
 
 def _extract_retry_delay(exc: Exception, default: float) -> float:
@@ -49,21 +57,26 @@ def embed_batch(
     if not texts:
         return []
 
-    client = _client()
+    clients = _clients()
     config = types.EmbedContentConfig(
         output_dimensionality=output_dimensionality, task_type=task_type
     )
     last_exc: Exception | None = None
     for attempt in range(max_retries):
-        try:
-            resp = client.models.embed_content(model=model, contents=texts, config=config)
-            return [e.values for e in resp.embeddings]
-        except (ClientError, ServerError) as exc:
-            last_exc = exc
-            wait = _extract_retry_delay(exc, default=10.0 * (attempt + 1))
-            print(f"    [embed retry {attempt + 1}/{max_retries}] {type(exc).__name__}: "
-                  f"wait {wait:.1f}s")
-            time.sleep(wait)
+        for i, client in enumerate(clients):
+            try:
+                resp = client.models.embed_content(model=model, contents=texts, config=config)
+                return [e.values for e in resp.embeddings]
+            except (ClientError, ServerError) as exc:
+                last_exc = exc
+                is_quota = "RESOURCE_EXHAUSTED" in str(exc)
+                if is_quota and i + 1 < len(clients):
+                    print(f"    [embed] key {i + 1} quota-limited, thu key {i + 2}")
+                    continue  # thử ngay key kế tiếp, không chờ
+                wait = _extract_retry_delay(exc, default=10.0 * (attempt + 1))
+                print(f"    [embed retry {attempt + 1}/{max_retries}] {type(exc).__name__}: "
+                      f"wait {wait:.1f}s")
+                time.sleep(wait)
     raise EmbeddingError(f"embed_batch failed after {max_retries} retries") from last_exc
 
 

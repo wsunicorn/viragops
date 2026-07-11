@@ -416,41 +416,69 @@ Xây API hỏi đáp có retrieval, prompt assembly, citation, refusal và trace
 
 ### Task
 
-- [ ] Implement `POST /qa/query`.
-- [ ] Implement query normalization.
-- [ ] Integrate best retrieval config.
-- [ ] Implement context assembly.
-- [ ] Implement prompt rendering.
-- [ ] Implement model call placeholder/mock trước.
-- [ ] Implement citation parser.
-- [ ] Implement refusal policy.
-- [ ] Implement trace_id.
-- [ ] Implement `POST /qa/debug`.
+- [x] Implement `POST /qa/query` — `src/api/routes/qa.py`, schema đúng `api_contracts.md`.
+- [x] Implement query normalization — tái dùng `vietnamese_normalizer.normalize_for_search` cho nhánh sparse (embedding dùng câu gốc giữ nguyên dấu câu).
+- [x] Integrate best retrieval config — load `hybrid_dbsf_v2` (Phase 4) + BM25 state + collection từ config/manifest lúc init, không hard-code.
+- [x] Implement context assembly — `prompt_builder.format_context` ([chunk_id] + tiêu đề văn bản + section, cắt 2500 ký tự/chunk).
+- [x] Implement prompt rendering — `p1_grounded_v1` (active_version trong prompts.yaml): chỉ trả lời từ ngữ cảnh, bắt buộc citation, refusal khi thiếu căn cứ, chống prompt-injection trong context, output strict JSON.
+- [x] Implement model call placeholder/mock trước — `MockGateway` cho test; `GeminiGateway` thật đọc tier từ `model_gateway.yaml` (primary→fallback, JSON mode) — LiteLLM thay transport ở Phase 7, call site giữ nguyên.
+- [x] Implement citation parser — `src/rag/citation.py`: parse JSON (chịu được fence), DROP citation bịa, hạ cấp answer-không-nguồn thành refusal, output không parse được → refusal an toàn.
+- [x] Implement refusal policy — 2 lớp: pre-LLM (< min_context_chunks, không tốn lượt gọi) + post-LLM (model khai refusal / mất hết citation hợp lệ).
+- [x] Implement trace_id — `trace_store.py`: JSONL (`data/traces/`, gitignored) + in-memory window 500, schema theo `data_schemas.md`.
+- [x] Implement `POST /qa/debug` — trả retrieved chunks + score + prompt_version + data/index/retrieval versions (không lộ nội dung prompt đầy đủ).
+
+Bonus phát sinh: `GET /qa/traces/{trace_id}` (contract module 03) và
+key-rotation trong embedder (429 daily quota → thử `GEMINI_API_KEY_2`).
 
 ### Đầu ra
 
-- QA API hoạt động.
-- Debug endpoint.
-- Trace cơ bản.
+- [x] QA API hoạt động — **verify thật bằng curl với Gemini thật** (chi tiết 3 kịch bản trong `modules/03_rag_runtime_model_gateway.md`).
+- [x] Debug endpoint — trả 5 chunk DBSF + toàn bộ version metadata.
+- [x] Trace cơ bản — retrieval_ms/generation_ms/token/citations/error_labels, đọc lại được qua GET.
 
 ### Kiểm tra dự kiến
 
 ```bash
-curl -X POST http://localhost:8000/qa/query -d @sample_question.json
-pytest tests/integration/test_qa_flow.py
+uvicorn src.api.main:app --port 8000
+curl -X POST http://localhost:8000/qa/query -H "Content-Type: application/json" --data-binary @question.json
+pytest tests/integration/test_qa_flow.py   # tự skip nếu Qdrant tắt
 ```
 
 ### Definition of Done
 
-- [ ] Câu hỏi có đáp án trả answer + citation.
-- [ ] Câu hỏi không có căn cứ trả refusal.
-- [ ] Response có trace_id.
-- [ ] Debug endpoint trả retrieved chunks.
+- [x] Câu hỏi có đáp án trả answer + citation — verify thật: "điểm TB tích lũy để tốt nghiệp?" → "2.0 thang 4" cite đúng Điều 33 Khoản 1 QĐ 1482; câu đa nguồn cite 3 chunk từ 3 văn bản khác nhau.
+- [x] Câu hỏi không có căn cứ trả refusal — verify thật: "giá vàng hôm nay?" → refusal, citations rỗng.
+- [x] Response có trace_id — mọi response, kể cả refusal pre-LLM.
+- [x] Debug endpoint trả retrieved chunks — kèm DBSF score thật (~1.3-1.7).
 
 ### Rủi ro
 
-- Citation không ổn: bắt output format có citations field.
-- Runtime lẫn logic provider: tách gateway ở phase sau.
+- Citation không ổn: bắt output format có citations field. *(Đã xử lý: JSON mode + validate + fail-closed.)*
+- Runtime lẫn logic provider: tách gateway ở phase sau. *(Đã tách sẵn interface `Gateway.generate(tier, prompt)` — Phase 7 chỉ thay transport.)*
+
+### Chưa tốt / cần cải thiện
+
+**Làm tốt, nên giữ nguyên cách làm:** citation fail-closed (thà refusal
+còn hơn trả câu không nguồn); gateway interface tách trước khi có LiteLLM
+(Phase 7 không phải sửa runtime); integration test dùng Qdrant thật +
+gateway mock + embed giả — chạy được trong CI-có-service mà không tốn quota.
+
+**Còn thiếu, cần quay lại:**
+- **`/qa/stream` chưa có** (contract có nêu) — chờ LiteLLM Phase 7 để
+  không viết streaming 2 lần.
+- **`thresholds.min_score` (0.15) chưa enforce** — điểm DBSF fused
+  (~1.3-1.7 đo thật) khác scale với giá trị 0.15 viết cho cosine; đang
+  ghi score vào trace để calibrate ngưỡng thật ở Phase 8/9. Hiện refusal
+  pre-LLM chỉ dựa min_context_chunks.
+- **`confidence` trả `null`** — chưa có calibration thật, không bịa số;
+  Phase 8 (evaluation) mới có cơ sở gán.
+- **Trace store chỉ single-process** (in-memory + JSONL append) — đủ cho
+  dev server, không đủ cho multi-worker; Langfuse Phase 10 thay thế.
+- **`cost_usd` luôn 0.0** (free tier) — cost model thật cần bảng giá
+  provider, để Phase 10 (observability/cost).
+- **Semantic cache (bước 4 flow chuẩn) chưa có** — Phase 8 theo kế hoạch.
+- **Chưa có rate-limit/auth trên API** — dev mode; cần trước khi expose
+  ra ngoài (Phase 9 security checklist).
 
 ---
 
