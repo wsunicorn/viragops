@@ -1,11 +1,9 @@
 # Retrieval config — schema chuẩn: docs/system/contracts/config_schemas.md
-# Baseline Phase 4 sẽ bắt đầu bằng dense; hybrid + rerank là ứng viên chính.
-retrieval_config_id: hybrid_rrf_rerank_v1
-# Gán thật sau khi chạy scripts/ingest_data.py (2026-07-11) trên snapshot
-# src_20260710, 9 tài liệu, 220 chunk (structure_aware) — xem
-# data/chunks/manifest_data_20260711.json. Dense = gemini-embedding-001
-# (768d), sparse = BM25 tự viết (src/dataops/sparse_bm25.py, không phải
-# bge_m3 như ví dụ cũ trong config/README.md — xem model_gateway.yaml).
+# CHỐT BẰNG SỐ LIỆU THẬT (Phase 4, 2026-07-11) — experiment 8 config trên 71
+# câu golden set, xem docs/system/experiments/results_retrieval_reranking.md:
+#   hybrid DBSF prefetch-40 thắng: recall@5=0.993, hit=1.000, MRR=0.827,
+#   nDCG@5=0.869, p95=17ms. (RRF: 0.979; sparse-only: 0.944; dense-only: 0.908.)
+retrieval_config_id: hybrid_dbsf_v2
 data_version: data_20260711
 index_version: idx_20260711_geminiembedding001
 query_normalization: true
@@ -13,16 +11,20 @@ retrieval:
   type: hybrid              # dense | sparse | hybrid
   dense:
     provider: qdrant
-    top_k: 20
+    top_k: 40               # prefetch depth — pre40 nhỉnh hơn pre20 về MRR/p95
   sparse:
-    provider: qdrant_sparse   # thực thi qua src/dataops/indexer.py hybrid_search() (RRF server-side)
-    top_k: 20
+    provider: qdrant_sparse   # BM25 tự viết (src/dataops/sparse_bm25.py)
+    top_k: 40
   fusion:
-    method: rrf             # rrf | dbsf
-    rrf_k: 60
+    method: dbsf            # rrf | dbsf — DBSF thắng RRF trên mọi metric (0.993 vs 0.979)
 reranker:
-  enabled: true
-  model: bge-reranker-v2-m3
+  # TẮT theo số liệu thật: (1) bge-reranker-v2-m3 không tải được (ISP chặn
+  # CDN huggingface.co — cùng lỗi fastembed Phase 3); (2) phương án thay thế
+  # Gemini listwise rerank LÀM GIẢM chất lượng hybrid (recall 0.979->0.958,
+  # MRR 0.819->0.718) và cộng ~1s latency/câu. Rerank chỉ giúp dense-only
+  # (0.908->0.923). Bật lại + đổi model nếu sau này tải được cross-encoder.
+  enabled: false
+  model: bge-reranker-v2-m3   # giữ làm tài liệu — chưa dùng được
   top_k_before: 20
   top_k_after: 5
 thresholds:

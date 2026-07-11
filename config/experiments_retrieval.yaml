@@ -1,0 +1,32 @@
+# Retrieval experiment definitions — Phase 4 (Module 2, Experiment 1 & 2).
+# Schema: mỗi experiment có danh sách config; mỗi config map sang
+# src/retrieval/retriever.py::RetrievalConfig. Kết quả gắn đủ bộ
+# (data_version, index_version, retrieval_config_id) theo acceptance
+# criteria của modules/02_retrieval_experiment.md.
+experiment_suite_id: retrieval_experiments_v1
+eval_k: 5   # metric chính tính ở top-5 (Recall@5/nDCG@5 theo metric_definitions.md)
+
+# Experiment 2 theo experiment_plan.md — so sánh dense/sparse/hybrid/rerank
+# trên strategy mặc định (structure_aware). 8 config đạt DoD "ít nhất 8".
+# LƯU Ý reranker: bge-reranker-v2-m3 (retrieval.yaml) KHÔNG tải được do ISP
+# chặn CDN huggingface.co (cùng lỗi fastembed Phase 3) — thay bằng Gemini
+# listwise rerank (src/retrieval/reranker.py), trade-off ghi trong docstring.
+retrieval_reranking:
+  strategy: structure_aware
+  configs:
+    - {config_id: dense_top5,            mode: dense,       limit: 5}
+    - {config_id: sparse_bm25_top5,      mode: sparse,      limit: 5}
+    - {config_id: hybrid_rrf_pre20,      mode: hybrid_rrf,  top_k_before: 20, limit: 5}
+    - {config_id: hybrid_rrf_pre40,      mode: hybrid_rrf,  top_k_before: 40, limit: 5}
+    - {config_id: hybrid_dbsf_pre20,     mode: hybrid_dbsf, top_k_before: 20, limit: 5}
+    - {config_id: hybrid_dbsf_pre40,     mode: hybrid_dbsf, top_k_before: 40, limit: 5}
+    - {config_id: dense_rerank_gemini,   mode: dense,       limit: 5, rerank: gemini_listwise, rerank_pool: 10}
+    - {config_id: hybrid_rrf_rerank_gemini, mode: hybrid_rrf, top_k_before: 20, limit: 5, rerank: gemini_listwise, rerank_pool: 10}
+
+# Experiment 1 theo experiment_plan.md — chunking ablation. So kế hoạch gốc
+# (8 config gồm fixed 256/512/768, semantic, table-aware): thu còn 4 strategy
+# đã implement thật ở Phase 3; semantic/table-aware chưa có (ghi nhận trong
+# report). Cùng 1 retrieval config để chỉ đo ảnh hưởng của chunking.
+chunking_ablation:
+  base_config: {mode: hybrid_rrf, top_k_before: 20, limit: 5}
+  strategies: [fixed, recursive, structure_aware, parent_child]

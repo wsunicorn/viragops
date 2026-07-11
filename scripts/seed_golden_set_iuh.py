@@ -487,12 +487,35 @@ QUESTIONS = [
 ]
 
 
+# Các field do tool HẠ NGUỒN ghi vào golden_set.jsonl (không phải seed script):
+# approve_golden_set.py ghi review_status/reviewed_*, link_relevant_chunks.py
+# ghi relevant_chunks. Rerun seed script KHÔNG được xóa chúng — cùng dạng bug
+# data-loss đã xảy ra 2 lần với extract_text.py (xem CHECKLIST Phase 2/3 mục
+# "Chưa tốt / cần cải thiện"), chặn trước thay vì sửa sau.
+_DOWNSTREAM_FIELDS = ("relevant_chunks", "review_status", "reviewed_by", "reviewed_at", "review_note")
+
+
 def main() -> None:
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+    existing: dict[str, dict] = {}
+    if OUT_PATH.exists():
+        with OUT_PATH.open(encoding="utf-8") as f:
+            existing = {row["id"]: row for row in (json.loads(x) for x in f if x.strip())}
+
+    preserved = 0
     with OUT_PATH.open("w", encoding="utf-8") as f:
         for item in QUESTIONS:
+            prior = existing.get(item["id"])
+            if prior:
+                for field in _DOWNSTREAM_FIELDS:
+                    if field in prior and (field != "relevant_chunks" or prior[field]):
+                        if item.get(field) != prior[field]:
+                            item[field] = prior[field]
+                            preserved += 1
             f.write(json.dumps(item, ensure_ascii=False) + "\n")
-    print(f"Wrote {len(QUESTIONS)} questions -> {OUT_PATH}")
+    print(f"Wrote {len(QUESTIONS)} questions -> {OUT_PATH}"
+          + (f" (preserved {preserved} downstream field value(s))" if preserved else ""))
 
 
 if __name__ == "__main__":

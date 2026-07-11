@@ -82,15 +82,45 @@ Xây lớp thực nghiệm retrieval để so sánh chunking, retrieval strategy
 | Metric sai | relevant chunks không chuẩn | Review golden set và relevant chunk mapping |
 | Hybrid không cải thiện | Fusion weight chưa phù hợp | Thử RRF/DBSF và normalize score |
 
+## Kết quả thật (Phase 4, 2026-07-11)
+
+- **Relevance ground truth:** `src/retrieval/citation_matcher.py` khớp
+  expected_citations → chunk_ids cho 71/71 câu không-refusal (42
+  structural qua parse Điều/Khoản + range, 30 lexical fallback cho tài
+  liệu không có heading Điều). Metric dạng citation-coverage (1 citation
+  = 1 nhóm chunk chấp nhận được) — xem docstring `src/retrieval/metrics.py`.
+- **Experiment 2 (8 config, `results_retrieval_reranking.md`):** hybrid
+  DBSF prefetch-40 thắng — recall@5=0.993, hit=1.000, MRR=0.827,
+  nDCG@5=0.869, p95=17ms. Thứ tự: DBSF > RRF (0.979) > sparse BM25 tự
+  viết (0.944) > dense thuần (0.908). Đã chốt vào `config/retrieval.yaml`
+  (`hybrid_dbsf_v2`).
+- **Reranker:** bge-reranker-v2-m3 KHÔNG tải được (ISP chặn CDN
+  huggingface.co, cùng lỗi fastembed Phase 3) → thay bằng Gemini listwise
+  (`src/retrieval/reranker.py`). Kết quả thật: rerank giúp dense-only
+  (0.908→0.923) nhưng LÀM GIẢM hybrid (0.979→0.958, MRR 0.819→0.718) và
+  cộng ~1s/câu → tắt reranker trong config chính thức. Jina/ViRanker
+  trong kế hoạch gốc chưa thử (cùng rào cản tải model).
+- **Experiment 1 (chunking ablation, `results_chunking_ablation.md`):**
+  structure_aware thắng — recall@5=0.979 ngang recursive nhưng MRR 0.812
+  vs 0.690 (xếp hạng tốt hơn hẳn); parent_child thấp nhất (0.923) vì
+  parent+child trùng nội dung chen top-5. Xác nhận bằng số liệu lựa chọn
+  default strategy của Phase 3. So kế hoạch gốc 8 config: fixed
+  256/512/768 gộp còn 1 mức (300 token), semantic/table-aware chưa
+  implement — ghi nhận là thiếu so kế hoạch, không phải đã thử và loại.
+- **Lưu ý so sánh chéo strategy:** mỗi strategy được chấm trên relevant
+  set TỰ SINH từ citation matcher trên chunk của chính nó (fair theo
+  granularity), trong đó fixed/recursive không có section → 100% lexical
+  matching — so sánh giữa strategy vì vậy có độ nhiễu nhất định.
+
 ## Checklist hoàn tất
 
-- [ ] Có retrieval config schema.
-- [ ] Dense retrieval chạy được.
-- [ ] Sparse/BM25 baseline chạy được.
-- [ ] Hybrid retrieval chạy được.
-- [ ] Reranker chạy được.
-- [ ] Metric retrieval tính đúng.
-- [ ] Chạy đủ experiment nhóm retrieval.
-- [ ] Có best retrieval config.
-- [ ] Có report phân tích lỗi.
+- [x] Có retrieval config schema (`config/experiments_retrieval.yaml` + RetrievalConfig dataclass).
+- [x] Dense retrieval chạy được (`src/retrieval/retriever.py`).
+- [x] Sparse/BM25 baseline chạy được (BM25 tự viết, cũng là vector sparse trong Qdrant).
+- [x] Hybrid retrieval chạy được (RRF + DBSF server-side qua Query API).
+- [x] Reranker chạy được *(Gemini listwise — cross-encoder bge chưa tải được, xem ghi chú trên)*.
+- [x] Metric retrieval tính đúng (unit test 51 case, gồm nhóm-coverage, no-double-credit nDCG).
+- [x] Chạy đủ experiment nhóm retrieval (8 config + 4 strategy ablation, chạy thật trên Qdrant).
+- [x] Có best retrieval config (`hybrid_dbsf_v2` trong `config/retrieval.yaml`).
+- [x] Có report phân tích lỗi (mục failure trong 2 file results_*.md — best config 0 câu trượt; ablation 1 câu q_024).
 

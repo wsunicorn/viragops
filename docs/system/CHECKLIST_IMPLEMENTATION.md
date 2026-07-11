@@ -103,7 +103,7 @@ Chuẩn bị tài liệu nguồn và golden set 300 câu hỏi có ground truth,
 - [x] Chia câu hỏi theo 5 nhóm: có đáp án (factoid/procedural), refusal (data-gap + out_of_scope), adversarial, multi-hop, ambiguous — cả 5 nhóm có mặt trong batch 76 câu, gồm 1 multi-hop THẬT qua 2 văn bản khác nhau (helper `qm()`), nhưng chưa đủ quota từng nhóm (xem bảng so sánh trong `golden_set_stats.md`).
 - [x] Gắn ground truth answer — cho 76 câu hiện có, trích/diễn giải trực tiếp từ nguồn thật.
 - [x] Gắn relevant documents — cho 76 câu hiện có.
-- [ ] Sau khi có chunk, gắn relevant chunks — Phase 3 đã tạo chunk thật (220 chunk, xem Phase 3 bên dưới) nhưng auto-matching citation cấp Điểm với chunk gom theo nhóm Khoản chỉ khớp chính xác 5/71 câu — chưa gán vì rủi ro gán sai cao hơn giá trị, để lại cho lần làm sau (xem `modules/01_data_ragops.md`). Vẫn có `relevant_chunks_mapping.csv` interim ở mức document.
+- [x] Sau khi có chunk, gắn relevant chunks — **ĐÃ GÁN 71/71 câu không-refusal (Phase 4, 2026-07-11)** qua `scripts/link_relevant_chunks.py` + matcher thật (`src/retrieval/citation_matcher.py`: parse Điều/Khoản + range "Khoản 4-6", fallback lexical cho tài liệu không có heading Điều). 42 citation khớp structural, 30 khớp lexical (nhóm lexical yếu hơn — xem `data/test_sets/relevant_chunks_report.md` để spot-check). Seed script đã được vá để KHÔNG xóa relevant_chunks khi rerun (chặn trước dạng bug data-loss từng gặp 2 lần).
 - [x] Gắn expected citations — cho câu không refusal trong 76 câu hiện có.
 - [x] Review thủ công ít nhất 30 câu mẫu — **Đã approve 76/76 câu qua AI self-review theo yêu cầu trực tiếp của user (2026-07-11)**, dùng `scripts/approve_golden_set.py` với audit trail (`reviewed_by`, `reviewed_at`, `review_note`). Phương pháp verify: kiểm tra chéo document_id registry (0 lỗi), đối chiếu số liệu tự động với nguồn (0 sai lệch/38 câu có số), đối chiếu cụm từ đặc trưng cho claim phức hợp. Đã giải quyết điểm mơ hồ "chất lượng cao" vs "tăng cường tiếng Anh". Còn 1 điểm treo: số QĐ học bổng D13 (xem `golden_set_review.md`). **Lưu ý:** đây không thay thế domain-expert review đầy đủ — khuyến nghị user spot-check trước khi dùng chính thức.
 - [x] Tạo smoke set 50 câu — batch 76 câu đã approve vượt mốc 50, dùng được làm smoke set thực tế.
@@ -321,41 +321,84 @@ So sánh chunking, dense/sparse/hybrid retrieval và reranking để chọn best
 
 ### Task
 
-- [ ] Implement dense retrieval.
-- [ ] Implement sparse/BM25 baseline.
-- [ ] Implement hybrid RRF.
-- [ ] Implement hybrid DBSF nếu khả thi.
-- [ ] Implement reranker wrapper.
-- [ ] Implement Recall@k, MRR, nDCG.
-- [ ] Implement experiment runner.
-- [ ] Chạy chunking ablation.
-- [ ] Chạy retrieval/reranking comparison.
-- [ ] Xuất report.
+- [x] Implement dense retrieval — `src/retrieval/retriever.py` (Qdrant Query API).
+- [x] Implement sparse/BM25 baseline — dùng luôn sparse vector BM25 tự viết đã index từ Phase 3.
+- [x] Implement hybrid RRF — fusion server-side qua Query API prefetch.
+- [x] Implement hybrid DBSF nếu khả thi — khả thi (qdrant v1.15.4 hỗ trợ), VÀ chính là config thắng cuộc.
+- [x] Implement reranker wrapper — `src/retrieval/reranker.py` (Gemini listwise; bge-reranker-v2-m3 không tải được do ISP chặn CDN HF — xem `modules/02_retrieval_experiment.md`).
+- [x] Implement Recall@k, MRR, nDCG — `src/retrieval/metrics.py`, dạng citation-coverage (1 citation = 1 nhóm chunk chấp nhận được), 51 unit test.
+- [x] Implement experiment runner — `scripts/run_experiment.py` + `config/experiments_retrieval.yaml`; query embedding cache 1 lần dùng mọi config.
+- [x] Chạy chunking ablation — 4 strategy thật trên 4 Qdrant collection (phải index thêm fixed/recursive/parent_child bằng `scripts/index_all_strategies.py`).
+- [x] Chạy retrieval/reranking comparison — 8 config thật trên 71 câu golden set.
+- [x] Xuất report — `experiments/results_retrieval_reranking.md` + `results_chunking_ablation.md` + CSV trong `data/experiments/`.
+
+**Tiền đề quan trọng làm trước experiment:** gán `relevant_chunks` thật cho
+golden set (nợ P0 từ Phase 3) — `src/retrieval/citation_matcher.py` (parse
+Điều/Khoản + range + lexical fallback) khớp 71/71 câu, chạy qua
+`scripts/link_relevant_chunks.py`, report ở `data/test_sets/relevant_chunks_report.md`.
 
 ### Đầu ra
 
-- Retrieval experiment reports.
-- Best retrieval config.
-- Failure cases retrieval.
+- [x] Retrieval experiment reports — 2 file results_*.md + CSV.
+- [x] Best retrieval config — **`hybrid_dbsf_v2`**: recall@5=0.993, hit=1.000, MRR=0.827, nDCG@5=0.869, p95=17ms — đã chốt vào `config/retrieval.yaml` (reranker TẮT theo số liệu: Gemini rerank làm giảm hybrid 0.979→0.958 và +1s/câu).
+- [x] Failure cases retrieval — best config 8-config: 0 câu trượt; ablation: 1 câu (q_024, camnang điều kiện tốt nghiệp hệ VLVH) — ghi trong report.
 
 ### Kiểm tra dự kiến
 
 ```bash
+python scripts/link_relevant_chunks.py
+python scripts/index_all_strategies.py
 python scripts/run_experiment.py --experiment chunking_ablation
 python scripts/run_experiment.py --experiment retrieval_reranking
 ```
 
 ### Definition of Done
 
-- [ ] Chạy được ít nhất 8 retrieval configs.
-- [ ] Có metric retrieval đầy đủ.
-- [ ] Có best config.
-- [ ] Có phân tích lỗi retrieval failure.
+- [x] Chạy được ít nhất 8 retrieval configs — đúng 8 config experiment 2 (+4 config ablation).
+- [x] Có metric retrieval đầy đủ — recall@5, hit rate, MRR, nDCG@5, latency p50/p95 cho từng config.
+- [x] Có best config — `hybrid_dbsf_v2`, vượt target recall@5 >= 0.85 của `metric_definitions.md` (0.993).
+- [x] Có phân tích lỗi retrieval failure — mục cuối mỗi report.
 
 ### Rủi ro
 
-- Sparse retrieval mất thời gian: dùng baseline BM25 nhẹ trước.
-- Reranker chậm: chỉ rerank top-20.
+- Sparse retrieval mất thời gian: dùng baseline BM25 nhẹ trước. *(Đã né được — BM25 tự viết từ Phase 3 dùng lại luôn.)*
+- Reranker chậm: chỉ rerank top-20. *(Thực tế rerank pool 10; vấn đề thật không phải chậm mà là GIẢM chất lượng — đã tắt.)*
+
+### Chưa tốt / cần cải thiện
+
+**Làm tốt, nên giữ nguyên cách làm:** đóng nợ P0 relevant_chunks TRƯỚC khi
+chạy experiment (metric vô nghĩa nếu ground truth sai); cache query
+embedding 1 lần dùng cho mọi config (tiết kiệm ~10 lần quota); mọi kết
+luận config đều bằng số liệu thật chạy trên Qdrant thật, không chọn cảm tính.
+
+**Còn thiếu, cần quay lại:**
+- **Quota embedding free tier có hạn mức NGÀY 1000 request-item** (phát
+  hiện giữa chừng khi index parent_child chết ở batch 3 — trước đó chỉ
+  biết hạn mức 100/phút; reset ~14:00 giờ VN = nửa đêm Pacific). Đã xử lý
+  bằng key thứ 2 user cấp (project Google khác, `GEMINI_API_KEY_2` trong
+  `.env`). Bài học vận hành: chạy eval batch 300 câu ở Phase 8+ phải
+  budget quota theo NGÀY, không chỉ theo phút — hoặc chuyển embedding
+  sang local (Ollama) trước khi scale.
+- **30/72 citation khớp bằng lexical fallback** (token-overlap với
+  ground_truth) — yếu hơn structural match; nếu ground_truth viết lại
+  thoáng quá thì có thể chọn nhầm chunk. Reviewer nên spot-check nhóm
+  lexical trong `relevant_chunks_report.md`.
+- **So sánh chéo chunking strategy có nhiễu**: fixed/recursive không có
+  section nên relevant set của chúng 100% từ lexical matching — recall
+  cao của 2 strategy này một phần là artifact của cách chấm (chunk được
+  chọn làm ground truth chính là chunk chứa nguyên văn ground_truth).
+  structure_aware/parent_child được chấm khắt khe hơn (structural).
+- **Reranker thật (cross-encoder) chưa thử được** vì ISP chặn CDN
+  huggingface.co — Gemini listwise chỉ là thay thế tạm và đã chứng minh
+  không tốt cho hybrid. Khi có mạng khác/mirror, tải bge-reranker-v2-m3
+  (hoặc ViRanker cho tiếng Việt) và chạy lại 2 config rerank.
+- **Kế hoạch gốc Experiment 1 có 8 config chunking** (fixed 256/512/768,
+  semantic, table-aware) — mới chạy 4; semantic + table-aware chưa
+  implement, fixed chỉ 1 mức 300 token. Chưa đủ để kết luận tuyệt đối
+  "structure_aware là tốt nhất mọi biến thể".
+- **Golden set vẫn 76/300** — mọi kết quả Phase 4 dựa trên 71 câu; số
+  liệu sẽ phải chạy lại khi golden set đạt 300 (runner + cache đã sẵn
+  sàng cho việc này, chỉ tốn ~230 embed items quota).
 
 ---
 
