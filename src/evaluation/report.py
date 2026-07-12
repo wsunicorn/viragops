@@ -94,6 +94,39 @@ def _failure_cases(results: list[QuestionResult], limit: int = 30) -> list[dict]
     return failures[:limit]
 
 
+def _fallback_note(results: list[QuestionResult]) -> list[str]:
+    """Nếu gateway rơi khỏi 'primary' (rate-limit/quota cạn giữa run — quan
+    sát thật 2026-07-12: 35/298 câu ở cuối 1 lần full eval), số liệu tổng
+    hợp bị nhiễu bởi model fallback (thường chậm hơn và hay bị hạ refusal
+    do citation không hợp lệ) — tách riêng để không đọc nhầm gap hạ tầng
+    thành gap chất lượng retrieval/prompt."""
+    non_primary = [r for r in results if r.fallback_hop not in ("primary", "n/a", "unknown", None)]
+    if not non_primary:
+        return []
+    primary = [r for r in results if r.fallback_hop == "primary"]
+    if not primary:
+        return []
+
+    p_agg, f_agg = aggregate(primary), aggregate(non_primary)
+    pct = len(non_primary) / len(results)
+    return [
+        f"> **⚠️ {len(non_primary)}/{len(results)} câu ({pct:.1%}) bị phục vụ bởi fallback "
+        "hop (không phải model primary)** — thường do quota/rate-limit cạn giữa run dài. "
+        "Số liệu tổng hợp phía trên gồm cả các câu này; bảng dưới tách riêng để không đọc "
+        "nhầm nhiễu hạ tầng thành gap chất lượng retrieval/prompt:",
+        "",
+        "| Nhóm | n | Recall@k | Citation Acc | Refusal Acc | Faithfulness | p95 latency |",
+        "|---|---:|---:|---:|---:|---:|---:|",
+        f"| primary | {len(primary)} | {_fmt(p_agg['retrieval'].get('recall_at_k'))} | "
+        f"{_fmt(p_agg['citation_accuracy'])} | {_fmt(p_agg['refusal_accuracy'])} | "
+        f"{_fmt(p_agg['faithfulness'])} | {p_agg['p95_latency_ms']} ms |",
+        f"| fallback | {len(non_primary)} | {_fmt(f_agg['retrieval'].get('recall_at_k'))} | "
+        f"{_fmt(f_agg['citation_accuracy'])} | {_fmt(f_agg['refusal_accuracy'])} | "
+        f"{_fmt(f_agg['faithfulness'])} | {f_agg['p95_latency_ms']} ms |",
+        "",
+    ]
+
+
 def write_csv(mode: str, results: list[QuestionResult], ts: str) -> Path:
     EVAL_DIR.mkdir(parents=True, exist_ok=True)
     csv_path = EVAL_DIR / f"eval_{mode}_{ts}.csv"
@@ -181,6 +214,7 @@ def write_markdown(
         f"| Fallback rate | {_fmt(overall['fallback_rate'])} | (theo dõi) | |",
         "| Cache hit rate | n/a | (theo dõi) | semantic cache chưa implement trong RAG runtime |",
         "",
+        *_fallback_note(results),
         "> **Lưu ý đọc Context Precision:** mẫu số luôn cố định = số chunk "
         "runtime thực trả (`reranker.top_k_after` trong `config/retrieval.yaml`, "
         "hiện = 5), trong khi tử số bị chặn trên bởi TỔNG số chunk liên quan "

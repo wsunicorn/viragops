@@ -86,10 +86,7 @@ Xây engine đánh giá RAG 4 tầng: retrieval, context, generation và operati
 
 Chạy qua `RagService` thật (không mock, LiteLLM proxy + Qdrant thật), 50
 câu stratified theo category thật của golden set 300 câu — số liệu đầy đủ
-ở `docs/system/experiments/results_evaluation_smoke.md`. Full eval (300
-câu) chưa chạy trong phiên này — xem CHECKLIST Phase 8 "Chưa tốt" để biết
-lý do (thời gian, rate limit tier `judge`) và điều kiện chạy khi cần số
-liệu chính thức.
+ở `docs/system/experiments/results_evaluation_smoke.md`.
 
 Tóm tắt (50/50 câu chạy thành công, không sập run nào):
 
@@ -116,4 +113,45 @@ Tóm tắt (50/50 câu chạy thành công, không sập run nào):
   chunk liên quan thật/câu hỏi (thường 1-3) — xem ghi chú trong report.
   Đây là giới hạn cấu trúc của cách đo, không phải retrieval kém; Context
   Recall/Hit rate mới là số đáng tin ở đây.
+
+## Kết quả thật (full, 298/300 câu, 2026-07-12)
+
+Chạy `--mode full` ngay sau smoke cùng ngày — 3232s (~54 phút), 2 câu lỗi
+mạng transient (không phải bug). Số liệu đầy đủ:
+`docs/system/experiments/results_evaluation_full.md`.
+
+**Phát hiện quan trọng nhất của lần chạy này KHÔNG phải là một metric số,
+mà là một sự cố hạ tầng thật giữa run:** cả 2 Gemini key cạn quota ngày
+(dùng chung ngân sách với smoke + Phase 4 chạy trước đó cùng ngày) ở
+khoảng câu 272/300 trở đi → LiteLLM tự động fallback: 16 câu qua secondary
+key, **19 câu rơi hẳn xuống Ollama local** (đúng thiết kế Phase 7). Số
+tổng hợp thô vì vậy bị nhiễu — báo cáo có bảng tách riêng primary (263
+câu, sạch) vs fallback (35 câu):
+
+| Nhóm | n | Recall@5 | Citation Acc | Refusal Acc | p95 latency |
+|---|---:|---:|---:|---:|---:|
+| primary | 263 | 0.940 | 0.781 | **0.962** | 1.49s |
+| fallback (secondary+local) | 35 | 0.867 | 0.864* | **0.457** | 23.7s |
+
+*(citation accuracy fallback cao hơn do survivorship bias — câu bị hạ
+refusal thì loại khỏi mẫu tính citation accuracy.)*
+
+**Đọc đúng: trên đường primary (88% run, phản ánh đúng chất lượng hệ
+thống), Refusal Accuracy=0.962 VƯỢT target 0.90 (còn tốt hơn cả smoke
+0.880 — gap ở smoke nhiều khả năng là nhiễu mẫu nhỏ) và p95
+latency=1.49s ĐẠT target 6s thoải mái.** Ngược lại, **Citation
+Accuracy=0.781 trên đường sạch VẪN dưới target 0.85, nhất quán với smoke
+(0.838)** — đây là gap thật cần sửa prompt/service, không phải nhiễu.
+
+**Phát hiện phụ có giá trị cho câu hỏi treo từ Phase 7** ("Ollama fallback
+chưa test trên câu phức tạp, chưa biết chất lượng"): giờ có câu trả lời
+thật — Ollama (qwen2.5:7b) hay trả JSON có citation không hợp lệ, bị
+`citation.py` tự hạ thành refusal (đúng chính sách fail-closed) → nhóm
+fallback có refusal_accuracy chỉ 0.457 và latency 23.7s. Fallback "không
+crash" (đúng mục tiêu Phase 7) nhưng chất lượng câu trả lời khi thật sự
+phải dùng tới nó thì kém hơn đáng kể — cần cân nhắc riêng nếu muốn SLA
+chất lượng đồng đều bất kể hop nào phục vụ.
+
+`src/evaluation/report.py::_fallback_note()` đã được thêm để tự động sinh
+bảng tách primary/fallback này cho mọi lần chạy sau, không cần vá tay.
 

@@ -706,11 +706,11 @@ Chạy đánh giá 4 tầng trên smoke/full set và xuất report.
 - [x] Implement eval report — `src/evaluation/report.py`: CSV per-câu + Markdown tổng hợp/theo-category/failure-case, cùng pattern CSV+Markdown Phase 4 (MLflow/DVC nêu trong module doc chưa từng được nối dây thật ở bất kỳ phase nào — ghi đúng cái có thật).
 - [x] Export failure cases — `report.py::_failure_cases()`: gom câu refusal sai/retrieval miss/citation sai/faithfulness<1/hallucination/judge lỗi parse, tối đa 30 câu trong report.
 - [x] Run smoke eval — `python scripts/run_evaluation.py --mode smoke`, 50 câu thật qua RagService thật (Phase 5-7, LiteLLM proxy + Qdrant thật, không mock). Kết quả: xem `docs/system/experiments/results_evaluation_smoke.md`.
-- [ ] Run full eval — 300 câu, CHƯA chạy trong phiên này (chi phí thời gian: ~300 câu × (1 gọi generate + tới ~1 gọi judge tier `gemini-3-flash-preview` chậm ~15-20s + delay 6.5s) ước tính hàng giờ ở rate limit 10 RPM hiện tại) — để chạy khi cần số liệu chính thức cho báo cáo, không chạy mặc định mỗi lần.
+- [x] Run full eval — `python scripts/run_evaluation.py --mode full`, 298/300 câu chạy thật (2 câu lỗi mạng transient, không phải bug), 3232s (~54 phút). Kết quả: `docs/system/experiments/results_evaluation_full.md`. **Phát hiện vận hành quan trọng giữa run:** cả 2 key Gemini cạn quota gần cuối (dùng chung ngân sách ngày với smoke + Phase 4 trước đó) → LiteLLM tự rơi xuống Ollama local cho 35/298 câu cuối, làm nhiễu số liệu tổng hợp (xem "Chưa tốt").
 
 ### Đầu ra
 
-- [x] Eval reports — `docs/system/experiments/results_evaluation_smoke.md` (+ `results_evaluation_full.md` khi chạy full).
+- [x] Eval reports — `docs/system/experiments/results_evaluation_smoke.md` + `results_evaluation_full.md`.
 - [x] Failure cases — mục "Failure cases" trong report.
 - [x] Baseline metrics — bảng "Kết quả tổng hợp" so với target `contracts/metric_definitions.md`.
 
@@ -724,7 +724,7 @@ python scripts/run_evaluation.py --mode full
 ### Definition of Done
 
 - [x] Smoke eval 50 câu chạy được — chạy thật, xem report.
-- [ ] Full eval 300 câu chạy được — code hỗ trợ (`--mode full`), chưa chạy thật lần nào (chi phí thời gian, xem "Chưa tốt").
+- [x] Full eval 300 câu chạy được — chạy thật 298/300 câu (2026-07-12), xem `results_evaluation_full.md`.
 - [x] Eval result có metric đủ 4 tầng — retrieval/context/generation/operations đều có số thật trong report (riêng `cache_hit_rate` báo `n/a` trung thực vì semantic cache chưa implement trong RAG runtime, không thuộc scope Phase 8).
 - [x] Có failure case report.
 
@@ -742,21 +742,46 @@ rubric dùng thang rời rạc {0.0, 0.5, 1.0} thay vì điểm liên tục — 
 nhiễu tự-chấm-không-nhất-quán của LLM-judge, đánh đổi lấy độ mịn.
 
 **Còn thiếu, cần quay lại:**
-- **Smoke eval thật phát hiện 2 mục CHƯA đạt target thật (không phải giả
-  định)** — xem `docs/system/experiments/results_evaluation_smoke.md`:
-  Refusal Accuracy=0.880 (target >=0.90, 6/50 câu sai cả 2 chiều —
-  over-refuse lẫn under-refuse) và Citation Accuracy=0.838 (target
-  >=0.85, sát nhưng chưa đạt, yếu nhất ở multi_hop=0.417 — model hay bỏ
-  sót citation thứ 2 trong câu multi-hop). Đây là việc thật cần quay lại
-  chỉnh `src/rag/service.py`/prompt, KHÔNG phải chỉ ghi nhận rồi để đó.
-- **Full eval 300 câu chưa chạy thật** — smoke (50 câu, stratified đủ 6
-  category) đã chạy thật, nhưng số liệu baseline chính thức cho báo cáo
-  khóa luận cần chạy `--mode full` ít nhất 1 lần trước khi viết kết luận
-  cuối. Ước tính thời gian dài do rate limit tier `judge`
-  (`gemini-3-flash-preview`, quan sát chậm ~15-20s/lệnh) — cân nhắc chạy
-  qua đêm hoặc giảm xuống `judge_sample` (chấm 1 phần câu, module doc đã
-  liệt kê mode này nhưng chưa implement riêng — hiện `smoke` đóng vai trò
-  đó).
+- **Full eval (298/300 câu, xem `results_evaluation_full.md`) xác nhận
+  Citation Accuracy là gap THẬT, ổn định qua cả 2 lần chạy** — smoke
+  0.838, full 0.785 (tính trên toàn bộ, gồm cả câu bị fallback) / **0.781
+  trên đường primary sạch (263 câu, không nhiễu hạ tầng)** — nhất quán
+  dưới target 0.85 ở cả 2 quy mô, yếu nhất ở multi_hop (0.625) và
+  ambiguous (0.452 — model hay chỉ bám 1 nhánh trả lời mà bỏ citation của
+  các điều kiện khác). Đây là việc thật cần quay lại chỉnh prompt
+  `p1_grounded_v1`/`src/rag/service.py` (có thể cần ép model liệt kê đủ
+  citation cho từng vế câu hỏi multi-hop), KHÔNG phải chỉ ghi nhận rồi để
+  đó.
+- **Refusal Accuracy: kết quả full eval THỰC RA TỐT HƠN smoke đáng kể khi
+  đọc đúng cách** — số tổng hợp thô 0.903 (đạt target 0.90) nhưng bị
+  nhiễu bởi 35/298 câu cuối run bị fallback (xem mục tiếp theo); tách
+  riêng đường primary (263 câu, 88% run) cho **Refusal Accuracy = 0.962
+  — vượt xa target và vượt cả số đo smoke (0.880)**. Kết luận: refusal
+  policy hiện tại (`src/rag/service.py` 2 lớp pre/post-LLM) hoạt động tốt
+  hơn con số smoke ban đầu cho thấy; gap ở smoke nhiều khả năng là nhiễu
+  mẫu nhỏ (chỉ 50 câu) chứ không phải vấn đề hệ thống — không cần sửa
+  gấp, nhưng vẫn nên theo dõi thêm ở lần chạy tiếp theo.
+- **Phát hiện vận hành quan trọng: full eval 300 câu liên tục trong 1
+  phiên (~54 phút) làm cạn quota NGÀY của cả 2 Gemini key** (dùng chung
+  ngân sách với smoke eval + Phase 4 chạy trước đó cùng ngày) — LiteLLM
+  proxy tự động fallback: 16 câu qua secondary key, **19 câu rơi hẳn
+  xuống Ollama local**, đúng thiết kế Phase 7 nhưng bị lộ ra 1 vấn đề
+  thật: **Ollama local hay trả JSON có citation không hợp lệ** →
+  `citation.py` tự hạ thành refusal (đúng chính sách fail-closed, không
+  phải bug) → refusal_accuracy của riêng nhóm fallback chỉ **0.457** và
+  p95 latency **23.7 giây** (so với 1.49s ở primary). Đây là bằng chứng
+  thật đầu tiên cho câu hỏi treo từ Phase 7 "Ollama fallback chỉ test 1
+  câu đơn giản, chưa biết chất lượng trên câu phức tạp" — giờ đã có câu
+  trả lời: **chất lượng citation-grounding của Ollama fallback kém hơn
+  đáng kể Gemini trên domain IUH thật**, cần cân nhắc nới lỏng
+  `require_citation` hoặc cải thiện prompt riêng cho hop fallback local
+  nếu muốn fallback thật sự "thành công" chứ không chỉ "không crash".
+  `src/evaluation/report.py` đã được vá thêm bảng tách primary/fallback
+  tự động cho lần chạy sau (`_fallback_note()`), không cần vá tay report
+  nữa.
+- **Bài học lịch chạy:** nên chạy full eval vào đầu ngày (trước khi dùng
+  quota cho việc khác) hoặc tách thành nhiều phiên nhỏ hơn trong ngày để
+  tránh đúng kiểu nhiễu đã gặp ở lần chạy này.
 - **`judge_sample`/`human_review` mode (nêu trong `modules/05_evaluation_engine.md`)
   chưa implement riêng** — `smoke` (stratified fixed-size) dùng tạm cho
   cả 2 mục đích "chạy nhanh" và "review mẫu", chưa có cách chọn N câu

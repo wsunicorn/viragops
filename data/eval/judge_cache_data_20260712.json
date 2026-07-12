@@ -257,5 +257,1559 @@
   "context_relevance": 1.0,
   "hallucination": false,
   "reasoning": "Câu trả lời hoàn toàn chính xác dựa trên ngữ cảnh được cung cấp, trả lời đúng cả hai ý của câu hỏi là tính công khai và quyền tham dự của người học khác."
+ },
+ "ee570874165aed93993d28d0": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống phản ánh đúng thông tin được cung cấp trong mục a, khoản 4 của ngữ cảnh, trả lời trực tiếp trọng tâm câu hỏi."
+ },
+ "9e76e3d9926f76629ba71a36": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác, trích xuất trực tiếp thông tin từ mục c trong ngữ cảnh cung cấp."
+ },
+ "fc8ed9bc3baa45e1e1adb427": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin được trích dẫn trong Điều 10, khoản 2 của ngữ cảnh."
+ },
+ "b0db3717cb35e167f16b5cc8": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác theo thông tin được cung cấp tại Điều 4, khoản 1 của ngữ cảnh về thời gian đào tạo đại học chính quy."
+ },
+ "51245e208c4d2d3f65767f35": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác dựa trên Điều 14 của ngữ cảnh được cung cấp."
+ },
+ "a8aab2e6d7fdb38f3d209a7d": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống trích dẫn chính xác thông tin từ Điều 11, khoản 3 trong ngữ cảnh được cung cấp."
+ },
+ "b884d8e3822db792a8164542": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống trích dẫn chính xác quy định tại khoản 2 Điều 11 của ngữ cảnh được cung cấp."
+ },
+ "390fbd126d30c1a1b91f6759": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin được nêu tại khoản 4 Điều 12 của ngữ cảnh được cung cấp."
+ },
+ "0a08a4c7a8f3b3284d401e8e": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác theo công thức được cung cấp trong ngữ cảnh tại mục 2, khoản c."
+ },
+ "252de8d976f33b2bcc761b61": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác dựa trên thông tin được cung cấp trong ngữ cảnh tại mục 2c của phần quy định về điểm thi kết thúc học phần."
+ },
+ "8c99365ecaf9cd046e3e3c26": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống bám sát hoàn toàn nội dung quy định được cung cấp trong ngữ cảnh, trả lời đúng trọng tâm câu hỏi của người dùng và không chứa thông tin ngoài ngữ cảnh."
+ },
+ "675394e41f8a1fa68a76c144": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác dựa trên bảng quy đổi điểm chữ được cung cấp trong ngữ cảnh tại mục 2a."
+ },
+ "1a6a38ae11231712b9267015": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin tại Điều 19, khoản 3 của ngữ cảnh được cung cấp."
+ },
+ "45040662ae1227a7e9b67716": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống phản ánh chính xác thông tin được trích dẫn tại Điều 9 của ngữ cảnh cung cấp."
+ },
+ "2eb1ef1063e824118d88fc96": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn trùng khớp với thông tin được quy định tại Khoản 2, Điều 20 của ngữ cảnh cung cấp."
+ },
+ "cd53ec51cca45538bddd8718": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác dựa trên Điều 20, khoản 3 của ngữ cảnh được cung cấp."
+ },
+ "87bf92720b04ca0a3fba00dc": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống phản ánh chính xác thông tin được cung cấp trong Điều 21 của ngữ cảnh."
+ },
+ "b01aa0fe3618c777c4ebd55d": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống bám sát quy định tại mục 2b của ngữ cảnh về quy trình chấm thi 02 vòng độc lập đối với bài thi tự luận."
+ },
+ "ce2796f3397808ad9f8b16c9": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin tại khoản 3 Điều 23 trong ngữ cảnh được cung cấp."
+ },
+ "105835815a8085227fd00806": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn chính xác dựa trên thông tin tại Điều 24, khoản 3 của ngữ cảnh được cung cấp."
+ },
+ "a8991bf157830f244f5c6907": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác theo ngữ cảnh được cung cấp, nêu rõ thời hạn 14 ngày để nộp đơn phúc khảo."
+ },
+ "3c332113e860a4478927817e": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác và dựa trên thông tin được cung cấp trong ngữ cảnh tại mục 2 về môn thi tự luận."
+ },
+ "cc851b71856a561e651f4d93": {
+  "faithfulness": 0.5,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": true,
+  "reasoning": "Ngữ cảnh chứa cả thông tin '07 ngày' và '07 ngày làm việc'. Câu trả lời đã thêm chữ 'làm việc' vào nội dung 07 ngày, chi tiết này không đồng nhất với toàn bộ ngữ cảnh được cung cấp (trong đó có đoạn ghi 07 ngày không có chữ 'làm việc')."
+ },
+ "a88c6d2665f92420a45fe5f7": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống đã tổng hợp chính xác các hình thức không được chấm phúc khảo dựa trên mục 5 của ngữ cảnh được cung cấp."
+ },
+ "c69647a82aaa29a126b16635": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống đã trích xuất chính xác thông tin về Điều, Quyết định và ngày ban hành dựa trên nội dung được cung cấp trong phần 'Quy trình phúc khảo' của ngữ cảnh."
+ },
+ "ac984b05566aa7733a167ce0": {
+  "faithfulness": 0.5,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": true,
+  "reasoning": "Hệ thống trả lời sai chủ thể chịu trách nhiệm làm hồ sơ cho môn tự luận (ngữ cảnh quy định là Trưởng bộ môn, không phải giảng viên) và đưa thông tin về phần mềm PMT không xuất hiện trong ngữ cảnh cung cấp."
+ },
+ "52cb1acd5d5089adc8125273": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống bám sát vào thông tin có sẵn trong ngữ cảnh và giải quyết đúng trọng tâm câu hỏi của người dùng."
+ },
+ "db5804a25d4845bbdff8ed0c": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống phản ánh chính xác thông tin từ ngữ cảnh được cung cấp về điều kiện tiếng Anh đối với sinh viên khóa 2021 trở về sau."
+ },
+ "76fe6431758382641abd0e3e": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác và dựa trên thông tin được cung cấp trong ngữ cảnh về yêu cầu trình độ tiếng Anh cho sinh viên hệ vừa làm vừa học và liên thông khóa 2021 trở về sau."
+ },
+ "060c1f56bb857f26083f3037": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống phản ánh chính xác thông tin được nêu trong ngữ cảnh (khóa 2017-2020 yêu cầu TOEIC tối thiểu 450 cho đại học chính quy)."
+ },
+ "8ebb6e064c391cee2307f46d": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống phản ánh chính xác thông tin được cung cấp trong ngữ cảnh về điều kiện thời gian tối thiểu 3 tháng liên tục để sinh viên được xét miễn điều kiện tiếng Anh."
+ },
+ "2bd8a6f1a435ed2b2a74a243": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống phản ánh chính xác thông tin tại Điều 35 của ngữ cảnh, bao gồm việc xác định hạng tốt nghiệp và các điều kiện làm giảm hạng."
+ },
+ "ede45f29532607310e74d3ed": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn bám sát thông tin tại Điều 35 trong ngữ cảnh được cung cấp, trả lời đúng trọng tâm câu hỏi và không chứa thông tin ngoại lai."
+ },
+ "e5b03e1be9647b1f093c5079": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác theo ngữ cảnh được cung cấp, nêu rõ thời hạn 3 tháng kể từ khi Hội đồng thông qua."
+ },
+ "71cdc5a17c8723480ea4f63c": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin được cung cấp trong ngữ cảnh tại mục số 4."
+ },
+ "51935da52ea1ec855dabff33": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời chính xác, bám sát ngữ cảnh, giải quyết được câu hỏi của người dùng mặc dù chưa liệt kê điều kiện 'nợ đọng' nhưng thông tin đưa ra hoàn toàn chính xác theo ngữ cảnh."
+ },
+ "4cfce6b7f774c61101eac0ee": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác và dựa trên thông tin có sẵn trong ngữ cảnh được cung cấp."
+ },
+ "ec232ce17d66fc992cdae607": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn bám sát và chính xác với thông tin được cung cấp trong ngữ cảnh về quy định buộc thôi học đối với sinh viên tự ý bỏ học 2 học kỳ liên tiếp."
+ },
+ "ad0f692eb89617022bb15937": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác và dựa trên thông tin tại Điều 29 mục d và Điều 24 mục 2 của ngữ cảnh được cung cấp."
+ },
+ "0b27ebad37665f96fbb64022": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác và dựa trên thông tin tại Điều 29 mục d và Điều 24 mục 2 của ngữ cảnh được cung cấp."
+ },
+ "ac38dd374a66c67e15e042ab": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác và dựa trên các thông tin được cung cấp trong ngữ cảnh về việc xử lý sinh viên sử dụng văn bằng, chứng chỉ giả."
+ },
+ "f07e862249ed68849ca6443b": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn dựa trên Điều 11 của ngữ cảnh được cung cấp, trả lời chính xác số lượng và tên các mức kỷ luật sinh viên."
+ },
+ "4fc74f0cc0c3cd5195e767bb": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời bám sát ngữ cảnh, giải quyết đúng câu hỏi và không chứa thông tin bên ngoài."
+ },
+ "e5a27e52f0ce5ac930e480e8": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời phản ánh chính xác quy định tại khoản 4 Điều 11 trong ngữ cảnh về việc áp dụng hình thức buộc thôi học đối với sinh viên tiếp tục vi phạm kỷ luật trong thời gian bị đình chỉ."
+ },
+ "7920d728470395f1709589c3": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác, đầy đủ và bám sát nội dung tại Điều 3 của ngữ cảnh được cung cấp."
+ },
+ "25e77590f3c72b7ebf51bea4": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn bám sát ngữ cảnh được cung cấp, trả lời trực tiếp đúng trọng tâm câu hỏi và không chứa thông tin ngoài."
+ },
+ "91f786c6da4cc14beaca8922": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác dựa trên thông tin được trích dẫn trong ngữ cảnh về thời gian nghỉ học tạm thời vì nhu cầu cá nhân."
+ },
+ "8bd0a71dc75d7a17d2cee914": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống phản ánh đúng và đủ điều kiện điểm trung bình chung tích lũy tối thiểu theo ngữ cảnh được cung cấp."
+ },
+ "f0600f65f838db8afd6f81ca": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin được nêu trong ngữ cảnh (cụ thể tại mục c, phần 2. Chuyển ngành đào tạo) và giải quyết trực tiếp câu hỏi của người dùng."
+ },
+ "9f12ed4bbdc5b29553fc5a30": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác, bám sát thông tin trong ngữ cảnh được cung cấp là sinh viên chỉ được xin chuyển ngành từ năm học thứ hai trở đi."
+ },
+ "f49812aa3433518d5b354834": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống phản ánh chính xác thông tin được nêu trong ngữ cảnh về thời điểm sinh viên được phép đăng ký học chương trình thứ hai."
+ },
+ "f7e07c6caf331e1b9ab36952": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn dựa trên quy định tại Điều 21 trong ngữ cảnh được cung cấp, trả lời trực tiếp và chính xác vào câu hỏi của người dùng."
+ },
+ "bc9c73bf40eb9691e5b81048": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn chính xác, bám sát nội dung ngữ cảnh được cung cấp và giải quyết đúng trọng tâm câu hỏi."
+ },
+ "74337a9b40cbd502cc982bf0": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn chính xác, đầy đủ và bám sát thông tin có trong ngữ cảnh được cung cấp."
+ },
+ "c68f93e6489143ab4dac2e8f": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác dựa trên bảng quy đổi điểm chứng chỉ tiếng Anh có trong ngữ cảnh được cung cấp."
+ },
+ "422cd8ecae02d36da3447346": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác dựa trên thông tin được cung cấp trong phần Lưu ý của tài liệu."
+ },
+ "8f74f5cf95852c3f412416ea": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác theo thông tin được cung cấp trong bảng 'Mức học bổng Khuyến khích học tập bậc đại học chính quy' tại ngữ cảnh."
+ },
+ "0a10a9b7a352dc50e637e06c": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn dựa trên ngữ cảnh được cung cấp và giải quyết đúng trọng tâm câu hỏi của người dùng."
+ },
+ "8f0f20fdaa9ae6059a5ac785": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với quy định được trích dẫn trong ngữ cảnh (Điều kiện xét học bổng nêu rõ học kỳ xét không bao gồm học kỳ đầu và cuối)."
+ },
+ "4cb5ed953376ed61c69bed5e": {
+  "faithfulness": 1.0,
+  "answer_relevance": 0.5,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời đúng về tỉ lệ phần trăm nhưng thiếu sót về điều kiện kết quả học tập và rèn luyện được quy định trong ngữ cảnh."
+ },
+ "7feb1f90785daf64f212ae51": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin được cung cấp trong phần 'HỌC BỔNG DOANH NGHIỆP' của ngữ cảnh."
+ },
+ "078b0539aa5f666327fd5bf4": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin tại mục 1 (Đối tượng giảm 70% học phí) và bảng chính sách giảm học phí trong ngữ cảnh được cung cấp."
+ },
+ "450a8674664522fef8444a89": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác và dựa trên thông tin có trong ngữ cảnh được cung cấp."
+ },
+ "271a1b136b3183490c1f9b7c": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin được nêu trong mục I của ngữ cảnh cung cấp."
+ },
+ "68abf626ac73a343385684ed": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác, đầy đủ và bám sát thông tin có trong ngữ cảnh được cung cấp."
+ },
+ "8e80ed77bc7bbda11234bd6d": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin được quy định tại Điều 11 trong ngữ cảnh được cung cấp."
+ },
+ "b5f487682988e44a496d64ad": {
+  "faithfulness": 1.0,
+  "answer_relevance": 0.5,
+  "context_relevance": 0.5,
+  "hallucination": false,
+  "reasoning": "Hệ thống bám sát ngữ cảnh được cung cấp nhưng bỏ sót yêu cầu giải thích về ảnh hưởng của kỷ luật đối với hạng tốt nghiệp vì thông tin đó không có trong ngữ cảnh."
+ },
+ "cb4b1e35e25a63fb0f9a7980": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống đã trích dẫn chính xác nội dung từ Điều 12 của ngữ cảnh để hướng dẫn xử lý khi bị rớt môn (điểm F), đáp ứng tốt câu hỏi của người dùng."
+ },
+ "b5a8e8de7e5ef330c49d9740": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống đã trích xuất đầy đủ và chính xác các điều kiện cảnh báo và buộc thôi học dựa trên ngữ cảnh được cung cấp."
+ },
+ "23cc7774fa8c73c8648bc818": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống bám sát nội dung tại Điều 13 trong ngữ cảnh, cung cấp chính xác thông tin về thời gian bảo lưu kết quả là 5 năm."
+ },
+ "74fc7359f7d9dd51ff6841f0": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống bám sát nội dung trong Điều 15 của ngữ cảnh cung cấp và trả lời đúng trọng tâm câu hỏi."
+ },
+ "d0249dcc3ed3270449e9c0eb": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống phản ánh chính xác thông tin được nêu tại Điều 16 trong ngữ cảnh được cung cấp."
+ },
+ "347719b3fc5bc81149d124b3": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời trích xuất chính xác thông tin từ khoản 3 Điều 18 của ngữ cảnh được cung cấp."
+ },
+ "a0954cf1136279633e59d720": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác và dựa trên nội dung được cung cấp tại Khoản 2, Điều 23 của ngữ cảnh."
+ },
+ "789dfe2692a1851c8cb50261": {
+  "faithfulness": 1.0,
+  "answer_relevance": 0.5,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống bám sát ngữ cảnh và trả lời đúng hai ý được hỏi, tuy nhiên còn thiếu ý về việc dùng ĐTBCHK để xét khen thưởng/xếp loại học lực năm học (được đề cập trong ngữ cảnh)."
+ },
+ "5443bae5780c85c21f7971f1": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn trùng khớp với thông tin tại khoản 3 Điều 31 trong ngữ cảnh được cung cấp."
+ },
+ "9c288c2ae5ed8c594d60d696": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác dựa trên thông tin tại mục 'Điều 4. Các hệ đào tạo và thời gian đào tạo' trong ngữ cảnh cung cấp."
+ },
+ "0678fec41a6114e571b1b24d": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời bám sát ngữ cảnh, trả lời đúng trọng tâm câu hỏi và không chứa thông tin ngoài ngữ cảnh."
+ },
+ "573f2ef52369c7aec0d0c782": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn trùng khớp với thông tin được trích dẫn trong mục 3a của ngữ cảnh cung cấp (tối đa không quá 3 năm). Đáp án tham khảo trong yêu cầu có vẻ bị sai lệch so với văn bản ngữ cảnh được cung cấp."
+ },
+ "9f3aa256dcc82277fb92da14": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống bám sát ngữ cảnh và giải quyết đúng câu hỏi về thời lượng thi trắc nghiệm."
+ },
+ "2bb16d2edd11649f8a8c0857": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống phản ánh chính xác thông tin được cung cấp trong mục 4d của ngữ cảnh về thời lượng thi tự luận."
+ },
+ "6b86cd3b2f5ca82dc8bc83bf": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin được quy định tại Điều 8, mục 1a trong ngữ cảnh cung cấp."
+ },
+ "3b3190a463024313679f80ae": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống bám sát hoàn toàn thông tin được cung cấp trong ngữ cảnh tại mục 3b."
+ },
+ "854b79079ef0b8fe5fe7a32f": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin được quy định tại mục 4b trong phần Biên soạn đề tài tiểu luận, đồ án của ngữ cảnh cung cấp."
+ },
+ "9a4165b08b14356f76a46ee2": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn bám sát thông tin được cung cấp trong mục 2a của ngữ cảnh về quy mô phòng thi lý thuyết."
+ },
+ "b87da4403c3597f6e8b7c0b5": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác và dựa trên nội dung tại mục 3a trong ngữ cảnh cung cấp."
+ },
+ "a91c7f846ca901d5822f5f9f": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin được quy định tại Điều 13, khoản 2 của ngữ cảnh được cung cấp."
+ },
+ "6245437ac9e9dfd42815db1c": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác, đầy đủ và bám sát các thông tin quy định trong ngữ cảnh được cung cấp."
+ },
+ "66b445ba14c7265f85697143": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời bám sát đúng nội dung tại Điều 14 khoản 2 của ngữ cảnh được cung cấp."
+ },
+ "fbf224de7fa1d8470b73b510": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống chính xác, đầy đủ và hoàn toàn dựa trên dữ liệu từ ngữ cảnh được cung cấp."
+ },
+ "e83d2ab27d28d1f5c2063339": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác và có căn cứ trực tiếp từ ngữ cảnh được cung cấp trong mục 3b."
+ },
+ "68fe1276f3e0fc084705c6c1": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn dựa trên dữ liệu tại đoạn 4 của ngữ cảnh, giải quyết trực tiếp và chính xác câu hỏi được đưa ra."
+ },
+ "ea45fb64277ea988f5da23d6": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống bám sát Điều 23 khoản 3 của ngữ cảnh được cung cấp, trả lời đúng cả hai ý của câu hỏi."
+ },
+ "5cca52c97d8c56bb05eb5d95": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác theo thông tin được cung cấp trong ngữ cảnh tại mục 3 về môn thi trắc nghiệm."
+ },
+ "07fe0d67ccf77d622e38326e": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác dựa trên thông tin tại Điều 29, khoản 1, điểm a và b của ngữ cảnh được cung cấp."
+ },
+ "62af451153a09c22ba0527d2": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin được quy định tại Điều 29, khoản 1, mục c của ngữ cảnh được cung cấp."
+ },
+ "209c9bb7f026df190d1b9c04": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống phản ánh chính xác nội dung tại Điều 30, khoản 1, mục c của ngữ cảnh được cung cấp."
+ },
+ "a4092c99a0ea897dc191e6c4": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin được nêu tại Điều 2, mục 1 của ngữ cảnh cung cấp, trả lời đúng trọng tâm câu hỏi."
+ },
+ "aa28190828c8fad51e1639c2": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời chính xác, bám sát thông tin có trong bảng chính sách miễn học phí tại phần ngữ cảnh cung cấp."
+ },
+ "d1afc16b33200dac4ea97b4e": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác, trực tiếp và dựa trên dữ liệu được cung cấp trong bảng chính sách miễn học phí của ngữ cảnh."
+ },
+ "761b22bea86480e8da901cbf": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác dựa trên thông tin tại mục 3 trong bảng chính sách miễn học phí của ngữ cảnh."
+ },
+ "e5731b54a2faa01b2af8f945": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn dựa trên bảng chính sách miễn học phí mục 5 trong ngữ cảnh, xác định đúng đối tượng và mức miễn 100% học phí."
+ },
+ "77f1a43a2e8ef7e37a03f72e": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác dựa trên thông tin được cung cấp trong phần IV của ngữ cảnh về đối tượng được hỗ trợ chi phí học tập."
+ },
+ "6660e1e7815a9d1eedd84a71": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống đã liệt kê đầy đủ và chính xác các đối tượng được xét học bổng tuyển sinh dựa hoàn toàn vào dữ liệu được cung cấp trong ngữ cảnh."
+ },
+ "c04bd774ed4ad6600cb8713d": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn chính xác theo ngữ cảnh được cung cấp (mục điều kiện xét học bổng Khuyến khích học tập) và trả lời đúng trọng tâm câu hỏi của người dùng."
+ },
+ "7ab8a0f8994f50443aeb2537": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống đã trích xuất đầy đủ và chính xác các thông tin về đối tượng trao tặng và cách xác định mức học bổng tài trợ dựa trên ngữ cảnh được cung cấp."
+ },
+ "a4f0f2f7461af6285e67f5ec": {
+  "faithfulness": 0.5,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": true,
+  "reasoning": "Hệ thống chỉ liệt kê 5 tiêu chí mà quên nhắc đến yếu tố 'Điểm thưởng' được nêu trong ngữ cảnh, dẫn đến việc khẳng định thang điểm chỉ có 5 tiêu chí là chưa hoàn toàn chính xác."
+ },
+ "77185fd37aee7e1c562a141a": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác dựa trên Điều 5 của ngữ cảnh cung cấp, nơi quy định mức điểm từ 80 đến 89 là loại Tốt."
+ },
+ "e942f1f0f0eebd58daf332cc": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác dựa trên Điều 5 về Phân loại kết quả đánh giá rèn luyện có trong ngữ cảnh cung cấp."
+ },
+ "c23a6cdcdea4a3d0e30b5aa2": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống đã tổng hợp chính xác các trường hợp khen thưởng được quy định cụ thể tại Điều 7 trong ngữ cảnh cung cấp."
+ },
+ "79ad4f5d98c6b62b1dedbc32": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin được quy định trong mục I của ngữ cảnh cung cấp."
+ },
+ "9c046df8ea2c3d92b46b8f6a": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống phản ánh chính xác và đầy đủ các thông tin về số lượng hồ sơ và mục đích nộp hồ sơ dựa trên dữ liệu được cung cấp trong ngữ cảnh."
+ },
+ "ca3070d44c1096b14456bb4f": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời trích xuất chính xác thông tin về thời hạn nộp hồ sơ của sinh viên khóa 21 từ mục VI.1 của ngữ cảnh được cung cấp."
+ },
+ "b72ee444036fe3ebbba43f1f": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống bám sát nội dung được trích dẫn trong mục I, giải quyết chính xác câu hỏi dựa trên thông tin cung cấp."
+ },
+ "6972b079407d6bb55a925c01": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn dựa trên dữ liệu từ ngữ cảnh được cung cấp, trả lời đúng trọng tâm câu hỏi về trách nhiệm của từng đơn vị."
+ },
+ "ebbaf7b319cfac1dfd15c89a": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác và bám sát thông tin được cung cấp trong ngữ cảnh về đường dẫn đăng ký học phần tại IUH."
+ },
+ "b497528acc4edab3d6bcde63": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống phản ánh chính xác thông tin được cung cấp trong ngữ cảnh về cách truy cập và tìm kiếm chương trình khung trên Cổng thông tin sinh viên."
+ },
+ "cad4fd64bb5606b676cf88a0": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin được cung cấp trong ngữ cảnh về các đối tượng sinh viên cần liên hệ khi gặp khó khăn trong quá trình đăng ký học phần."
+ },
+ "e8124b50ac32323b439aa822": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống bám sát ngữ cảnh được cung cấp, trả lời đúng trọng tâm câu hỏi và không chứa thông tin sai lệch."
+ },
+ "5bc5548359aa218fa3048307": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống bám sát ngữ cảnh được cung cấp, trả lời đúng cả hai vế của câu hỏi và không đưa thêm thông tin ngoài ngữ cảnh."
+ },
+ "2c08d6d5bc2a805de29f22a9": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống sử dụng chính xác các thông tin có trong ngữ cảnh (mục 3d trang 26 và mục 3 trang 28) để giải đáp đầy đủ cho cả hai vế của câu hỏi."
+ },
+ "d537f97c3cb442d0e0c970e2": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời bám sát ngữ cảnh được cung cấp, nêu bật được sự khác biệt về quy trình và thời hạn giữa thi tự luận và trắc nghiệm theo đúng các quy định đã trích dẫn."
+ },
+ "e64c8d932bb654bb5289df8b": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Hệ thống đã trả lời đầy đủ, chính xác các điều kiện về học lực và hệ quả khi bị cảnh báo kết quả học tập dựa hoàn toàn vào ngữ cảnh cung cấp."
+ },
+ "9b741f44a92e08fe4b4b08c2": {
+  "faithfulness": 1.0,
+  "answer_relevance": 0.5,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời bám sát ngữ cảnh nhưng chưa giải quyết được phần 'phải làm gì tiếp theo' vì thiếu thông tin về hậu quả bị điểm 0 cho học phần do hành vi gian lận (đình chỉ thi) làm ảnh hưởng đến lộ trình học lại."
+ },
+ "5e124b9927380253b9dcce9a": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời đã phản ánh chính xác thông tin được cung cấp trong ngữ cảnh về số tín chỉ tối thiểu và yêu cầu về kết quả rèn luyện để được xét học bổng."
+ },
+ "a2325153d639af427e3aadde": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 0.5,
+  "hallucination": false,
+  "reasoning": "Câu trả lời bám sát ngữ cảnh được cung cấp, xác nhận việc thiếu thông tin trong tài liệu về ký túc xá cho sinh viên quốc tế và giá phòng."
+ },
+ "ce55e2dc4db13d159ba3db23": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống đã trích dẫn đầy đủ và chính xác các điều kiện bảo lưu theo quy định tại Điều 17 của ngữ cảnh cung cấp."
+ },
+ "6828381738a02136c45f78f3": {
+  "faithfulness": 1.0,
+  "answer_relevance": 0.5,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời bám sát quy định phúc khảo trong ngữ cảnh nhưng chưa khai thác hết các khả năng khác (như điểm thành phần bị nhập sai) khiến câu trả lời chưa hoàn toàn đầy đủ theo thực tế quy chế."
+ },
+ "70d1351ea842d88fcba19f79": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Hệ thống đã trả lời đúng vị trí liên hệ (Phòng Đào tạo) dựa trên ngữ cảnh cung cấp cho trường hợp chuyển ngành theo nhu cầu cá nhân."
+ },
+ "b12444f8139a3bb8b16de4b1": {
+  "faithfulness": 1.0,
+  "answer_relevance": 0.5,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống bám sát ngữ cảnh và liệt kê chính xác các điều kiện buộc thôi học, tuy nhiên chưa làm rõ được việc 'điểm kém' ở mức độ nào mới dẫn đến cảnh báo để từ đó dẫn tới buộc thôi học, khiến câu trả lời thiếu đi sự tương tác làm rõ thông tin từ người dùng."
+ },
+ "e278eebcaa1e2123d6f3a65a": {
+  "faithfulness": 1.0,
+  "answer_relevance": 0.5,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống bám sát ngữ cảnh và giải thích được các điều kiện cần thiết, nhưng chưa chỉ ra được việc thiếu thông tin về đối tượng cụ thể của sinh viên để xác định quyền lợi chi tiết."
+ },
+ "be0dbeb8e182f5698091226a": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Hệ thống đã trích xuất chính xác quy trình xử lý đề thi có sai sót từ ngữ cảnh được cung cấp, trả lời trực diện vào câu hỏi của người học."
+ },
+ "5c603e4b9ec270e1bf2ce5f9": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống phản ánh chính xác và đầy đủ các nội dung được định nghĩa trong ngữ cảnh về học phần tiên quyết và học phần học trước mà không có bất kỳ thông tin bên ngoài nào."
+ },
+ "61336a5352683f3df0aa796c": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác dựa trên ngữ cảnh mục e, đáp ứng đầy đủ yêu cầu về nội dung và tín chỉ."
+ },
+ "dde80845b54b1619c02436c0": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống phản ánh chính xác nội dung mục 3f trong ngữ cảnh cung cấp."
+ },
+ "d5be10aa5b7e0559a04aed9b": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống đã bám sát thông tin trong mục d của ngữ cảnh, trả lời đầy đủ các vế của câu hỏi một cách chính xác và không có thông tin ngoại lai."
+ },
+ "b444e1f7288b81351d857d15": {
+  "faithfulness": 0.5,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": true,
+  "reasoning": "Câu trả lời khẳng định sinh viên không phải tham gia thi, trong khi ngữ cảnh chỉ ghi sinh viên cần liên hệ Khoa Ngoại ngữ để được hỗ trợ giải quyết, không khẳng định chắc chắn là được miễn thi."
+ },
+ "ffcfdf76d62d804d6ec7fefb": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống phản ánh chính xác thông tin được cung cấp tại Điều 23 của ngữ cảnh, đáp ứng đúng trọng tâm câu hỏi mà không thêm thắt thông tin ngoài."
+ },
+ "20f71351b28546478f43c802": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống bám sát nội dung Điều 1 trong ngữ cảnh được cung cấp, trả lời trực diện và đầy đủ các nội dung được quy định trong phạm vi điều chỉnh của quy chế."
+ },
+ "dabbb1169ae6e6fa525e0194": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác và dựa trên nội dung tại Điều 3, Khoản 2 của ngữ cảnh được cung cấp."
+ },
+ "0e96d1541a402ecc03045d6c": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống trích dẫn chính xác nội dung từ Khoản 2 Điều 4 của ngữ cảnh được cung cấp."
+ },
+ "17a8e93ed89ea9f7cedd4a79": {
+  "faithfulness": 0.5,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": true,
+  "reasoning": "Câu trả lời của hệ thống gán thêm trách nhiệm phối hợp thống kê dữ liệu cho Phòng Tài chính - Kế toán, trong khi ngữ cảnh tại Điều 5 khoản 3 nêu rõ Phòng Đào tạo và Viện ĐTQT&SĐH mới là đơn vị thực hiện việc phối hợp với Phòng Tài chính - Kế toán để thống kê dữ liệu."
+ },
+ "a4ad4b19f1f49a29e00726ae": {
+  "faithfulness": 0.5,
+  "answer_relevance": 0.5,
+  "context_relevance": 1.0,
+  "hallucination": true,
+  "reasoning": "Hệ thống đã suy diễn về thời hạn nộp Phiếu thông tin soạn đề thi trắc nghiệm dựa trên các quy định về bàn giao đề thi chính thức (Điều 9.2), trong khi ngữ cảnh không nêu rõ thời hạn cụ thể cho phiếu này."
+ },
+ "d8cde1f345c22962758a4b3e": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin được cung cấp trong Điều 11 của ngữ cảnh."
+ },
+ "dc8f9b42f9284696de918317": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống bám sát ngữ cảnh được cung cấp tại mục 6 của phần quy chế và trả lời chính xác, trực tiếp vào câu hỏi."
+ },
+ "a706bad3073b710fdf0dd605": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin được trích dẫn tại Điều 17, mục 1a của ngữ cảnh cung cấp."
+ },
+ "4de1b6f0af1ebf074fc29695": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời đã tóm tắt chính xác quy trình chấm bài thi trắc nghiệm trực tuyến dựa trên Điều 19 của ngữ cảnh cung cấp."
+ },
+ "fe4876dc14d4fe7cb2d145bf": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác dựa trên Điều 20, khoản 1 của ngữ cảnh được cung cấp."
+ },
+ "3ec628567b04f65128a16170": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống phản ánh chính xác thông tin được quy định tại Khoản 4 Điều 20 của ngữ cảnh cung cấp."
+ },
+ "99642f0b24f5963d3916ae19": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống phản ánh chính xác và đầy đủ các quy định tại Điều 24 khoản 2 và 3 của ngữ cảnh được cung cấp."
+ },
+ "31d88dc2025ea0f36dc7f90f": {
+  "faithfulness": 0.5,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": true,
+  "reasoning": "Câu trả lời có nhắc đến việc giảng viên nhập điểm cho thi trực tuyến, điều này được quy định tại Điều 19 khoản 1, tuy nhiên cụm từ 'thi tập trung' không xuất hiện trong ngữ cảnh liên quan đến quy trình nhập điểm nên được coi là thông tin suy diễn hoặc ngoài ngữ cảnh."
+ },
+ "edcd73028a38fa4defac24d8": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác dựa trên Điều 28 trong ngữ cảnh được cung cấp."
+ },
+ "3dbe9fdae4f978dbcaf7e495": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống bám sát ngữ cảnh, giải quyết đầy đủ hai vế của câu hỏi về hạn mức nghỉ tạm thời và rủi ro bị buộc thôi học."
+ },
+ "d40177bbb05519a38c6548f1": {
+  "faithfulness": 1.0,
+  "answer_relevance": 0.5,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Hệ thống trả lời đúng về việc không được chuyển chương trình, nhưng chưa giải đáp được vế thứ hai của câu hỏi về thứ tự xử lý khi muốn chuyển ngành cùng lúc."
+ },
+ "56b508e2c4d3741ae3bb8997": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống bám sát Điều 12 Khoản 2 trong ngữ cảnh được cung cấp và giải quyết trực tiếp câu hỏi của người dùng."
+ },
+ "1d4850c0ef5038e73dedf0f6": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời bám sát ngữ cảnh, trả lời đúng quy trình chuyển hồ sơ và thời gian theo quy định trong văn bản."
+ },
+ "d37bdc99119a14b742beac35": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác dựa trên điều kiện cần về kết quả rèn luyện được nêu trong ngữ cảnh là phải đạt từ loại Khá trở lên."
+ },
+ "c5a79d2cd45188adbd934027": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời phản hồi chính xác cả hai vế của câu hỏi và toàn bộ thông tin đều được rút ra từ ngữ cảnh đã cung cấp."
+ },
+ "e412e8b7bf010e7dcb81d35c": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 0.5,
+  "hallucination": false,
+  "reasoning": "Câu trả lời bám sát vào nội dung văn bản được cung cấp và trả lời đúng trọng tâm câu hỏi về sự thiếu hụt thông tin năm 2026."
+ },
+ "6f4acf3d72fcb13ff4009c66": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời đã phản ánh đúng nội dung ngữ cảnh liên quan đến quy định xử lý vi phạm trong học thuật và xác nhận thông tin không được cung cấp."
+ },
+ "3a5a12245b437fe18b13a835": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống bám sát ngữ cảnh, giải thích đúng yêu cầu chung để nhận học bổng nhưng thiếu sự phân loại rõ ràng các loại học bổng vốn có tiêu chí khác nhau như trong đáp án tham khảo."
+ },
+ "fdc4f3da2c64441d446452f4": {
+  "faithfulness": 1.0,
+  "answer_relevance": 0.5,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời bám sát ngữ cảnh nhưng chưa giải đáp được trọn vẹn thắc mắc về quy trình thực tế hoặc làm rõ các hình thức học vượt, chỉ cung cấp đường dẫn để tìm hiểu thêm."
+ },
+ "1edce7938380e5fea1292d86": {
+  "faithfulness": 0.0,
+  "answer_relevance": 0.5,
+  "context_relevance": 1.0,
+  "hallucination": true,
+  "reasoning": "Câu trả lời của hệ thống đưa ra thông tin về việc dự tuyển đầu vào không có trong ngữ cảnh cung cấp. Ngoài ra, hệ thống đã không làm rõ sự khác biệt giữa các loại đình chỉ (đình chỉ thi vs đình chỉ học tập) có trong ngữ cảnh."
+ },
+ "6bbe1eeff438a78805881495": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống bám sát ngữ cảnh được cung cấp, nêu rõ hậu quả khi kết quả rèn luyện thấp (từ ảnh hưởng đến quyền lợi đến việc bị tạm ngừng học hoặc buộc thôi học)."
+ },
+ "faaa1f16e7e828781dbe6bc2": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin được nêu tại Điều 5, khoản 3 của ngữ cảnh được cung cấp."
+ },
+ "af279436dbbc3c241e7bd64a": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin được quy định tại Điều 6, khoản 3 của ngữ cảnh cung cấp."
+ },
+ "3a45aab0a294e676f8afc33b": {
+  "faithfulness": 0.5,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": true,
+  "reasoning": "Câu trả lời đúng về nội dung vi phạm được nêu tại Điều 6, nhưng đã đưa ra thông tin không có trong ngữ cảnh là 'Sổ tay Sinh viên IUH 2024'."
+ },
+ "993f4794c038f1cd5a1fed4f": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin được trích dẫn trực tiếp từ ngữ cảnh trong phần 'NỘI QUY HỌC ĐƯỜNG'."
+ },
+ "0a2c09c7ff54997ba2cf46b0": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác và bám sát thông tin về thời gian đào tạo được quy định tại Điều 4 trong ngữ cảnh."
+ },
+ "889349583229905dc6fb8337": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác và bám sát thông tin có trong ngữ cảnh được cung cấp."
+ },
+ "83529ddc8ebfbd26fa2a8da5": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời chính xác, dựa hoàn toàn vào dữ liệu được cung cấp trong ngữ cảnh về quy định cho khóa tuyển sinh từ năm 2014 đến 2016."
+ },
+ "7033d9b068716920c2adb7cd": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác dựa trên ngữ cảnh được cung cấp về điều kiện tốt nghiệp cho sinh viên khóa 2021 trở về sau."
+ },
+ "ded6c7fb9c763ef0fea8d834": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời dựa hoàn toàn vào dữ liệu tại mục 'Bảng quy đổi điểm chứng chỉ tiếng Anh' trong ngữ cảnh được cung cấp."
+ },
+ "ff5ee0c3109eb15361eae6ff": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống phản ánh chính xác thông tin được cung cấp trong ngữ cảnh về số lượng học phần của hai chương trình đào tạo."
+ },
+ "e9ad4d06d40ddaf16dd01640": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống phản ánh chính xác thông tin được trích dẫn trực tiếp từ Điều 6 trong ngữ cảnh cung cấp."
+ },
+ "a9b1c4029a1c930f8ced72fb": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác và bám sát thông tin được cung cấp tại mục 4c của ngữ cảnh."
+ },
+ "bed8163df7d5808992dacaa4": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống bám sát hoàn toàn ngữ cảnh được cung cấp, trả lời đúng trọng tâm câu hỏi về các yêu cầu khoa học và bảo mật của đề thi, không có thông tin ngoài lề."
+ },
+ "94d1a19fe7fdcde48896e549": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời chính xác, bám sát các thông tin được cung cấp trong ngữ cảnh về quy cách trình bày đề thi."
+ },
+ "c2fca5e07b5e78544c98506b": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin được quy định tại Điều 9, khoản 1 của ngữ cảnh được cung cấp."
+ },
+ "aaaea0edde2463439c950c5b": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác dựa trên Điều 10, mục 1b trong ngữ cảnh cung cấp."
+ },
+ "ecc42caa7b91366b89073252": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác theo ngữ cảnh được cung cấp và giải quyết đúng trọng tâm câu hỏi."
+ },
+ "7d3576d2c66d11ba2c2af91a": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn chính xác, bám sát nội dung tại mục 3 trong phần ngữ cảnh được cung cấp."
+ },
+ "fab7a948b3c4d01dcab76a08": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác và dựa trên thông tin tại Điều 16, Khoản 3 của ngữ cảnh được cung cấp."
+ },
+ "92f0eef213c6c910235becd4": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống phản ánh chính xác thông tin được nêu tại Điều 13 trong ngữ cảnh, bao gồm việc không tính điểm trung bình tích lũy và không được miễn giảm học phí cho học phần mở rộng."
+ },
+ "ded4fced051913b7d54e3355": {
+  "faithfulness": 1.0,
+  "answer_relevance": 0.5,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời nêu đúng mức kỷ luật thi hộ nhưng chưa trả lời rõ về ảnh hưởng điểm số của học phần đó đối với hành vi thi hộ (chỉ đề cập đến mức đình chỉ thi đối với các lỗi khác)."
+ },
+ "d6e5dba2ef207277202794aa": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời dựa hoàn toàn vào dữ liệu ngữ cảnh quy định về việc dừng học chương trình thứ hai khi bị cảnh báo và hệ quả của việc bị buộc thôi học đối với tư cách sinh viên."
+ },
+ "0c8bcf1293c375fa6d81c1b1": {
+  "faithfulness": 1.0,
+  "answer_relevance": 0.5,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống chính xác dựa trên ngữ cảnh về việc không được hoàn/rút phí khi nộp đơn trễ, tuy nhiên chưa đề cập cụ thể quyền lợi bảo lưu học phí khi nộp đơn đúng hạn theo đáp án tham khảo."
+ },
+ "cf5e4977b002fb2dc910353e": {
+  "faithfulness": 0.0,
+  "answer_relevance": 0.5,
+  "context_relevance": 0.5,
+  "hallucination": true,
+  "reasoning": "Hệ thống không trích xuất được thông tin về việc xử lý điểm tích lũy khi học cải thiện từ ngữ cảnh được cung cấp, dẫn đến việc khẳng định 'Quy chế không quy định' là sai lệch so với dữ liệu trong Điều 12, Khoản 3 (dù diễn đạt của ngữ cảnh có chút gây hiểu lầm) và chứa thông tin không có trong văn bản được cung cấp."
+ },
+ "c2f24383754e67cfb801c1f6": {
+  "faithfulness": 1.0,
+  "answer_relevance": 0.5,
+  "context_relevance": 0.5,
+  "hallucination": false,
+  "reasoning": "Câu trả lời bám sát ngữ cảnh về kỷ luật buộc thôi học, nhưng về vấn đề học bổng, hệ thống trả lời không có thông tin là chính xác vì ngữ cảnh được cung cấp thực sự không đề cập đến quy chế xét học bổng."
+ },
+ "e2bb625f1fd7fd35272ba498": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn dựa trên dữ liệu thời gian được cung cấp trong ngữ cảnh, so sánh chính xác giữa thi trắc nghiệm (2 ngày) và thi tự luận (5 ngày chấm + 7 ngày thông báo)."
+ },
+ "3e98171bb32f9062b0ea41ea": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác dựa trên quy định tại Điều 35, khoản 2 của ngữ cảnh được cung cấp."
+ },
+ "f1484e45b84f2481bd5797e8": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hệ thống dựa hoàn toàn vào ngữ cảnh được cung cấp và giải quyết trực tiếp câu hỏi của người dùng bằng cách liệt kê các trường hợp khác nhau."
+ },
+ "52e4aa497f7f150e5ee1c474": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn dựa trên Điều 26 mục 1 của ngữ cảnh, nêu rõ điều kiện để được xét phúc khảo khi quá hạn 14 ngày làm việc."
+ },
+ "87c71cd55ba1cdd12256d460": {
+  "faithfulness": 0.5,
+  "answer_relevance": 0.5,
+  "context_relevance": 1.0,
+  "hallucination": true,
+  "reasoning": "Câu trả lời chỉ giải quyết trường hợp học phần bị hủy do không đóng học phí mà chưa xét đến trường hợp hủy học phần khác, đồng thời đưa thêm thông tin về học lại khi bị điểm F không liên quan trực tiếp đến việc học phần bị hủy đăng ký."
+ },
+ "3e5b9fe9c3aaaebad6ccaab7": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác và bám sát thông tin có trong ngữ cảnh được cung cấp về thời gian và quy mô của Ngày hội tuyển dụng."
+ },
+ "50e0b75890af170742508d2a": {
+  "faithfulness": 1.0,
+  "answer_relevance": 0.5,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời đúng về nội dung nhưng thiếu thông tin về Trung tâm Kết nối doanh nghiệp và Giới thiệu việc làm vốn có trong ngữ cảnh."
+ },
+ "906dc3f512aabaa53a1b2f26": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin được cung cấp trong ngữ cảnh về thủ tục chuyển sinh hoạt Đảng của sinh viên tại trường."
+ },
+ "10c5dcebd96bda44d64ce4b3": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn chính xác theo ngữ cảnh tại Điều 6, khoản 2a, bám sát trọng tâm câu hỏi và không có thông tin ngoại lai."
+ },
+ "35d1a128544d7dd7c86b5cc0": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời đã nêu chính xác công thức tính thời lượng thi vấn đáp được quy định tại mục 4e của ngữ cảnh cung cấp."
+ },
+ "ab64c9b256acbb8444d032db": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với công thức được quy định tại mục f, Điều 4 của ngữ cảnh được cung cấp."
+ },
+ "9776b05c200366fd42bdfe90": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác dựa trên khoản 5 mục c của ngữ cảnh được cung cấp."
+ },
+ "887d2360bb34d3890f655316": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống phản ánh chính xác thông tin được quy định tại mục 6 trong ngữ cảnh, bao gồm yêu cầu ghi số tờ giấy làm bài trên từng tờ giấy thi và các thủ tục ký tên, ghi số lượng tờ khi nộp bài."
+ },
+ "2d1dc77fb6ae43b3adf81819": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác dựa trên khoản 1 Điều 12 của ngữ cảnh được cung cấp."
+ },
+ "e6736a2e0e28312f1312ffdd": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với mục (f) trong đoạn trích ngữ cảnh được cung cấp."
+ },
+ "6a0f36a1950752e8d0aa1d8f": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn dựa trên dữ liệu ngữ cảnh cung cấp, giải quyết trực tiếp cả hai vế của câu hỏi và giải thích đúng mối quan hệ giữa các điều khoản."
+ },
+ "bb0621623ef3669f5ba57da0": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống bám sát dữ liệu trong ngữ cảnh: việc công nhận kết quả học tập dựa trên Điều 23 (tham chiếu Điều 31) và thời gian đào tạo 1,5 - 2 năm được trích xuất từ Điều 4."
+ },
+ "7812653eab34b1252fe0a969": {
+  "faithfulness": 0.5,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": true,
+  "reasoning": "Hệ thống trả lời cán bộ coi thi vi phạm lần đầu bị Khiển trách là sai với ngữ cảnh, vì ngữ cảnh quy định mức Khiển trách đối với cán bộ coi thi chỉ áp dụng khi đã từng bị nhắc nhở bằng văn bản ít nhất một lần."
+ },
+ "9e83dcad08e5ad1e4e0bcd20": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống bám sát vào nội dung được cung cấp trong ngữ cảnh, trả lời đúng trọng tâm câu hỏi và không chứa thông tin sai lệch hoặc không có căn cứ."
+ },
+ "e919b4ef20584adb522185af": {
+  "faithfulness": 0.5,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": true,
+  "reasoning": "Câu trả lời của hệ thống đưa ra các ví dụ cụ thể như IELTS, TOEFL, VSTEP nhưng trong ngữ cảnh chỉ liệt kê tên chứng chỉ trong bảng quy đổi (như PET, KET) chứ không nhắc đến VSTEP. Ngoài ra, hệ thống chưa hỏi về khóa tuyển sinh và bậc đào tạo của sinh viên để đưa ra hướng dẫn chính xác như đáp án tham khảo."
+ },
+ "62574e3e34785db04089265c": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác và dựa trên công thức tính điểm được cung cấp trong ngữ cảnh."
+ },
+ "38659b0d9e4fcc053ab261d5": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn chính xác và khớp với bảng quy đổi thang điểm 10 sang thang điểm chữ và thang điểm 4 được cung cấp trong ngữ cảnh."
+ },
+ "7bce27b9fa82908397979d76": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn dựa trên dữ liệu từ ngữ cảnh được cung cấp, trả lời trực tiếp và chính xác vào cả hai ý của câu hỏi."
+ },
+ "d465000ae1f68865aa322687": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác và dựa trên ngữ cảnh được cung cấp về thang điểm cũng như tính chất của các học phần Giáo dục thể chất và Giáo dục quốc phòng - An ninh."
+ },
+ "896c92a2713c70e080747f49": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác dựa trên Điều 35, mục 2c của ngữ cảnh cung cấp."
+ },
+ "6649105924e3a60c9134b3fa": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác, bám sát ngữ cảnh được cung cấp tại Điều 35 mục 2, điểm d để đưa ra kết luận cho mức điểm 2.10."
+ },
+ "2804abb2fd3526454fc3f310": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin được quy định tại Điều 35, khoản 1 trong ngữ cảnh được cung cấp."
+ },
+ "9db1172c78f76268951b692b": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin được cung cấp trong ngữ cảnh tại mục 3."
+ },
+ "8693963ec473bd8cdef010f3": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với thông tin được nêu trong mục 3 của ngữ cảnh cung cấp."
+ },
+ "918114770a9e2125ddc6932b": {
+  "faithfulness": 1.0,
+  "answer_relevance": 0.5,
+  "context_relevance": 0.5,
+  "hallucination": false,
+  "reasoning": "Hệ thống trả lời chính xác phần thông tin có trong ngữ cảnh và trung thực về phần thông tin thiếu hụt, thay vì tự bịa đặt thông tin không có trong ngữ cảnh."
+ },
+ "41e5f159d033cd16306a1644": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác và bám sát thông tin được cung cấp tại mục 8 của ngữ cảnh."
+ },
+ "244908f0eeca58be182f37d4": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống phản ánh chính xác thông tin được nêu trong ngữ cảnh (mục 9), trả lời trực tiếp và đầy đủ câu hỏi của người dùng."
+ },
+ "530a7d9d7ae8584419824955": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời bám sát ngữ cảnh tại Điều 2 của văn bản, cung cấp thông tin chính xác về quyết định được thay thế mà không bổ sung thông tin ngoài."
  }
 }
