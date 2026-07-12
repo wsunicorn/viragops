@@ -1,12 +1,12 @@
 # Relevant chunks linking report
 
-> Sinh bởi `scripts/link_relevant_chunks.py` lúc 2026-07-12T03:56:03.127448+00:00.
+> Sinh bởi `scripts/link_relevant_chunks.py` lúc 2026-07-12T08:51:24.241078+00:00.
 > Chunk source: `structure_aware_data_20260712.jsonl` (strategy `structure_aware`, data_20260712).
 
 - Câu không-refusal đã gán relevant_chunks: **249**
-- Citation khớp structural (parse Điều/Khoản + range): **192**
-- Citation khớp lexical (token-overlap với ground_truth, cho tài liệu không có heading Điều): **81** — mapping yếu hơn, reviewer nên ưu tiên spot-check nhóm này
-- Citation không khớp được: **2** (q_156)
+- Citation khớp structural (parse Điều/Khoản + range): **194**
+- Citation khớp lexical (token-overlap với ground_truth, cho tài liệu không có heading Điều): **80** — mapping yếu hơn, reviewer nên ưu tiên spot-check nhóm này
+- Citation không khớp được: **3** (q_156)
 
 | question | document | citation section | method | #chunks |
 |---|---|---|---|---:|
@@ -150,6 +150,7 @@
 | q_154 | doc_qd1482_quy_che_tin_chi | Điều 20, Khoản 2.b | structural | 1 |
 | q_155 | doc_qd1482_quy_che_tin_chi | Điều 19 | structural | 2 |
 | q_156 | doc_hd05_mien_giam_hp | Mục II, Hướng dẫn 05/HD-ĐHCN, 18/09/2025 | none | 0 |
+| q_156 | doc_hd05_mien_giam_hp | Mục III, Hướng dẫn 05/HD-ĐHCN, 18/09/2025 | none | 0 |
 | q_157 | doc_qd610_thi_danh_gia | Điều 14 | structural | 2 |
 | q_158 | doc_qd1482_quy_che_tin_chi | Điều 6, Khoản 3 | structural | 1 |
 | q_159 | doc_qd1482_quy_che_tin_chi | Điều 6, Khoản 3 | structural | 1 |
@@ -198,8 +199,8 @@
 | q_208 | doc_qd1482_quy_che_tin_chi | Điều 4, Khoản 1 | structural | 1 |
 | q_209 | doc_qd1482_quy_che_tin_chi | Điều 20, Khoản 1.a | structural | 1 |
 | q_210 | doc_qd1482_quy_che_tin_chi | Điều 20, Khoản 1.b | structural | 1 |
-| q_211 | doc_camnang_dieu_kien_tot_nghiep | Điều kiện xét tốt nghiệp, mục 1.e | lexical | 1 |
-| q_212 | doc_camnang_dieu_kien_tot_nghiep | Điều kiện xét tốt nghiệp, mục 1.e | lexical | 1 |
+| q_211 | doc_qd1482_quy_che_tin_chi | Điều 33, Khoản 1.e | structural | 1 |
+| q_212 | doc_qd1482_quy_che_tin_chi | Điều 33, Khoản 1.e | structural | 1 |
 | q_213 | doc_camnang_dieu_kien_tot_nghiep | Điều kiện xét tốt nghiệp, mục 1.e | lexical | 1 |
 | q_214 | doc_camnang_bang_quy_doi_tieng_anh | Bảng quy đổi điểm chứng chỉ tiếng Anh | lexical | 1 |
 | q_215 | doc_camnang_chuan_tieng_anh | Quy định chuẩn tiếng Anh, Lưu ý | lexical | 1 |
@@ -214,6 +215,7 @@
 | q_224 | doc_qd610_thi_danh_gia | Điều 16, Khoản 3 | structural | 1 |
 | q_225 | doc_qd1482_quy_che_tin_chi | Điều 13, Khoản 2 | structural | 1 |
 | q_225 | doc_qd1482_quy_che_tin_chi | Điều 13, Khoản 3 | structural | 1 |
+| q_225 | doc_hd05_mien_giam_hp | Mục I, Hướng dẫn 05/HD-ĐHCN, 18/09/2025 | lexical | 1 |
 | q_226 | doc_qd610_thi_danh_gia | Điều 29, Khoản 1.d | structural | 1 |
 | q_226 | doc_qd1482_quy_che_tin_chi | Điều 24, Khoản 2 | structural | 1 |
 | q_227 | doc_qd1482_quy_che_tin_chi | Điều 19, Khoản 2.a | structural | 1 |
