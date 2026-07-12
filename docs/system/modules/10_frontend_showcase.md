@@ -105,13 +105,14 @@ experiments/`.
 | QA demo trông "giả" | Mock response khi dev không có API | Luôn nối API thật kể cả lúc dev, dùng `.env.local` trỏ backend local |
 | Animation giật máy yếu | Quá nhiều hiệu ứng đồng thời | Giới hạn số scroll-trigger đồng thời, ưu tiên GPU-friendly transform/opacity |
 | CORS lỗi khi gọi API | FastAPI chưa bật CORS cho origin frontend | Thêm `CORSMiddleware` vào `src/api/main.py` cho origin dev/prod |
+| **`asChild` prop không nhận diện được (React warning thật, đã gặp 2026-07-12)** | shadcn/ui bản cài lúc này dùng **Base UI** (`@base-ui/react`), KHÔNG phải Radix UI như phần lớn tài liệu/training data giả định — Base UI dùng prop `render` thay vì `asChild`, và khuyến nghị chính thức là KHÔNG bọc `<Link>` trong `<Button>` (link có semantics riêng) | Dùng `buttonVariants({...})` làm className trực tiếp trên `<Link>` thay vì `<Button asChild><Link/></Button>`. Luôn đọc `node_modules/next/dist/docs/` và `node_modules/@base-ui/react/docs/` trước khi giả định API quen thuộc — đúng cảnh báo trong `frontend/AGENTS.md`. |
 
 ## Checklist hoàn tất
 
-- [ ] Next.js project scaffold xong, chạy `npm run dev` được.
-- [ ] Landing/showcase page hoàn chỉnh, đúng số liệu/tiến độ thật.
-- [ ] QA demo hoạt động, nối API thật, hiển thị citation/refusal đúng.
-- [ ] Dashboard thực nghiệm hoạt động, số liệu khớp report gốc.
-- [ ] Animation cuộn trang mượt, đã test trên máy sẽ dùng để demo.
-- [ ] Thêm service `frontend` vào `docker-compose.yml`.
-- [ ] CORS đã cấu hình đúng cho FastAPI backend.
+- [x] Next.js project scaffold xong, chạy `npm run dev` được — verify thật (curl 200 cả 3 route, `npm run build` production thành công, `tsc --noEmit` + `eslint` sạch).
+- [x] Landing/showcase page hoàn chỉnh, đúng số liệu/tiến độ thật — số liệu transcribe từ report thật trong `src/lib/data/*.ts`, ghi rõ nguồn.
+- [x] QA demo hoạt động, nối API thật, hiển thị citation/refusal đúng — verify bằng `curl -X POST /qa/query` thật qua CORS preflight + request thật (câu hỏi tín chỉ, trả lời đúng + citation đúng Điều 6 Khoản 4).
+- [x] Dashboard thực nghiệm hoạt động, số liệu khớp report gốc.
+- [ ] Animation cuộn trang mượt, đã test trên máy sẽ dùng để demo — **CHƯA verify bằng mắt** (không có công cụ screenshot/browser trong phiên làm việc này); chỉ xác nhận code compile/render sạch, chưa xác nhận cảm giác mượt thật khi cuộn. Cần user tự mở `localhost:3000` kiểm tra trước khi dùng demo chính thức.
+- [x] Thêm service `frontend` vào `docker-compose.yml` — `docker compose config` validate sạch, chưa build image thật (chưa cần thiết ở bước này).
+- [x] CORS đã cấu hình đúng cho FastAPI backend — verify thật bằng OPTIONS preflight, header `access-control-allow-origin` đúng.

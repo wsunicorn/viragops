@@ -35,6 +35,19 @@ services:
       litellm:
         condition: service_healthy
 
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Baked in at build time (NEXT_PUBLIC_* is inlined client-side) —
+        # host machine's localhost, not the `api` service DNS name, since
+        # the browser (not the frontend container) is what calls this URL.
+        NEXT_PUBLIC_API_BASE_URL: http://localhost:${APP_PORT:-8000}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
   litellm:
     image: ghcr.io/berriai/litellm:main-stable
     ports:

@@ -879,6 +879,22 @@ cảnh project. Đây là ngoại lệ có chủ đích, không phải bỏ qua 
 nhật thêm khi có số liệu Quality Gate/Observability/Feedback (Phase
 9-11) sau này. Xem `docs/system/modules/10_frontend_showcase.md`.
 
+**Build thật hoàn tất (2026-07-12), verify không chỉ viết code:**
+`frontend/` scaffold Next.js 16 + React 19 + Tailwind v4, cài Motion/
+GSAP/Lenis/shadcn (Base UI). 3 trang thật (`/`, `/demo`, `/dashboard`),
+số liệu dashboard transcribe từ report thật (không tính lại công thức
+khác). `npx tsc --noEmit` + `npm run lint` + `npm run build` đều sạch.
+`/demo` verify thật: `curl -X POST /qa/query` qua CORS preflight
+(`access-control-allow-origin` đúng) trả lời đúng câu hỏi tín chỉ + trích
+dẫn đúng Điều 6 Khoản 4. **Phát hiện thật đáng ghi lại:** shadcn/ui bản
+cài dùng **Base UI**, không phải Radix UI như quen thuộc — `asChild`
+không tồn tại, phải dùng `buttonVariants()` trực tiếp trên `<Link>` (xem
+`frontend/AGENTS.md` cảnh báo trước, và mục "Lỗi thường gặp" trong
+`modules/10_frontend_showcase.md`). **Còn treo:** chưa verify bằng mắt
+độ mượt animation cuộn trang (không có công cụ screenshot/browser trong
+phiên làm việc) — user cần tự mở `localhost:3000` xác nhận trước khi
+dùng làm demo chính thức bảo vệ khóa luận.
+
 ---
 
 ## Phase 9 - Xây CI/CD Quality Gate (Tuần 15-16)
