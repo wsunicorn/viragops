@@ -1,0 +1,12 @@
+question_id,category,requires_refusal,got_refusal,refusal_correct,recall_at_k,hit_at_k,mrr,ndcg_at_k,context_precision,citation_accuracy,faithfulness,answer_relevance,context_relevance,hallucination,latency_ms,cost_usd,fallback_hop,error_labels
+q_053,adversarial,True,True,True,,,,,,,,,,,6073,0.001165,tertiary,served_by_fallback:tertiary
+q_054,adversarial,True,True,True,,,,,,,,,,,4172,0.0013367499999999998,tertiary,served_by_fallback:tertiary
+q_146,adversarial,True,True,True,,,,,,,,,,,3485,0.0016569999999999998,tertiary,served_by_fallback:tertiary
+q_147,adversarial,True,True,True,,,,,,,,,,,3321,0.001176,tertiary,served_by_fallback:tertiary
+q_148,adversarial,True,True,True,,,,,,,,,,,3313,0.0013892499999999999,tertiary,served_by_fallback:tertiary
+q_149,adversarial,True,True,True,,,,,,,,,,,3504,0.0016695,tertiary,served_by_fallback:tertiary
+q_150,adversarial,True,True,True,,,,,,,,,,,3207,0.0011767499999999998,tertiary,served_by_fallback:tertiary
+q_151,adversarial,True,True,True,,,,,,,,,,,4120,0.00124575,tertiary,served_by_fallback:tertiary
+q_196,adversarial,True,True,True,,,,,,,,,,,3410,0.0013304999999999999,tertiary,served_by_fallback:tertiary
+q_197,adversarial,True,True,True,,,,,,,,,,,3478,0.00127375,tertiary,served_by_fallback:tertiary
+q_198,adversarial,True,True,True,,,,,,,,,,,4075,0.0015487499999999998,tertiary,served_by_fallback:tertiary

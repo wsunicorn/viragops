@@ -1,0 +1,10 @@
+question_id,category,requires_refusal,got_refusal,refusal_correct,recall_at_k,hit_at_k,mrr,ndcg_at_k,context_precision,citation_accuracy,faithfulness,answer_relevance,context_relevance,hallucination,latency_ms,cost_usd,fallback_hop,error_labels
+q_051,out_of_scope,True,True,True,,,,,,,,,,,6710,0.0012112499999999999,tertiary,served_by_fallback:tertiary
+q_052,out_of_scope,True,True,True,,,,,,,,,,,3459,0.0012909999999999998,tertiary,served_by_fallback:tertiary
+q_141,out_of_scope,True,True,True,,,,,,,,,,,4230,0.0012785,tertiary,served_by_fallback:tertiary
+q_142,out_of_scope,True,True,True,,,,,,,,,,,3622,0.00121475,tertiary,served_by_fallback:tertiary
+q_143,out_of_scope,True,True,True,,,,,,,,,,,3892,0.00118725,tertiary,served_by_fallback:tertiary
+q_144,out_of_scope,True,True,True,,,,,,,,,,,3651,0.00129,tertiary,served_by_fallback:tertiary
+q_145,out_of_scope,True,True,True,,,,,,,,,,,3449,0.0015247499999999998,tertiary,served_by_fallback:tertiary
+q_194,out_of_scope,True,True,True,,,,,,,,,,,3304,0.0013532499999999999,tertiary,served_by_fallback:tertiary
+q_195,out_of_scope,True,True,True,,,,,,,,,,,3362,0.0011247499999999999,tertiary,served_by_fallback:tertiary

@@ -41,26 +41,40 @@ giảm chất lượng ở category khác không?
   limit=7 — 2 hop của câu hỏi này thường cách nhau khá xa trong ranking,
   cần buffer đủ lớn mới vớt được.
 
-## Quyết định
+## Validate ở tầng generation thật — VÀ ĐÃ REVERT
 
-Đổi `config/retrieval.yaml` → `reranker.top_k_after: 5` thành `10` — bằng
-chứng retrieval-side rõ ràng, không có category nào bị hại. Đánh đổi cần
-theo dõi (chưa đo được ở bước retrieval-only này, cần validate qua
-generation thật):
-- **Context Precision** (đã thấp do giới hạn cấu trúc, xem
-  `results_evaluation_full.md`) sẽ càng thấp hơn (mẫu số tăng gấp đôi) —
-  chấp nhận được, đã biết đây không phải chỉ số đáng tin ở hệ thống này.
-- **Token/latency/cost** tăng do prompt dài hơn (gần gấp đôi số chunk) —
-  cần đo lại p95 latency + cost/req thật sau khi đổi, so với target
-  <=6s/<=$0.005 hiện đang ĐẠT thoải mái (p95=1.49s, cost=$0.0009/req ở
-  limit=5) nên còn nhiều dư địa.
-- **Citation Accuracy ở tầng GENERATION** (không chỉ retrieval) cần
-  validate lại thật — nhiều chunk hơn có thể giúp model trích đủ hơn,
-  nhưng cũng có thể làm model phân tâm/trích nhầm nhiều hơn. Kế hoạch:
-  chạy lại `scripts/run_evaluation.py --mode targeted` cho multi_hop +
-  ambiguous với limit=10 sau khi full eval baseline (limit=5, p6) hoàn
-  tất, để tránh tranh chấp quota giữa 2 lần chạy song song.
+Đổi thử `top_k_after: 5 -> 10`, chạy lại `scripts/run_evaluation.py
+--mode targeted --category multi_hop --prompt-version
+p7_citation_complete_safe_v1` (30 câu, chạy sạch 100% qua Gemini tertiary
+key, không dính Ollama fallback — verify qua cột `fallback_hop` trong
+CSV) để đo đúng metric mục tiêu (Citation Accuracy), không chỉ suy luận
+từ recall retrieval-only:
 
-**Trạng thái tại thời điểm ghi tài liệu này: `results_evaluation_full.md`
-(full 300 câu, p6, limit=5) đang chạy nền, sẽ dùng làm baseline "trước"
-để so sánh với limit=10 "sau".**
+| limit | Recall@k (multi_hop) | **Citation Accuracy (multi_hop)** |
+|---:|---:|---:|
+| 5  | 0.856 | **0.700** |
+| 10 | 0.889 | **0.650** |
+
+**Kết quả NGƯỢC với kỳ vọng từ bước retrieval-only:** Recall tăng đúng
+như dự đoán (+3.3 điểm %), nhưng Citation Accuracy — metric mục tiêu thật
+sự đang cần sửa — GIẢM (-5 điểm %). Diễn giải: đưa nhiều chunk hơn cho
+model làm tăng khả năng chunk đúng "có mặt" trong ngữ cảnh, nhưng cũng
+tăng số "chunk gây nhiễu" (distractor) khiến model dễ trích nhầm/trích
+thừa hơn — đúng loại lỗi mà `p6`/`p7`'s quy tắc 2 ("chỉ trích khi đoạn đó
+THỰC SỰ là căn cứ") được thiết kế để giảm, nhưng bị chính việc tăng
+`top_k_after` làm khó hơn.
+
+**Quyết định cuối: REVERT `top_k_after` về `5`.** Giữ nguyên phần sửa
+prompt (`p6`/`p7`) — phần đó đã chứng minh cải thiện thật cả 2 metric
+(Citation Accuracy VÀ Refusal Accuracy) mà không cần đổi retrieval.
+Recall-side gap còn lại (đặc biệt ambiguous, procedural — xem bảng trên)
+vẫn treo, nhưng "tăng top_k_after" không phải giải pháp đúng cho mục
+tiêu Citation Accuracy — cần hướng khác (vd re-retrieval theo từng hop
+CÓ CHỌN LỌC chỉ khi câu hỏi được phát hiện là multi-hop, thay vì tăng
+context cho MỌI câu hỏi kể cả factoid đơn giản).
+
+**Bài học chính của thí nghiệm này (đáng đưa vào báo cáo khóa luận):**
+số liệu retrieval-only (recall@k) không đủ để quyết định thay đổi
+production — bắt buộc phải đo thêm 1 bước qua generation thật trước khi
+đổi config, vì 2 tầng có thể phản ứng NGƯỢC HƯỚNG NHAU với cùng 1 thay
+đổi.

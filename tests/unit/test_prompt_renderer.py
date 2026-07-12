@@ -28,8 +28,8 @@ def test_validate_template_catches_mismatch():
 
 
 def test_all_seed_templates_valid_and_renderable():
-    """Cả 7 variant P0-P6 phải render sạch với đúng bộ biến khai báo."""
-    assert len(SEED_PROMPTS) == 7
+    """Cả 8 variant P0-P7 phải render sạch với đúng bộ biến khai báo."""
+    assert len(SEED_PROMPTS) == 8
     for seed in SEED_PROMPTS:
         validate_template(seed["template"], COMMON_METADATA["variables"])
         out = render(seed["template"], {"context": "[chunk_1] nội dung", "question": "hỏi gì?"})
@@ -43,7 +43,7 @@ def test_seed_versions_follow_naming_convention():
     assert versions == [
         "p0_naive_v1", "p1_grounded_v1", "p2_citation_first_v1",
         "p3_refusal_aware_v1", "p4_self_check_v1", "p5_concise_v1",
-        "p6_citation_complete_v1",
+        "p6_citation_complete_v1", "p7_citation_complete_safe_v1",
     ]
 
 

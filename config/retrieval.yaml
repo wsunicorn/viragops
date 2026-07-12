@@ -43,17 +43,20 @@ reranker:
   enabled: false
   model: bge-reranker-v2-m3   # giữ làm tài liệu — chưa dùng được
   top_k_before: 20
-  # top_k_after: 5->10 (2026-07-12), bằng chứng thật retrieval-only trên
-  # 249 câu: recall@k tăng đơn điệu ở MỌI category khi tăng limit (không
-  # category nào giảm — đúng lý thuyết vì top-10 ⊇ top-5), ambiguous
-  # +10.6 điểm % (0.789->0.895), multi_hop +3.3 (0.856->0.889), factoid
-  # +2.1 (0.963->0.984). Xem docs/system/experiments/
-  # results_context_limit_ablation.md. procedural KHÔNG đổi (0.917 ở mọi
-  # mức) — phần miss còn lại của category này nằm ngoài top-10, không
-  # phải vấn đề cutoff. Còn cần validate ở tầng generation thật (Citation
-  # Accuracy có tăng tương xứng không, hay model bị phân tâm khi có nhiều
-  # chunk hơn) — xem CHECKLIST Phase 8.
-  top_k_after: 10
+  # top_k_after: THỬ 5->10 (2026-07-12), ĐÃ REVERT VỀ 5 sau khi validate
+  # thật ở tầng generation. Retrieval-only cho thấy recall@k tăng đơn
+  # điệu ở mọi category khi tăng limit (ambiguous +10.6 điểm %, multi_hop
+  # +3.3, factoid +2.1 — xem docs/system/experiments/
+  # results_context_limit_ablation.md) — nhưng đo THẬT qua generation
+  # (multi_hop, n=30, cùng prompt, chạy sạch qua Gemini không dính Ollama
+  # fallback) cho kết quả NGƯỢC: Citation Accuracy GIẢM 0.700->0.650 khi
+  # limit=10. Kết luận: nhiều chunk hơn giúp chunk đúng "có mặt" nhưng
+  # làm model dễ trích nhầm/trích thừa hơn (nhiều distractor hơn) — với
+  # metric mục tiêu là Citation Accuracy (không phải Recall), tăng limit
+  # là NƯỚC ĐI SAI dù retrieval-only nhìn có vẻ tốt hơn. Bài học: không
+  # suy ra chất lượng generation chỉ từ số liệu retrieval-only, luôn phải
+  # đo thêm 1 bước qua model thật trước khi đổi production config.
+  top_k_after: 5
 thresholds:
   min_score: 0.15
   min_context_chunks: 2
