@@ -32,8 +32,7 @@
 
 | Trạng thái | Số câu |
 |---|---:|
-| pending_review | 224 |
-| approved | 76 |
+| approved | 300 |
 
 ## Phân bố theo risk_tags (chủ đề)
 
@@ -85,4 +84,4 @@
 
 - `relevant_chunks` đã gán cho 249/250 câu có căn cứ tài liệu (99.6% nếu > 0) qua `scripts/link_relevant_chunks.py` — phần còn lại (nếu có) là lexical-miss, xem `data/test_sets/relevant_chunks_report.md`.
 - Học phí cụ thể theo ngành/năm và số QĐ học bổng D13 vẫn là data gap thật (chưa có nguồn sạch) — xem `golden_set_review.md` mục việc còn lại.
-- Theo `review_status`: 224 câu vẫn `pending_review` — chưa qua domain-expert hay AI self-review có phương pháp. Khuyến nghị domain expert spot-check trước khi dùng làm baseline chính thức cho báo cáo khóa luận, đặc biệt các con số tín chỉ/điểm số/phần trăm.
+- Theo `review_status`: 0 câu vẫn `pending_review` — chưa qua domain-expert hay AI self-review có phương pháp. Khuyến nghị domain expert spot-check trước khi dùng làm baseline chính thức cho báo cáo khóa luận, đặc biệt các con số tín chỉ/điểm số/phần trăm.
