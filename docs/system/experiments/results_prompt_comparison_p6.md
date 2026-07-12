@@ -1,10 +1,16 @@
-# Kết quả so sánh: p1_grounded_v1 (active) vs p6_citation_complete_v1 (candidate)
+# Kết quả so sánh: p1_grounded_v1 (trước đây active) vs p6_citation_complete_v1 (giờ active)
 
 > Sinh thủ công từ 3 cặp chạy `scripts/run_evaluation.py --prompt-version ...`
 > lúc 2026-07-12 (~10:00-10:25 UTC), `--no-judge` (chỉ đo retrieval/citation/
 > refusal — không tốn quota judge). `eval_result_id=eval_citation_cmp_20260712_1010`
-> đã ghi cho cả 2 version trong registry. **p6 CHƯA được activate** — chờ
-> quyết định của user (xem CHECKLIST Phase 8 "Chưa tốt").
+> đã ghi cho cả 2 version trong registry.
+>
+> **CẬP NHẬT: p6_citation_complete_v1 ĐÃ ĐƯỢC ACTIVATE (2026-07-12)** — user
+> xác nhận qua AskUserQuestion dựa trên số liệu dưới đây; `p1_grounded_v1`
+> chuyển sang `archived` tự động theo policy 1-active/prompt_id của
+> `PromptRegistry`. Verify thật qua `RagService.answer()`: response trả về
+> `prompt_version=p6_citation_complete_v1`, câu hỏi mẫu (nghỉ học tạm thời)
+> trả lời đúng + citation hợp lệ.
 
 ## Vì sao có candidate này
 
@@ -72,8 +78,8 @@ quy tắc trích dẫn khắt khe hơn). Citation Accuracy vẫn CHƯA đạt ta
 pháp triệt để; retrieval-side fix (vd re-retrieval theo từng hop cho câu
 multi-hop) mới có khả năng đóng nốt phần gap còn lại.
 
-**Khuyến nghị:** activate p6 làm active version — bằng chứng đủ để qua
-được `PromptRegistry.activate()`'s yêu cầu `eval_result_id` (đã set:
-`eval_citation_cmp_20260712_1010`). Quyết định activate cuối cùng để user
-xác nhận (deploy production prompt vượt phạm vi "sửa citation accuracy"
-ban đầu yêu cầu).
+**Đã activate (2026-07-12)** — user xác nhận, `PromptRegistry.activate()`
+chạy thành công (`eval_result_id=eval_citation_cmp_20260712_1010`),
+`p1_grounded_v1` archived. Còn treo: chưa chạy lại full 300 câu với p6 để
+có baseline chính thức mới (khuyến nghị dùng cho báo cáo khóa luận) — số
+liệu hiện tại chỉ dựa trên multi_hop+ambiguous+smoke, không phải full set.
