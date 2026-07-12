@@ -30,20 +30,34 @@ class PromptProvider(Protocol):
 
 
 class RegistryPromptProvider:
-    """Resolves the active version from the PostgreSQL registry once and
-    caches it — a server restart picks up newly-activated prompts, which
-    matches the Phase 6 activation flow (activate -> redeploy/restart)."""
+    """Resolves a version from the PostgreSQL registry once and caches it —
+    a server restart picks up newly-activated prompts, which matches the
+    Phase 6 activation flow (activate -> redeploy/restart).
 
-    def __init__(self, dsn: str, prompt_id: str = "rag_qa_vi") -> None:
+    `prompt_version`, when given, pins a SPECIFIC version (any status —
+    including a `testing` draft, not yet active) instead of resolving the
+    active one. This lets an eval run score a candidate prompt against
+    real traffic-shaped questions BEFORE activation, without touching the
+    registry's activation policy (Phase 8 need: compare candidate vs
+    active on a targeted category subset)."""
+
+    def __init__(
+        self, dsn: str, prompt_id: str = "rag_qa_vi", prompt_version: str | None = None
+    ) -> None:
         from src.promptops.registry import PromptRegistry
 
         self._registry = PromptRegistry(dsn)
         self._prompt_id = prompt_id
+        self._prompt_version = prompt_version
         self._cached: ActivePrompt | None = None
 
     def get_active(self) -> ActivePrompt:
         if self._cached is None:
-            version = self._registry.get_active(self._prompt_id)
+            version = (
+                self._registry.get(self._prompt_id, self._prompt_version)
+                if self._prompt_version
+                else self._registry.get_active(self._prompt_id)
+            )
             self._cached = ActivePrompt(
                 version=version.prompt_version, template=version.template
             )

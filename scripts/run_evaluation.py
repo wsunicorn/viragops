@@ -57,6 +57,11 @@ def main() -> int:
         "--no-judge", action="store_true",
         help="bỏ qua lệnh gọi judge (chỉ tính retrieval/context/refusal, không tốn quota generation cho chất lượng câu trả lời)",
     )
+    parser.add_argument(
+        "--prompt-version", default=None,
+        help="ghim 1 phiên bản prompt cụ thể (kể cả status='testing', chưa activate) thay vì "
+        "dùng active version — dùng để so sánh candidate prompt trên eval engine trước khi activate",
+    )
     args = parser.parse_args()
 
     settings = get_settings()
@@ -73,7 +78,7 @@ def main() -> int:
     service = RagService(
         gateway=LiteLLMGateway(base_url=settings.litellm_base_url, master_key=settings.litellm_master_key),
         qdrant_url=settings.qdrant_url,
-        prompt_provider=RegistryPromptProvider(settings.postgres_dsn),
+        prompt_provider=RegistryPromptProvider(settings.postgres_dsn, prompt_version=args.prompt_version),
     )
 
     judge = None
