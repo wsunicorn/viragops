@@ -4,8 +4,12 @@
 #   hybrid DBSF prefetch-40 thắng: recall@5=0.993, hit=1.000, MRR=0.827,
 #   nDCG@5=0.869, p95=17ms. (RRF: 0.979; sparse-only: 0.944; dense-only: 0.908.)
 retrieval_config_id: hybrid_dbsf_v2
-data_version: data_20260711
-index_version: idx_20260711_geminiembedding001
+data_version: data_20260712
+index_version: idx_20260712_geminiembedding001
+# 2026-07-12: re-ingest thêm doc_camnang_dangky_hocphan (D14) khi mở rộng
+# golden set 76->300 câu. Cùng 9 doc cũ + 1 doc mới (222 chunk structure_aware,
+# +2 so với 220 trước đó) — cấu hình fusion/threshold GIỮ NGUYÊN vì chỉ thêm
+# nội dung, chưa re-run experiment 8-config; xem CHECKLIST Phase 4 "Chưa tốt".
 query_normalization: true
 retrieval:
   type: hybrid              # dense | sparse | hybrid

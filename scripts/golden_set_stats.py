@@ -91,33 +91,44 @@ def main() -> int:
         lines.append(f"| {tag} | {count} |")
 
     lines += ["", "## So với mục tiêu full set (300 câu, 5 nhóm)", "", "| Nhóm | Hiện có | Mục tiêu |", "|---|---:|---:|"]
-    counted_answer = by_category.get("factoid", 0) + by_category.get("procedural", 0)
-    counted_answer += sum(
-        1 for i in items if i["category"] == "multi_hop" and not i["requires_refusal"]
+    # "Có đáp án" = single-hop factoid/procedural KHÔNG refusal — multi_hop và
+    # data_gap (cũng gắn category="factoid") đều là 2 nhóm mục tiêu RIÊNG,
+    # không được cộng/gộp vào đây (bug cũ: cộng nhầm cả multi_hop lẫn
+    # data_gap-factoid, tổng sai >200 dù đã khớp đúng cơ cấu thiết kế).
+    non_refusal_factoid = sum(
+        1 for i in items if i["category"] == "factoid" and not i["requires_refusal"]
     )
+    counted_answer = non_refusal_factoid + by_category.get("procedural", 0)
     lines.append(
         f"| Có đáp án | {counted_answer} | {TARGET_GROUPS['có đáp án (factoid/procedural/multi_hop, không refusal)']} |"
     )
-    lines.append(f"| Không có đáp án (refusal domain thật) | {true_out_of_scope} | {TARGET_GROUPS['không có đáp án (refusal thật sự, không tính data_gap)']} |")
-    lines.append(f"| Adversarial | {by_category.get('adversarial', 0)} | {TARGET_GROUPS['adversarial']} |")
+    lines.append(f"| Không có đáp án (data gap, refusal trong domain) | {data_gap} | {TARGET_GROUPS['không có đáp án (refusal thật sự, không tính data_gap)']} |")
+    # golden_set_design.md gộp "ngoài domain" vào chung nhóm adversarial (20
+    # câu) — category `out_of_scope` là tập con của bucket này, không phải
+    # nhóm mục tiêu thứ 6 riêng.
+    adversarial_bucket = by_category.get("adversarial", 0) + by_category.get("out_of_scope", 0)
+    lines.append(
+        f"| Adversarial (gồm out_of_scope: {by_category.get('out_of_scope', 0)}) | "
+        f"{adversarial_bucket} | {TARGET_GROUPS['adversarial']} |"
+    )
     lines.append(f"| Multi-hop | {by_category.get('multi_hop', 0)} | {TARGET_GROUPS['multi_hop']} |")
     lines.append(f"| Ambiguous | {by_category.get('ambiguous', 0)} | {TARGET_GROUPS['ambiguous']} |")
 
+    n_linked = sum(1 for i in items if i.get("relevant_chunks"))
+    n_citable = sum(1 for i in items if i.get("relevant_documents"))
     lines += [
         "",
-        "## Việc còn lại để đạt full set 300 câu",
+        "## Việc còn lại",
         "",
-        "- Mở rộng câu hỏi cho category vẫn còn thiếu nguồn sạch: `hoc_phi` theo ngành/năm cụ thể "
-        "(chưa có bảng học phí chi tiết), thang điểm rèn luyện đầy đủ (Xuất sắc/Tốt/Khá/TB/Yếu/Kém theo "
-        "khoảng điểm — chưa tìm thấy trong nguồn hiện có). Xem `golden_set_review.md` mục việc còn lại.",
-        "- Batch hiện tại đã approve qua AI self-review (theo yêu cầu trực tiếp của user, xem "
-        "`golden_set_review.md` mục audit trail) — không phải domain-expert review đầy đủ. Khuyến nghị "
-        "domain expert spot-check trước khi dùng làm baseline chính thức cho báo cáo khóa luận, đặc biệt "
-        "các con số tín chỉ/điểm số/phần trăm.",
-        "- Sau khi có chunking thật (Phase 3), gắn `relevant_chunks` cụ thể thay vì để trống.",
-        "- Bổ sung thêm câu multi-hop cần tổng hợp từ ≥2 văn bản khác nhau (đã có 1 câu mẫu qua 2 văn bản "
-        "thật — dùng helper `qm()` trong seed script — phần lớn còn lại vẫn gộp nhiều khoản trong cùng "
-        "một văn bản).",
+        f"- `relevant_chunks` đã gán cho {n_linked}/{n_citable} câu có căn cứ tài liệu "
+        f"({n_linked / n_citable:.1%} nếu > 0) qua `scripts/link_relevant_chunks.py` — phần còn lại "
+        "(nếu có) là lexical-miss, xem `data/test_sets/relevant_chunks_report.md`.",
+        "- Học phí cụ thể theo ngành/năm và số QĐ học bổng D13 vẫn là data gap thật (chưa có nguồn sạch) "
+        "— xem `golden_set_review.md` mục việc còn lại.",
+        f"- Theo `review_status`: {by_review_status.get('pending_review', 0)} câu vẫn `pending_review` — "
+        "chưa qua domain-expert hay AI self-review có phương pháp. Khuyến nghị domain expert spot-check "
+        "trước khi dùng làm baseline chính thức cho báo cáo khóa luận, đặc biệt các con số tín "
+        "chỉ/điểm số/phần trăm.",
     ]
 
     STATS_OUT_PATH.write_text("\n".join(lines), encoding="utf-8")

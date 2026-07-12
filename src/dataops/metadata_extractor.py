@@ -7,14 +7,17 @@ indexed, or citation-accuracy eval in Phase 5+ is meaningless by
 construction. `processed_manifest.json` supplies char_count/sha256 for
 freshness checks.
 
-Only these 9 curated documents are ingested by default (see
+Only these 10 curated documents are ingested by default (see
 docs/system/experiments/golden_set_review.md and data_sources_iuh.md):
-several other extracted files (D2, D7, D9-index, D10, D11 shell pages) are
-mostly pdt.iuh.edu.vn/stsv.iuh.edu.vn SPA app-shell noise with almost no
-real regulation text (verified by reading them directly) — indexing them
-would pollute retrieval with site-chrome chunks instead of adding real
-coverage, so they are intentionally excluded rather than padded in to hit
-a document count.
+several other extracted files (D2, D7, D11, D12) are mostly
+pdt.iuh.edu.vn/stsv.iuh.edu.vn SPA app-shell noise with almost no real
+regulation text (verified by reading them directly) — indexing them would
+pollute retrieval with site-chrome chunks instead of adding real coverage,
+so they are intentionally excluded rather than padded in to hit a document
+count. The 10th document (doc_camnang_dangky_hocphan / D14) was added in
+the golden-set-expansion pass (2026-07-12): the original D10 extract was
+also SPA noise, so real content was re-fetched directly from
+camnang.iuh.edu.vn (S1, canonical) and saved as a new snapshot file.
 """
 
 from __future__ import annotations
@@ -44,6 +47,7 @@ _EFFECTIVE_DATE: dict[str, str | None] = {
     "doc_hd05_mien_giam_hp": "2025-09-18",
     "doc_sotay_2024": None,
     "doc_faet_hoc_bong_2024": None,
+    "doc_camnang_dangky_hocphan": None,
 }
 
 _SOURCE_URI: dict[str, str] = {
@@ -56,6 +60,7 @@ _SOURCE_URI: dict[str, str] = {
     "doc_hd05_mien_giam_hp": "https://ctsv.iuh.edu.vn/",
     "doc_sotay_2024": "https://tqa.iuh.edu.vn/thong-bao/so-tay-sinh-vien-cua-iuh-nam-2024/",
     "doc_faet_hoc_bong_2024": "https://faet.iuh.edu.vn/news.html@detail@271@585@",
+    "doc_camnang_dangky_hocphan": "https://camnang.iuh.edu.vn/huong-dan-dang-ky-hoc-phan.php",
 }
 
 

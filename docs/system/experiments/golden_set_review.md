@@ -2,6 +2,21 @@
 
 ## Trạng thái
 
+**Batch 4 (2026-07-12): mở rộng 76 → 300 câu, đúng cơ cấu golden_set_design.md (200 có đáp án / 30 refusal / 20 adversarial / 30 multi-hop / 20 ambiguous). 224 câu mới (`q_077`-`q_300`) ở `review_status = pending_review`** (76 câu cũ giữ nguyên `approved` từ trước, không bị seed script ghi đè — xem `_DOWNSTREAM_FIELDS`).
+
+### Tóm tắt batch 4
+
+- **Nguồn mở rộng:** đào sâu thêm 9 văn bản đã index (còn rất nhiều Điều/Khoản chưa dùng ở batch 1-3, đặc biệt QĐ 610 — quy chế 32 Điều nhưng batch 3 mới dùng ~7 Điều) + 1 văn bản mới (`doc_camnang_dangky_hocphan`, D14).
+- **D2/D7/D11/D12 điều tra lại và xác nhận KHÔNG dùng được:** D7/D11/D12 chỉ chứa khung điều hướng SPA (không có nội dung — cùng vấn đề pdt.iuh.edu.vn đã ghi ở phát hiện #2 dưới); D2 (`d2_0_quy-che-hoc-vu.txt`) giống hệt byte-by-byte với `d1_1` (một bản scrape khác của D1, KHÔNG phải d1_0 đang index) — đánh số Điều khác hẳn QĐ1482 hiện hành, không có số quyết định trong phần trích xuất được. **Đã verify bằng cách fetch trực tiếp `camnang.iuh.edu.vn` (2026-07-12)**: nội dung sống hiện tại vẫn trích dẫn "Quyết định số 1482/QĐ-ĐHCN ngày 15/11/2021" với cách đánh số Điều khớp 100% với `d1_0` đang index — xác nhận **QĐ1482 vẫn là quy chế hiện hành, golden set batch 1-3 không bị lỗi thời**; d1_1/d2_0 là bản không xác minh được (có thể trang cũ/dự thảo), không dùng làm nguồn mới.
+- **D10 dùng được nhờ fetch trực tiếp:** bản gốc `d10_0_...txt` trong `src_20260710` cũng chỉ là khung điều hướng SPA (giống D7/D11/D12); nội dung thật được fetch trực tiếp từ `camnang.iuh.edu.vn/huong-dan-dang-ky-hoc-phan.php` (S1, ưu tiên cao nhất) và lưu thành `d14_0_huong-dan-dang-ky-hoc-phan-camnang.txt` — đăng ký document_id mới `doc_camnang_dangky_hocphan`.
+- **Pipeline re-run thật:** `scripts/ingest_data.py --recreate-collection` chạy lại full 4-strategy chunking + embed + index cho cả 10 document (structure_aware: 220→222 chunks), tạo `data_version=data_20260712`, `index_version=idx_20260712_geminiembedding001`; `config/retrieval.yaml` đã cập nhật theo. Verify thật: embedding key 1 quota-limited ngay từ batch đầu (đã dùng nhiều trong ngày), tự động fallback key 2, không lỗi.
+- **`scripts/link_relevant_chunks.py` re-run cho cả 300 câu: 249/250 câu có citation được gán chunk thật (99.6%)** — 2 câu miss (`q_156`, `q_229`) do lexical token-overlap dưới ngưỡng 0.45 với đoạn HD05 tương ứng (câu hỏi ambiguous/multi-hop diễn giải, không trích nguyên văn) — chấp nhận được, đã thử fix 1 lần (đổi format section) nhưng vẫn miss, không ép thêm để tránh gán sai chunk.
+- **Đã giải quyết mục tồn "thang điểm rèn luyện đầy đủ"** (mục "Việc còn lại" cũ) — tìm thấy bảng phân loại Xuất sắc/Tốt/Khá/TB/Yếu/Kém trong Sổ tay 2024 trang 11 (`Trích Điều 5`), dùng cho q_115-117, q_133, q_183, q_203.
+- **Chưa giải quyết:** số QĐ học bổng D13 (phát hiện #7, vẫn treo); học phí cụ thể theo ngành/năm (vẫn là data_gap có chủ đích, dùng cho nhiều câu refusal mới q_136/q_235/q_263).
+- 224 câu mới **chưa qua domain-expert hay AI self-review** như batch 3 — khuyến nghị chạy `scripts/approve_golden_set.py` hoặc domain-expert spot-check trước khi dùng làm baseline chính thức cho báo cáo.
+
+---
+
 **Batch 3 (2026-07-11): 76 câu, `review_status = approved` cho toàn bộ — theo yêu cầu trực tiếp của user.**
 
 ### Audit trail approval
@@ -35,6 +50,7 @@ Toàn bộ `ground_truth` trong batch này được copy/diễn giải trực ti
 | `doc_hd05_mien_giam_hp` | Hướng dẫn miễn, giảm học phí và hỗ trợ chi phí học tập 2025-2026 | HD 05/HD-ĐHCN, 18/09/2025 | `d8_hu...txt` (OCR Gemini, PDF scan 5 trang) | https://ctsv.iuh.edu.vn/... (xem D8 trong `data_sources_iuh.yaml`) |
 | `doc_sotay_2024` | Sổ tay Sinh viên IUH 2024 | không ghi số hiệu riêng (tổng hợp trích từ QĐ 2008/2023, QĐ 589/2021) | `d9_so-tay...txt` (OCR Gemini, PDF scan 82 trang, 6 batch) | https://tqa.iuh.edu.vn/thong-bao/so-tay-sinh-vien-cua-iuh-nam-2024/ |
 | `doc_faet_hoc_bong_2024` | Quy định về việc cấp xét học bổng (áp dụng từ khóa 2024) | không thấy số QĐ trong bản trích (mẫu để trống "...../QĐ-ĐHCN ngày .... năm 2023") | `d13_0_...txt` (HTML server-rendered, không OCR) | https://faet.iuh.edu.vn/news.html@detail@271@585@... (mirror; bản gốc pdt.iuh.edu.vn/quy-che-xet-hoc-bong/ là SPA không crawl được) |
+| `doc_camnang_dangky_hocphan` | Hướng dẫn đăng ký học phần | không có số quyết định riêng (bài hướng dẫn, không phải quy chế) | `d14_0_huong-dan-dang-ky-hoc-phan-camnang.txt` (fetch trực tiếp 2026-07-12, HTML camnang, không OCR) | https://camnang.iuh.edu.vn/huong-dan-dang-ky-hoc-phan.php |
 
 **Số hiệu quyết định mới phát hiện trong Sổ tay SV 2024** (chưa có trong bảng D1-D13 gốc, ghi nhận để tra cứu sau):
 - **QĐ 2008/QĐ-ĐHCN, 24/08/2023** — Quy chế Công tác sinh viên (khen thưởng, kỷ luật, nhiệm vụ/quyền SV).
@@ -53,9 +69,12 @@ Toàn bộ `ground_truth` trong batch này được copy/diễn giải trực ti
 
 ## Việc còn lại (xem thêm `golden_set_stats.md`)
 
-- [x] ~~Domain expert review từng câu~~ → **Đã approve qua AI self-review theo yêu cầu user (2026-07-11)**, xem audit trail đầu file. Vẫn khuyến nghị domain expert spot-check trước khi dùng chính thức.
+- [x] ~~Domain expert review từng câu~~ → **Đã approve qua AI self-review theo yêu cầu user (2026-07-11)** cho 76 câu batch 1-3, xem audit trail đầu file. 224 câu batch 4 (2026-07-12) vẫn `pending_review`.
 - [x] Xác nhận phát hiện #1 (chất lượng cao vs tăng cường tiếng Anh) — đã giải quyết.
+- [x] Thang điểm rèn luyện đầy đủ (Xuất sắc/Tốt/Khá/TB/Yếu/Kém) — tìm thấy trong Sổ tay 2024, dùng cho q_115-117 (batch 4).
+- [x] Mở rộng lên 200 câu có đáp án / 30 refusal / 20 adversarial / 30 multi-hop / 20 ambiguous theo đúng cơ cấu 300 câu — **hoàn tất 2026-07-12, khớp chính xác cơ cấu thiết kế**.
+- [x] Sau Phase 3 (chunking), thay `relevant_chunks: []` bằng chunk_id thật — 249/300 câu có citation đã gán (99.6% trong nhóm có căn cứ), 2 câu miss do lexical threshold.
 - [ ] Xác nhận số QĐ thật cho quy định học bổng (phát hiện #7) — vẫn treo, số hiệu bị thiếu ngay trên nguồn gốc.
-- [ ] Bổ sung câu cho: học phí cụ thể theo ngành/năm (vẫn thiếu), thang điểm rèn luyện đầy đủ (Xuất sắc/Tốt/Khá/TB/Yếu/Kém theo khoảng điểm — chưa tìm thấy trong D9).
-- [ ] Mở rộng lên 200 câu có đáp án / 30 refusal / 20 adversarial / 30 multi-hop / 20 ambiguous theo đúng cơ cấu 300 câu.
-- [ ] Sau Phase 3 (chunking), thay `relevant_chunks: []` bằng chunk_id thật.
+- [ ] 224 câu batch 4 cần domain-expert hoặc AI self-review có phương pháp (như batch 3) trước khi dùng làm baseline chính thức cho báo cáo khóa luận.
+- [ ] q_156, q_229 (HD05, lexical miss) — domain expert nên gán relevant_chunks thủ công nếu muốn coverage 100%.
+- [ ] Học phí cụ thể theo ngành/năm vẫn là data_gap có chủ đích (chưa có nguồn học phí chính thức theo ngành).

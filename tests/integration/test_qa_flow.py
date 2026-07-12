@@ -88,6 +88,6 @@ def test_trace_recorded_with_versions(service):
     assert trace is not None
     assert trace["retrieval_config_id"] == "hybrid_dbsf_v2"
     assert trace["prompt_version"] == "p1_grounded_v1"
-    assert trace["data_version"] == "data_20260711"
+    assert trace["data_version"] == "data_20260712"
     assert trace["retrieved"], "trace phải ghi danh sách chunk đã retrieve"
     assert "retrieval_ms" in trace

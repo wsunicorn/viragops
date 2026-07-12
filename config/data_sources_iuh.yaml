@@ -127,3 +127,16 @@ documents:
     topics: [hoc_bong]
     urls:
       - "https://faet.iuh.edu.vn/news.html@detail@271@585@Quy-dinh-ve-viec-cap-xet-hoc-bong-(Ap-dung-tu-khoa-2024)-"
+
+  # Thêm 2026-07-12 (mở rộng golden set 76->300): bản D10 gốc trong
+  # src_20260710 chỉ là khung điều hướng SPA (giống D7/D11/D12, xác nhận lại
+  # cùng ngày — pdt.iuh.edu.vn giờ trả 403 cho request tĩnh, không phải chỉ
+  # app-shell). Nội dung thật fetch trực tiếp từ camnang.iuh.edu.vn (không bị
+  # chặn) và lưu thành d14, KHÔNG ghi đè d10.
+  - id: D14
+    title: "Hướng dẫn đăng ký học phần (bản camnang, thay thế D10 không dùng được)"
+    unit: camnang
+    canonical: true
+    topics: [dang_ky_mon]
+    urls:
+      - https://camnang.iuh.edu.vn/huong-dan-dang-ky-hoc-phan.php
