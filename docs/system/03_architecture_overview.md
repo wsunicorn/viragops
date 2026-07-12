@@ -85,7 +85,7 @@ Mọi thay đổi phải đi qua:
 Deployment local/full-scope gồm:
 
 - `api`: FastAPI runtime;
-- `frontend`: Streamlit/Gradio demo;
+- `frontend`: Next.js showcase/demo web app (đổi từ Streamlit/Gradio 2026-07-12 — xem `modules/10_frontend_showcase.md`), gọi thẳng `api` qua `/qa/query`, không truy cập trực tiếp storage nào khác;
 - `qdrant`: vector database;
 - `postgres`: metadata database;
 - `valkey`: cache/queue;

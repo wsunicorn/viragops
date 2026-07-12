@@ -10,9 +10,20 @@ Run local:  uvicorn src.api.main:app --reload --port 8000
 import logging
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.routes import health, prompts, qa
 from src.common.settings import APP_VERSION, get_settings
+
+# Phase 10 (frontend showcase, thêm sớm 2026-07-12): Next.js chạy khác
+# origin (localhost:3000) với API (localhost:8000) — browser chặn fetch
+# cross-origin nếu thiếu CORS. Danh sách cố định cho dev + Vercel preview
+# domain mẫu; KHÔNG dùng "*" vì QA endpoint không phải public/anonymous
+# read-only mãi mãi (Phase 9 sẽ thêm auth/rate-limit).
+_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
 
 
 def create_app() -> FastAPI:
@@ -27,6 +38,13 @@ def create_app() -> FastAPI:
             "observability, optimization and feedback loop."
         ),
         version=APP_VERSION,
+    )
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=_ALLOWED_ORIGINS,
+        allow_credentials=True,
+        allow_methods=["GET", "POST"],
+        allow_headers=["*"],
     )
     app.include_router(health.router)
     app.include_router(qa.router)

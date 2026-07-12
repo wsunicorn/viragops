@@ -1547,7 +1547,7 @@ Golden set nên được xem là một đóng góp chính của khóa luận, kh
 | **Database** | PostgreSQL + ClickHouse | PostgreSQL cho metadata/prompt/config; ClickHouse cho trace/observability throughput cao |
 | **Workflow Orchestration** | Prefect hoặc Dagster | Lập lịch ingest, reindex, eval nightly, feedback improvement loop |
 | **Security/Guardrails** | OWASP LLM Top 10 checklist, PII detector, prompt injection tests, allowlist tools | Phù hợp rủi ro RAG: prompt injection, data leakage, insecure output, excessive agency |
-| **Frontend** | Streamlit hoặc Gradio + FastAPI Swagger | Nhanh, demo rõ, đủ để trình bày dashboard và QA workflow |
+| **Frontend** | Next.js (App Router) + Tailwind CSS v4 + Motion + GSAP/ScrollTrigger + Lenis + shadcn/ui, gọi FastAPI qua `/qa/query` | Đổi từ Streamlit/Gradio (2026-07-12, theo yêu cầu trực tiếp user) — cần showcase animation cuộn trang, giao diện đẹp cho bảo vệ khóa luận, không chỉ form input/output; xem `docs/system/modules/10_frontend_showcase.md` |
 
 ### 5.2 Project Structure
 
@@ -1657,14 +1657,13 @@ llmops-rag-platform/
 │   ├── run_experiment.py
 │   └── ingest_data.py
 │
-├── frontend/                   # Streamlit/Gradio UI
-│   ├── app.py
-│   ├── pages/
-│   │   ├── chat.py
-│   │   ├── dashboard.py
-│   │   ├── experiments.py
-│   │   └── admin.py
-│   └── components/
+├── frontend/                   # Next.js showcase/QA-demo/dashboard web app
+│   ├── app/
+│   │   ├── page.tsx             # landing/showcase (kiến trúc, 8 phase, số liệu thật)
+│   │   ├── demo/page.tsx        # QA demo thật, gọi /qa/query
+│   │   └── dashboard/page.tsx   # trực quan hoá kết quả thực nghiệm (Phase 4/6/8)
+│   ├── components/
+│   └── lib/                     # API client gọi FastAPI backend
 │
 ├── tests/
 │   ├── unit/
@@ -1805,9 +1804,11 @@ services:
 
   frontend:
     build:
-      context: ./frontend
+      context: ./frontend        # Next.js — xem docs/system/modules/10_frontend_showcase.md
     ports:
-      - "8501:8501"
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
     depends_on:
       - api
 

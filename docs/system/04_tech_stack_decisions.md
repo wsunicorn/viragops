@@ -29,7 +29,7 @@
 | Cache | Redis/Valkey + redis-vl | Semantic cache, queue nhẹ |
 | Object store | MinIO/S3 | Lưu raw/processed docs và artifact |
 | Workflow | Prefect hoặc Dagster | Lập lịch ingest/eval/nightly job |
-| Frontend | Streamlit hoặc Gradio | Demo nhanh, đủ cho khóa luận |
+| Frontend | Next.js (App Router) + Tailwind CSS v4 + Motion + GSAP/ScrollTrigger + Lenis + shadcn/ui | Đổi từ Streamlit/Gradio (2026-07-12, theo yêu cầu trực tiếp user) — showcase/demo cần animation cuộn trang mượt, giao diện đẹp trực quan cho bảo vệ khóa luận, không chỉ là form input/output đơn giản. Chi tiết: `docs/system/modules/10_frontend_showcase.md` |
 
 ## Quyết định model/provider
 
@@ -78,7 +78,7 @@ K3s/Kubernetes chỉ làm sau khi hệ thống Compose ổn định và nếu c�
 | Langfuse self-host | Langfuse Cloud | Nếu local Compose quá nặng |
 | LiteLLM | OpenRouter hoặc custom gateway | Nếu cần provider aggregation nhanh |
 | RAGAS | DeepEval/custom only | Nếu metric RAGAS không phù hợp tiếng Việt |
-| Streamlit | Gradio | Nếu muốn chat UI nhanh hơn |
+| Next.js | Vite + React (cùng bộ animation lib) | Nếu chỉ cần demo nội bộ, không cần SEO/SSR, muốn dev loop nhanh hơn |
 
 ## Rủi ro stack
 
