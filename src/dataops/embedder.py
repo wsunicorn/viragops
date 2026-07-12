@@ -27,14 +27,22 @@ class EmbeddingError(RuntimeError):
 
 
 def _clients() -> list[genai.Client]:
-    """Primary key + optional GEMINI_API_KEY_2 fallback.
+    """Primary key + optional GEMINI_API_KEY_2/_3 fallback.
 
     The free-tier DAILY quota (1000 request-items/project, measured
     2026-07-11 — see CHECKLIST Phase 4 "Chưa tốt") exhausts mid-workload;
-    a second key from a different Google project has its own budget, so
-    on 429 the next key is tried before backing off.
+    extra keys from different Google projects each have their own budget,
+    so on 429 the next key is tried before backing off. GEMINI_API_KEY_3
+    added 2026-07-12 when re-running Phase 4 on the 300-question golden
+    set exhausted both existing keys mid-run (chunking_ablation embeds
+    ~1339 chunks, well past a single key's daily budget).
     """
-    keys = [os.environ.get("GEMINI_API_KEY", ""), os.environ.get("GEMINI_API_KEY_2", "")]
+    keys = [
+        os.environ.get("GEMINI_API_KEY", ""),
+        os.environ.get("GEMINI_API_KEY_2", ""),
+        os.environ.get("GEMINI_API_KEY_3", ""),
+        os.environ.get("GEMINI_API_KEY_4", ""),
+    ]
     clients = [genai.Client(api_key=k) for k in keys if k]
     if not clients:
         raise EmbeddingError("GEMINI_API_KEY not set (check .env is loaded into environment)")

@@ -1,15 +1,20 @@
 # Retrieval config — schema chuẩn: docs/system/contracts/config_schemas.md
-# CHỐT BẰNG SỐ LIỆU THẬT (Phase 4, 2026-07-11) — experiment 8 config trên 71
-# câu golden set, xem docs/system/experiments/results_retrieval_reranking.md:
-#   hybrid DBSF prefetch-40 thắng: recall@5=0.993, hit=1.000, MRR=0.827,
-#   nDCG@5=0.869, p95=17ms. (RRF: 0.979; sparse-only: 0.944; dense-only: 0.908.)
+# CHỐT BẰNG SỐ LIỆU THẬT (Phase 4 gốc, 2026-07-11, 71 câu) và TÁI XÁC NHẬN
+# (2026-07-12, 249/300 câu sau khi mở rộng golden set) — xem
+# docs/system/experiments/results_retrieval_reranking.md:
+#   hybrid DBSF prefetch-40 vẫn thắng cả 2 lần chạy: recall@5=0.993->0.932,
+#   hit=1.000->0.944, MRR=0.827->0.791, nDCG@5=0.869->0.815, p95=17->19ms.
+#   Số liệu giảm khi golden set lớn hơn/đa dạng hơn (kỳ vọng — không phải
+#   dấu hiệu retrieval kém đi) nhưng THỨ HẠNG config không đổi: DBSF > RRF
+#   (0.906) > sparse (0.865) > dense (0.882 — sparse/dense đổi chỗ nhẹ so
+#   với lần đầu, chênh lệch nhỏ trong margin nhiễu).
 retrieval_config_id: hybrid_dbsf_v2
 data_version: data_20260712
 index_version: idx_20260712_geminiembedding001
 # 2026-07-12: re-ingest thêm doc_camnang_dangky_hocphan (D14) khi mở rộng
-# golden set 76->300 câu. Cùng 9 doc cũ + 1 doc mới (222 chunk structure_aware,
-# +2 so với 220 trước đó) — cấu hình fusion/threshold GIỮ NGUYÊN vì chỉ thêm
-# nội dung, chưa re-run experiment 8-config; xem CHECKLIST Phase 4 "Chưa tốt".
+# golden set 76->300 câu (222 chunk structure_aware, +2 so với 220 trước
+# đó). Đã re-run đủ 8-config experiment trên bộ 300 câu (249 câu có căn cứ)
+# — kết luận GIỮ NGUYÊN, không cần đổi fusion/threshold.
 query_normalization: true
 retrieval:
   type: hybrid              # dense | sparse | hybrid
@@ -23,10 +28,18 @@ retrieval:
     method: dbsf            # rrf | dbsf — DBSF thắng RRF trên mọi metric (0.993 vs 0.979)
 reranker:
   # TẮT theo số liệu thật: (1) bge-reranker-v2-m3 không tải được (ISP chặn
-  # CDN huggingface.co — cùng lỗi fastembed Phase 3); (2) phương án thay thế
-  # Gemini listwise rerank LÀM GIẢM chất lượng hybrid (recall 0.979->0.958,
-  # MRR 0.819->0.718) và cộng ~1s latency/câu. Rerank chỉ giúp dense-only
-  # (0.908->0.923). Bật lại + đổi model nếu sau này tải được cross-encoder.
+  # CDN huggingface.co — cùng lỗi fastembed Phase 3); (2) Gemini listwise
+  # rerank vẫn KHÔNG thắng được hybrid DBSF (best config không rerank).
+  # LƯU Ý (2026-07-12, 249 câu — khác kết luận lần đầu 71 câu): trên bộ
+  # câu lớn hơn, rerank thực ra CÓ giúp cả dense (0.882->0.894) lẫn
+  # hybrid_rrf (0.906->0.928) — không còn "luôn làm giảm chất lượng" như
+  # kết luận cũ, nhưng vẫn KHÔNG vượt được hybrid_dbsf không-rerank
+  # (0.932) và cộng latency cực lớn khi bị rate-limit thật (p95 đo được
+  # 61s/câu do retry — xem results_retrieval_reranking.md). Kết luận
+  # "không cần bật" vẫn đúng, nhưng lý do chính xác hơn là "không đáng
+  # đánh đổi latency" chứ không phải "luôn làm giảm chất lượng". Bật lại
+  # + đổi model nếu sau này tải được cross-encoder (nhanh hơn, không phụ
+  # thuộc rate-limit API).
   enabled: false
   model: bge-reranker-v2-m3   # giữ làm tài liệu — chưa dùng được
   top_k_before: 20

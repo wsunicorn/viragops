@@ -112,6 +112,34 @@ Xây lớp thực nghiệm retrieval để so sánh chunking, retrieval strategy
   granularity), trong đó fixed/recursive không có section → 100% lexical
   matching — so sánh giữa strategy vì vậy có độ nhiễu nhất định.
 
+## Kết quả thật (tái xác nhận trên golden set 300 câu, 2026-07-12)
+
+Sau khi mở rộng golden set 76→300 câu (xem `golden_set_review.md` mục
+"Batch 4"), chạy lại nguyên vẹn cả 2 experiment trên `data_20260712` /
+249 câu có căn cứ (thay vì 71):
+
+- **Kết luận KHÔNG đổi:** `hybrid_dbsf_pre40` vẫn thắng (recall@5=0.932,
+  giảm từ 0.993 — kỳ vọng khi bộ câu lớn/đa dạng hơn, không phải retrieval
+  kém đi), và `structure_aware` vẫn thắng chunking ablation (recall@5=
+  0.906). Thứ hạng tương đối giữa các config giữ nguyên: DBSF > RRF >
+  {sparse, dense} cho experiment 2; structure_aware > {fixed, parent_child}
+  > recursive cho experiment 1.
+- **Phát hiện mới, khác kết luận cũ:** trên 249 câu, Gemini rerank thực ra
+  **giúp** cả dense (0.882→0.894) và hybrid_rrf (0.906→0.928) — kết luận
+  cũ "rerank luôn làm giảm chất lượng hybrid" chỉ đúng khi so với DBSF,
+  không đúng khi so với RRF thuần. Rerank vẫn không vượt được hybrid_dbsf
+  không-rerank, và p95 latency đo được **61 giây/câu** khi chạy 250 câu
+  liên tục và bị Gemini rate-limit thật (retry backoff 10-30s lặp lại) —
+  đây là bằng chứng thực nghiệm mạnh hơn cho việc không bật reranker
+  (không đáng đổi latency), thay vì lý do "chất lượng luôn tệ hơn" như
+  ghi nhận ban đầu trên mẫu nhỏ.
+- **Quota vận hành:** re-run tốn ~1800 embedding item (1339 chunk 3
+  strategy còn thiếu + 250 query), vượt xa 1 key/ngày (1000) — cần thêm 2
+  key nữa (tổng 4) mới chạy xong trong 1 phiên. Xem CHECKLIST Phase 4
+  "Chưa tốt" để biết chi tiết.
+- Không đổi `config/retrieval.yaml` — số liệu mới CHỐT LẠI cùng lựa chọn
+  cũ, không phải đổi hướng.
+
 ## Checklist hoàn tất
 
 - [x] Có retrieval config schema (`config/experiments_retrieval.yaml` + RetrievalConfig dataclass).

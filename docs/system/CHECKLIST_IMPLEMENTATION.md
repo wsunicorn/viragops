@@ -407,14 +407,26 @@ luận config đều bằng số liệu thật chạy trên Qdrant thật, khôn
   semantic, table-aware) — mới chạy 4; semantic + table-aware chưa
   implement, fixed chỉ 1 mức 300 token. Chưa đủ để kết luận tuyệt đối
   "structure_aware là tốt nhất mọi biến thể".
-- ~~Golden set vẫn 76/300~~ → **Golden set đạt 300/300 (2026-07-12)**,
-  nhưng **số liệu Phase 4 (8-config experiment) CHƯA được chạy lại** trên
-  bộ 300 câu / `data_version=data_20260712` mới — mọi kết luận
-  `hybrid_dbsf_v2` vẫn đang dựa trên 71 câu cũ và `data_20260711`. Runner
-  + cache đã sẵn sàng cho việc này (chỉ tốn thêm ~230 query-embed items
-  quota), nhưng chưa chạy trong phiên mở rộng golden set — để lại cho lần
-  làm việc tiếp theo trước khi dùng `hybrid_dbsf_v2` làm số liệu chính
-  thức cho báo cáo với đầy đủ 300 câu.
+- ~~Golden set vẫn 76/300~~ → **Golden set đạt 300/300 (2026-07-12), và cả
+  2 experiment ĐÃ CHẠY LẠI trên bộ 300 câu / `data_20260712`** cùng ngày.
+  Kết luận `hybrid_dbsf_v2` + `structure_aware` **được tái xác nhận, không
+  đổi** (recall@5 giảm 0.993→0.932 và 0.906 cho chunking — kỳ vọng khi
+  golden set lớn/đa dạng hơn, không phải retrieval kém đi; thứ hạng config
+  giữ nguyên). Phát hiện mới đáng chú ý: **kết luận cũ "Gemini rerank luôn
+  làm giảm chất lượng hybrid" KHÔNG còn đúng nguyên vẹn** — trên 249 câu,
+  rerank thực ra giúp cả dense (0.882→0.894) và hybrid_rrf (0.906→0.928),
+  chỉ là vẫn không vượt được hybrid_dbsf không-rerank. Quyết định tắt
+  reranker vẫn đúng nhưng lý do chính xác hơn là "không đáng đổi latency"
+  (p95 đo được **61 giây/câu** do bị rate-limit thật khi chạy 250 câu liên
+  tục — xem `results_retrieval_reranking.md`), không phải "luôn tệ hơn".
+- **Quota Gemini embedding hết SẠCH cả 3 key trong lúc re-run** (structure_
+  aware+fixed+recursive+parent_child = ~1561 chunk + 250 query = ~1800+
+  item, vượt xa 1 key/ngày) — user cấp thêm key 3 và key 4 giữa chừng
+  (`GEMINI_API_KEY_3`, `GEMINI_API_KEY_4` trong `.env`, `embedder.py`
+  `_clients()` giờ hỗ trợ tối đa 4 key). Bài học vận hành được xác nhận
+  lại lần nữa: **eval quy mô 300 câu tốn quota nhiều hơn hẳn** so với 71
+  câu — nên tính trước ngân sách quota theo ngày/key trước khi chạy full
+  suite, hoặc chuyển sang embedding local cho khối lượng lớn.
 
 ---
 
