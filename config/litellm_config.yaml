@@ -5,16 +5,23 @@
 # scripts (docs/system/contracts/config_schemas.md). Runtime giờ gọi qua
 # LiteLLM (src/rag/litellm_gateway.py), không còn gọi thẳng Gemini SDK.
 #
-# Mỗi tier có 3-bậc fallback CÓ THỨ TỰ (router_settings.fallbacks, không
+# Mỗi tier có 4-bậc fallback CÓ THỨ TỰ (router_settings.fallbacks, không
 # phải load-balancing giữa các deployment cùng tên):
 #   1. primary   — Gemini, GEMINI_API_KEY
 #   2. secondary — Gemini model khác, GEMINI_API_KEY_2 (project Google
 #                  khác — né chung quota, xem bài học Phase 4/6)
-#   3. local     — Ollama qwen2.5:7b chạy trên máy host (không phải
+#   3. tertiary  — Gemini, GEMINI_API_KEY_5 (project Google thứ 3 — thêm
+#                  2026-07-12 khi Phase 8 full eval + so sánh prompt p6
+#                  làm cạn SẠCH cả primary lẫn secondary trong 1 ngày; xem
+#                  CHECKLIST Phase 8 "Chưa tốt"). Vẫn ưu tiên Gemini hơn
+#                  Ollama vì Phase 8 đo được citation-grounding của Ollama
+#                  kém hơn hẳn khi thật sự phải dùng tới (refusal_accuracy
+#                  0.457 so với 0.962 trên đường Gemini).
+#   4. local     — Ollama qwen2.5:7b chạy trên máy host (không phải
 #                  qwen3:4b: đo thật cho thấy qwen3:4b "suy nghĩ" nội bộ
 #                  77-90s/câu dù đã set think:false, đôi khi lẫn tiếng
 #                  Anh/sai số liệu — xem CHECKLIST Phase 7 "Chưa tốt").
-#                  Chỉ kích hoạt khi CẢ HAI Gemini key đều lỗi (rate
+#                  Chỉ kích hoạt khi CẢ 3 key Gemini đều lỗi (rate
 #                  limit/outage) — latency cao (~15-20s) chấp nhận được
 #                  cho một fallback hiếm khi chạm tới.
 
@@ -27,6 +34,10 @@ model_list:
     litellm_params:
       model: gemini/gemini-3-flash-preview
       api_key: os.environ/GEMINI_API_KEY_2
+  - model_name: cheap-tertiary
+    litellm_params:
+      model: gemini/gemini-3.1-flash-lite
+      api_key: os.environ/GEMINI_API_KEY_5
   - model_name: cheap-local
     litellm_params:
       model: ollama_chat/qwen2.5:7b
@@ -41,6 +52,10 @@ model_list:
     litellm_params:
       model: gemini/gemini-3-flash-preview
       api_key: os.environ/GEMINI_API_KEY_2
+  - model_name: balanced-tertiary
+    litellm_params:
+      model: gemini/gemini-3.1-flash-lite
+      api_key: os.environ/GEMINI_API_KEY_5
   - model_name: balanced-local
     litellm_params:
       model: ollama_chat/qwen2.5:7b
@@ -55,6 +70,10 @@ model_list:
     litellm_params:
       model: gemini/gemini-3.1-flash-lite
       api_key: os.environ/GEMINI_API_KEY_2
+  - model_name: strong-tertiary
+    litellm_params:
+      model: gemini/gemini-3-flash-preview
+      api_key: os.environ/GEMINI_API_KEY_5
   - model_name: strong-local
     litellm_params:
       model: ollama_chat/qwen2.5:7b
@@ -69,6 +88,10 @@ model_list:
     litellm_params:
       model: gemini/gemini-3.1-flash-lite
       api_key: os.environ/GEMINI_API_KEY_2
+  - model_name: judge-tertiary
+    litellm_params:
+      model: gemini/gemini-3-flash-preview
+      api_key: os.environ/GEMINI_API_KEY_5
   - model_name: judge-local
     litellm_params:
       model: ollama_chat/qwen2.5:7b
@@ -84,13 +107,17 @@ router_settings:
   # cheap-secondary" -> KHÔNG rơi xuống cheap-local. Phải khai từng chặng.
   fallbacks:
     - cheap-primary: [cheap-secondary]
-    - cheap-secondary: [cheap-local]
+    - cheap-secondary: [cheap-tertiary]
+    - cheap-tertiary: [cheap-local]
     - balanced-primary: [balanced-secondary]
-    - balanced-secondary: [balanced-local]
+    - balanced-secondary: [balanced-tertiary]
+    - balanced-tertiary: [balanced-local]
     - strong-primary: [strong-secondary]
-    - strong-secondary: [strong-local]
+    - strong-secondary: [strong-tertiary]
+    - strong-tertiary: [strong-local]
     - judge-primary: [judge-secondary]
-    - judge-secondary: [judge-local]
+    - judge-secondary: [judge-tertiary]
+    - judge-tertiary: [judge-local]
   num_retries: 1
   timeout: 30           # khớp default_timeout_seconds trong model_gateway.yaml
   allowed_fails: 1       # 1 lỗi là chuyển fallback ngay — free tier 429 không tự phục hồi trong giây lát

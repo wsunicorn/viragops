@@ -42,6 +42,7 @@ services:
     environment:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - GEMINI_API_KEY_2=${GEMINI_API_KEY_2}
+      - GEMINI_API_KEY_5=${GEMINI_API_KEY_5}
       - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:?set LITELLM_MASTER_KEY in .env}
     volumes:
       - ./config/litellm_config.yaml:/app/config.yaml:ro

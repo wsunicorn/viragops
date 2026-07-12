@@ -26,7 +26,9 @@ import httpx
 
 from src.rag.gateway_client import GatewayError, GenerationResult
 
-_HOP_BY_SUFFIX = {"-primary": "primary", "-secondary": "secondary", "-local": "local"}
+_HOP_BY_SUFFIX = {
+    "-primary": "primary", "-secondary": "secondary", "-tertiary": "tertiary", "-local": "local",
+}
 
 
 def _classify_hop(model_group: str) -> str:

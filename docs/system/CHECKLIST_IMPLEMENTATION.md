@@ -673,12 +673,20 @@ trên máy này).
 - **`cumulative_cost_usd` reset về 0 mỗi khi restart server** — không
   bền qua nhiều lần chạy; Phase 10 (Langfuse) mới có cost tracking bền
   vững qua thời gian.
-- **Ollama fallback chỉ test với 1 câu hỏi đơn giản** (chưa chạy qua bộ
-  golden set thật) — chưa biết chất lượng câu trả lời Ollama trên các câu
-  hỏi phức tạp/nhiều citation của domain IUH thật.
+- ~~Ollama fallback chỉ test với 1 câu hỏi đơn giản, chưa biết chất lượng
+  trên câu phức tạp~~ → **Đã có câu trả lời thật (Phase 8 full eval,
+  2026-07-12):** khi bị dùng thật trên 35 câu, Ollama fallback có
+  refusal_accuracy chỉ 0.457 (so với 0.962 trên đường Gemini) vì hay trả
+  citation không hợp lệ — xem CHECKLIST Phase 8.
 - **litellm image `main-stable`** không pin version cụ thể — lần build
   lại sau có thể kéo bản khác, rủi ro nhỏ về reproducibility; nên pin tag
   version cụ thể khi ổn định.
+- **Thêm chặng fallback thứ 3 (`tertiary`, `GEMINI_API_KEY_5`) cho cả 4
+  tier (2026-07-12)** — cả primary lẫn secondary cạn quota ngày cùng lúc
+  khi chạy liên tiếp nhiều eval thật trong 1 ngày (Phase 8), 2 key không
+  đủ dự phòng. Cùng bài học Phase 4/6: mỗi key nên ở project Google khác
+  nhau để có ngân sách quota độc lập thật, không chỉ khác tên biến môi
+  trường.
 
 ---
 
@@ -742,16 +750,33 @@ rubric dùng thang rời rạc {0.0, 0.5, 1.0} thay vì điểm liên tục — 
 nhiễu tự-chấm-không-nhất-quán của LLM-judge, đánh đổi lấy độ mịn.
 
 **Còn thiếu, cần quay lại:**
-- **Full eval (298/300 câu, xem `results_evaluation_full.md`) xác nhận
-  Citation Accuracy là gap THẬT, ổn định qua cả 2 lần chạy** — smoke
-  0.838, full 0.785 (tính trên toàn bộ, gồm cả câu bị fallback) / **0.781
-  trên đường primary sạch (263 câu, không nhiễu hạ tầng)** — nhất quán
-  dưới target 0.85 ở cả 2 quy mô, yếu nhất ở multi_hop (0.625) và
-  ambiguous (0.452 — model hay chỉ bám 1 nhánh trả lời mà bỏ citation của
-  các điều kiện khác). Đây là việc thật cần quay lại chỉnh prompt
-  `p1_grounded_v1`/`src/rag/service.py` (có thể cần ép model liệt kê đủ
-  citation cho từng vế câu hỏi multi-hop), KHÔNG phải chỉ ghi nhận rồi để
-  đó.
+- ~~Full eval xác nhận Citation Accuracy là gap thật ở multi_hop
+  (0.625)/ambiguous (0.452)~~ → **Đã điều tra + xử lý một phần
+  (2026-07-12), xem `results_prompt_comparison_p6.md`.** Điều tra sâu (đọc
+  trace thật + đối chiếu retrieval) tìm ra 2 nguyên nhân riêng biệt, không
+  chỉ 1:
+  1. **Lỗi dữ liệu golden set thật** — 6 câu (q_016-q_021) trích dẫn
+     `doc_tqa_phuc_khao` (trang tóm tắt, chỉ khớp lexical yếu) trong khi
+     nội dung y hệt có sẵn ở `doc_qd610_thi_danh_gia` (văn bản gốc, khớp
+     structural chính xác) — model trích ĐÚNG nguồn gốc nhưng bị chấm sai.
+     Đã sửa citation source cho cả 6 câu. **Phát hiện phụ:** q_021's
+     ground_truth SAI thật ("Trưởng bộ môn" thay vì đúng là "GV giảng
+     dạy" theo Điều 26 Khoản 2.b) — hệ thống đã trả lời đúng hơn cả
+     ground_truth cũ, xác nhận qua `data/traces/traces.jsonl`. Đã sửa.
+  2. **Model over-cite/wrong-pick và bỏ sót citation ở câu nhiều vế** —
+     nguyên nhân prompt thật. Đã thêm variant `p6_citation_complete_v1`
+     (registry, status=`testing`, CHƯA activate) với quy tắc citation
+     chặt hơn. So sánh thật (không mock) trên multi_hop (n=30) và
+     ambiguous (n=20): Citation Accuracy +0.028/+0.084, Refusal Accuracy
+     +0.033/+0.100, không hồi quy ở factoid (n=36, mẫu lớn nhất) hay
+     category khác — xem `results_prompt_comparison_p6.md` đầy đủ.
+     **Chưa activate** — cần user xác nhận (deploy prompt mới vượt phạm
+     vi "sửa citation accuracy", auto-mode classifier đã chặn activate
+     tự động, đúng chủ đích).
+  - Citation Accuracy vẫn CHƯA đạt target 0.85 kể cả với p6 — cải thiện
+    thật nhưng chưa triệt để; phần gap còn lại nhiều khả năng cần fix ở
+    tầng retrieval (multi-hop cần re-retrieval theo từng hop, ngoài phạm
+    vi 1 lần sửa prompt), không chỉ prompt.
 - **Refusal Accuracy: kết quả full eval THỰC RA TỐT HƠN smoke đáng kể khi
   đọc đúng cách** — số tổng hợp thô 0.903 (đạt target 0.90) nhưng bị
   nhiễu bởi 35/298 câu cuối run bị fallback (xem mục tiếp theo); tách
