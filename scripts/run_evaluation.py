@@ -92,13 +92,14 @@ def main() -> int:
         "retrieval_config_id": service.retrieval_config_id,
         "prompt_version": service._prompt.version,  # noqa: SLF001 - báo cáo cần version thật, không có getter public
     }
+    eval_k = service.context_limit  # khớp đúng số chunk runtime THẬT đưa cho model
 
     results: list[QuestionResult] = []
     t_start = time.perf_counter()
     for i, item in enumerate(items, start=1):
         print(f"[{i}/{len(items)}] {item['id']} ({item['category']}) ...", end=" ", flush=True)
         try:
-            r = run_question(service, judge, item, chunks_by_doc, chunk_text_by_id, eval_k=5)
+            r = run_question(service, judge, item, chunks_by_doc, chunk_text_by_id, eval_k=eval_k)
         except Exception as exc:  # noqa: BLE001 - 1 câu lỗi không được làm sập cả run
             print(f"ERROR: {exc}")
             continue
@@ -111,7 +112,7 @@ def main() -> int:
     if not results:
         raise SystemExit("No question scored successfully — check stack (qdrant/postgres/litellm).")
 
-    report_mod.write_outputs(args.mode, results, meta)
+    report_mod.write_outputs(args.mode, results, meta, eval_k=eval_k)
     return 0
 
 

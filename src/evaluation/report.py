@@ -166,9 +166,9 @@ def write_csv(mode: str, results: list[QuestionResult], ts: str) -> Path:
 
 
 def write_markdown(
-    mode: str, results: list[QuestionResult], meta: dict[str, Any], ts: str
+    mode: str, results: list[QuestionResult], meta: dict[str, Any], ts: str, eval_k: int = 5
 ) -> Path:
-    overall = aggregate(results)
+    overall = aggregate(results, eval_k=eval_k)
     ret = overall.get("retrieval", {})
 
     lines = [
@@ -260,9 +260,11 @@ def write_markdown(
     return doc_path
 
 
-def write_outputs(mode: str, results: list[QuestionResult], meta: dict[str, Any]) -> None:
+def write_outputs(
+    mode: str, results: list[QuestionResult], meta: dict[str, Any], eval_k: int = 5
+) -> None:
     ts = datetime.now(UTC).strftime("%Y%m%d_%H%M")
     csv_path = write_csv(mode, results, ts)
-    doc_path = write_markdown(mode, results, meta, ts)
+    doc_path = write_markdown(mode, results, meta, ts, eval_k=eval_k)
     print(f"\nCSV -> {csv_path.relative_to(PROJECT_ROOT)}")
     print(f"Report -> {doc_path.relative_to(PROJECT_ROOT)}")

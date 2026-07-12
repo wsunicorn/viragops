@@ -43,7 +43,17 @@ reranker:
   enabled: false
   model: bge-reranker-v2-m3   # giữ làm tài liệu — chưa dùng được
   top_k_before: 20
-  top_k_after: 5
+  # top_k_after: 5->10 (2026-07-12), bằng chứng thật retrieval-only trên
+  # 249 câu: recall@k tăng đơn điệu ở MỌI category khi tăng limit (không
+  # category nào giảm — đúng lý thuyết vì top-10 ⊇ top-5), ambiguous
+  # +10.6 điểm % (0.789->0.895), multi_hop +3.3 (0.856->0.889), factoid
+  # +2.1 (0.963->0.984). Xem docs/system/experiments/
+  # results_context_limit_ablation.md. procedural KHÔNG đổi (0.917 ở mọi
+  # mức) — phần miss còn lại của category này nằm ngoài top-10, không
+  # phải vấn đề cutoff. Còn cần validate ở tầng generation thật (Citation
+  # Accuracy có tăng tương xứng không, hay model bị phân tâm khi có nhiều
+  # chunk hơn) — xem CHECKLIST Phase 8.
+  top_k_after: 10
 thresholds:
   min_score: 0.15
   min_context_chunks: 2

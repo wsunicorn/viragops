@@ -88,11 +88,16 @@ class RagService:
         self._require_citation: bool = pcfg["policy"]["require_citation"]
 
         fusion = rcfg["retrieval"]["fusion"]["method"]
+        # Public (không phải chỉ _ret_cfg.limit nội bộ) vì Phase 8 eval engine
+        # cần biết đúng con số này để tính Recall@k khớp với những gì runtime
+        # THẬT SỰ đưa cho model — hardcode k=5 riêng ở tầng eval sẽ lệch nếu
+        # con số này đổi (đã xảy ra thật: 5->10, xem CHECKLIST Phase 8).
+        self.context_limit: int = rcfg["reranker"]["top_k_after"]
         self._ret_cfg = RetrievalConfig(
             config_id=self.retrieval_config_id,
             mode=f"hybrid_{fusion}" if rcfg["retrieval"]["type"] == "hybrid" else rcfg["retrieval"]["type"],
             top_k_before=rcfg["retrieval"]["dense"]["top_k"],
-            limit=rcfg["reranker"]["top_k_after"],
+            limit=self.context_limit,
         )
 
         self._collection = (
