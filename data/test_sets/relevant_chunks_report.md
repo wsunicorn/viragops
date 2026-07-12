@@ -1,11 +1,11 @@
 # Relevant chunks linking report
 
-> Sinh bởi `scripts/link_relevant_chunks.py` lúc 2026-07-12T08:51:24.241078+00:00.
+> Sinh bởi `scripts/link_relevant_chunks.py` lúc 2026-07-12T09:50:50.653522+00:00.
 > Chunk source: `structure_aware_data_20260712.jsonl` (strategy `structure_aware`, data_20260712).
 
 - Câu không-refusal đã gán relevant_chunks: **249**
-- Citation khớp structural (parse Điều/Khoản + range): **194**
-- Citation khớp lexical (token-overlap với ground_truth, cho tài liệu không có heading Điều): **80** — mapping yếu hơn, reviewer nên ưu tiên spot-check nhóm này
+- Citation khớp structural (parse Điều/Khoản + range): **200**
+- Citation khớp lexical (token-overlap với ground_truth, cho tài liệu không có heading Điều): **74** — mapping yếu hơn, reviewer nên ưu tiên spot-check nhóm này
 - Citation không khớp được: **3** (q_156)
 
 | question | document | citation section | method | #chunks |
@@ -31,12 +31,12 @@
 | q_073 | doc_qd610_thi_danh_gia | Điều 21, Khoản 2.b | structural | 1 |
 | q_074 | doc_qd610_thi_danh_gia | Điều 23, Khoản 3 | structural | 1 |
 | q_075 | doc_qd610_thi_danh_gia | Điều 24, Khoản 3 | structural | 1 |
-| q_016 | doc_tqa_phuc_khao | Điều 26, 27 (QĐ 610/QĐ-ĐHCN) | lexical | 1 |
-| q_017 | doc_tqa_phuc_khao | Điều 26, 27 (QĐ 610/QĐ-ĐHCN) | lexical | 1 |
-| q_018 | doc_tqa_phuc_khao | Điều 26, 27 (QĐ 610/QĐ-ĐHCN) | lexical | 1 |
-| q_019 | doc_tqa_phuc_khao | Điều 26, 27 (QĐ 610/QĐ-ĐHCN) | lexical | 1 |
-| q_020 | doc_tqa_phuc_khao | Điều 26, 27 (QĐ 610/QĐ-ĐHCN) | lexical | 1 |
-| q_021 | doc_tqa_phuc_khao | Điều 26, 27 (QĐ 610/QĐ-ĐHCN) | lexical | 1 |
+| q_016 | doc_qd610_thi_danh_gia | Điều 26, Khoản 1 | structural | 1 |
+| q_017 | doc_qd610_thi_danh_gia | Điều 26, Khoản 2.a | structural | 1 |
+| q_018 | doc_qd610_thi_danh_gia | Điều 26, Khoản 2.c | structural | 1 |
+| q_019 | doc_qd610_thi_danh_gia | Điều 26, Khoản 5 | structural | 1 |
+| q_020 | doc_qd610_thi_danh_gia | Điều 26, 27 | structural | 4 |
+| q_021 | doc_qd610_thi_danh_gia | Điều 26, Khoản 2.b | structural | 1 |
 | q_022 | doc_camnang_dieu_kien_tot_nghiep | Điều kiện xét tốt nghiệp, mục 1.b | lexical | 1 |
 | q_023 | doc_camnang_dieu_kien_tot_nghiep | Điều kiện xét tốt nghiệp, mục 1.e | lexical | 1 |
 | q_024 | doc_camnang_dieu_kien_tot_nghiep | Điều kiện xét tốt nghiệp, mục 1.e | lexical | 1 |
