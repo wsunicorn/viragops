@@ -73,12 +73,47 @@ Xây engine đánh giá RAG 4 tầng: retrieval, context, generation và operati
 
 ## Checklist hoàn tất
 
-- [ ] Golden set loader hoạt động.
-- [ ] Retrieval metrics hoạt động.
-- [ ] Context metrics hoạt động.
-- [ ] Generation metrics hoạt động.
-- [ ] Operations metrics hoạt động.
-- [ ] LLM judge hoạt động.
-- [ ] Eval report xuất được.
-- [ ] Failure cases xuất được.
+- [x] Golden set loader hoạt động — `src/evaluation/golden_set.py`.
+- [x] Retrieval metrics hoạt động — tái dùng `src/retrieval/metrics.py` (Phase 4).
+- [x] Context metrics hoạt động — `src/evaluation/metrics.py` (precision/recall) + judge (relevance).
+- [x] Generation metrics hoạt động — judge (faithfulness/answer relevance/hallucination) + deterministic (citation/refusal accuracy).
+- [x] Operations metrics hoạt động — latency p50/p95, cost, error rate, fallback rate từ trace thật; `cache_hit_rate` báo `n/a` trung thực (semantic cache chưa implement).
+- [x] LLM judge hoạt động — `src/evaluation/judge.py::GeminiJudge`, tier `judge` có sẵn từ Phase 7, cache theo hash.
+- [x] Eval report xuất được — `src/evaluation/report.py`, CSV + Markdown.
+- [x] Failure cases xuất được — mục "Failure cases" trong report.
+
+## Kết quả thật (smoke, 2026-07-12)
+
+Chạy qua `RagService` thật (không mock, LiteLLM proxy + Qdrant thật), 50
+câu stratified theo category thật của golden set 300 câu — số liệu đầy đủ
+ở `docs/system/experiments/results_evaluation_smoke.md`. Full eval (300
+câu) chưa chạy trong phiên này — xem CHECKLIST Phase 8 "Chưa tốt" để biết
+lý do (thời gian, rate limit tier `judge`) và điều kiện chạy khi cần số
+liệu chính thức.
+
+Tóm tắt (50/50 câu chạy thành công, không sập run nào):
+
+- **Đạt target:** Recall@5=0.905 (>=0.85), Context Recall=0.905 (>=0.80),
+  Faithfulness=0.973 (>=0.85), Answer Relevance=0.973 (>=0.80), Context
+  Relevance=0.973 (>=0.80), Hallucination Rate=0.027 (<=0.05), p95
+  latency generation=1397ms (<=6000ms), cost/req=$0.000746 (<=$0.005).
+- **CHƯA đạt target — vấn đề thật, không phải lỗi đo:**
+  - **Refusal Accuracy=0.880** (target >=0.90) — 6/50 câu refusal sai,
+    cả 2 chiều: q_235/q_236/q_264/q_300 lẽ ra phải refuse (data_gap/thiếu
+    căn cứ) nhưng hệ thống vẫn trả lời; q_199 (ambiguous)/q_254
+    (multi-hop) lẽ ra phải trả lời nhưng bị refuse. Cần xem lại ngưỡng
+    refusal pre-check và/hoặc prompt guardrail — đúng như ghi chú "chưa
+    calibrate" trong `src/rag/service.py` Phase 5.
+  - **Citation Accuracy=0.838** (target >=0.85) — sát target, đa số lỗi
+    rơi vào multi_hop (0.417) — model trích đúng 1 trong 2+ citation kỳ
+    vọng nhưng bỏ sót citation còn lại.
+  - **Error rate=0.020** (target <=0.01) — 1/50 câu (q_199) model trả
+    output không parse được JSON -> hệ thống tự động downgrade thành
+    refusal (đúng theo policy `citation.py`), nhưng vẫn tính là lỗi vận
+    hành cần giảm.
+- **Context Precision=0.189 — KHÔNG so trực tiếp với target 0.75 được:**
+  mẫu số cố định = 5 (top_k_after), còn tử số bị chặn trên bởi tổng số
+  chunk liên quan thật/câu hỏi (thường 1-3) — xem ghi chú trong report.
+  Đây là giới hạn cấu trúc của cách đo, không phải retrieval kém; Context
+  Recall/Hit rate mới là số đáng tin ở đây.
 

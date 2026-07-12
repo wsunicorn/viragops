@@ -687,23 +687,23 @@ Chạy đánh giá 4 tầng trên smoke/full set và xuất report.
 
 ### Task
 
-- [ ] Implement golden set loader.
-- [ ] Implement retrieval metrics.
-- [ ] Implement context metrics.
-- [ ] Implement generation metrics.
-- [ ] Implement citation accuracy.
-- [ ] Implement refusal accuracy.
-- [ ] Integrate LLM judge.
-- [ ] Implement eval report.
-- [ ] Export failure cases.
-- [ ] Run smoke eval.
-- [ ] Run full eval.
+- [x] Implement golden set loader — `src/evaluation/golden_set.py`: `select(mode, category)` với 3 mode (`smoke`=50 câu stratified theo category thật/`full`=300/`targeted`=lọc theo category), `smoke_subset()` seed cố định để tái lập.
+- [x] Implement retrieval metrics — tái dùng nguyên `src/retrieval/metrics.py` (Phase 4, không viết lại): recall@k/hit/MRR/nDCG dạng citation-coverage.
+- [x] Implement context metrics — `src/evaluation/metrics.py`: `context_precision()` (chunk thật retrieve / có liên quan), `context_recall` alias trực tiếp `recall_at_k`, `context_relevance` qua judge.
+- [x] Implement generation metrics — faithfulness/answer_relevance/context_relevance/hallucination qua judge (`src/evaluation/judge.py`), citation accuracy + refusal accuracy tính thẳng (deterministic, không cần judge).
+- [x] Implement citation accuracy — `src/evaluation/metrics.py::citation_accuracy()` (citation model thực sự trích có đúng nhóm citation kỳ vọng không, khác với validate "chunk có thật" đã có ở `src/rag/citation.py` Phase 5).
+- [x] Implement refusal accuracy — `runner.py::run_question()` so `resp.refusal` với `item["requires_refusal"]` trực tiếp.
+- [x] Integrate LLM judge — `src/evaluation/judge.py::GeminiJudge`, gọi qua tier `judge` có sẵn trong `config/model_gateway.yaml`/`litellm_config.yaml` (chưa dùng tới trước Phase 8), rubric 1 lệnh gọi chấm cả 4 tiêu chí, cache theo hash (question, answer, context) — `data/eval/judge_cache_<data_version>.json`.
+- [x] Implement eval report — `src/evaluation/report.py`: CSV per-câu + Markdown tổng hợp/theo-category/failure-case, cùng pattern CSV+Markdown Phase 4 (MLflow/DVC nêu trong module doc chưa từng được nối dây thật ở bất kỳ phase nào — ghi đúng cái có thật).
+- [x] Export failure cases — `report.py::_failure_cases()`: gom câu refusal sai/retrieval miss/citation sai/faithfulness<1/hallucination/judge lỗi parse, tối đa 30 câu trong report.
+- [x] Run smoke eval — `python scripts/run_evaluation.py --mode smoke`, 50 câu thật qua RagService thật (Phase 5-7, LiteLLM proxy + Qdrant thật, không mock). Kết quả: xem `docs/system/experiments/results_evaluation_smoke.md`.
+- [ ] Run full eval — 300 câu, CHƯA chạy trong phiên này (chi phí thời gian: ~300 câu × (1 gọi generate + tới ~1 gọi judge tier `gemini-3-flash-preview` chậm ~15-20s + delay 6.5s) ước tính hàng giờ ở rate limit 10 RPM hiện tại) — để chạy khi cần số liệu chính thức cho báo cáo, không chạy mặc định mỗi lần.
 
 ### Đầu ra
 
-- Eval reports.
-- Failure cases.
-- Baseline metrics.
+- [x] Eval reports — `docs/system/experiments/results_evaluation_smoke.md` (+ `results_evaluation_full.md` khi chạy full).
+- [x] Failure cases — mục "Failure cases" trong report.
+- [x] Baseline metrics — bảng "Kết quả tổng hợp" so với target `contracts/metric_definitions.md`.
 
 ### Kiểm tra dự kiến
 
@@ -714,14 +714,67 @@ python scripts/run_evaluation.py --mode full
 
 ### Definition of Done
 
-- [ ] Smoke eval 50 câu chạy được.
-- [ ] Full eval 300 câu chạy được.
-- [ ] Eval result có metric đủ 4 tầng.
-- [ ] Có failure case report.
+- [x] Smoke eval 50 câu chạy được — chạy thật, xem report.
+- [ ] Full eval 300 câu chạy được — code hỗ trợ (`--mode full`), chưa chạy thật lần nào (chi phí thời gian, xem "Chưa tốt").
+- [x] Eval result có metric đủ 4 tầng — retrieval/context/generation/operations đều có số thật trong report (riêng `cache_hit_rate` báo `n/a` trung thực vì semantic cache chưa implement trong RAG runtime, không thuộc scope Phase 8).
+- [x] Có failure case report.
 
 ### Rủi ro
 
-- Eval tốn tiền: judge sampling, cache judge outputs.
+- Eval tốn tiền: judge sampling, cache judge outputs. *(Free tier hiện cost=0 thật; rủi ro thật sự đo được là RATE LIMIT/thời gian chạy, không phải tiền — xem "Chưa tốt".)*
+
+### Chưa tốt / cần cải thiện
+
+**Làm tốt, nên giữ nguyên cách làm:** chạy eval qua `RagService` thật
+(Phase 5-7 nguyên trạng, không tách bản sao logic riêng cho eval) — số
+liệu phản ánh đúng cái user thật sự nhận được, không thể âm thầm lệch
+khỏi runtime production như một bộ eval viết riêng dễ mắc phải; judge
+rubric dùng thang rời rạc {0.0, 0.5, 1.0} thay vì điểm liên tục — giảm
+nhiễu tự-chấm-không-nhất-quán của LLM-judge, đánh đổi lấy độ mịn.
+
+**Còn thiếu, cần quay lại:**
+- **Smoke eval thật phát hiện 2 mục CHƯA đạt target thật (không phải giả
+  định)** — xem `docs/system/experiments/results_evaluation_smoke.md`:
+  Refusal Accuracy=0.880 (target >=0.90, 6/50 câu sai cả 2 chiều —
+  over-refuse lẫn under-refuse) và Citation Accuracy=0.838 (target
+  >=0.85, sát nhưng chưa đạt, yếu nhất ở multi_hop=0.417 — model hay bỏ
+  sót citation thứ 2 trong câu multi-hop). Đây là việc thật cần quay lại
+  chỉnh `src/rag/service.py`/prompt, KHÔNG phải chỉ ghi nhận rồi để đó.
+- **Full eval 300 câu chưa chạy thật** — smoke (50 câu, stratified đủ 6
+  category) đã chạy thật, nhưng số liệu baseline chính thức cho báo cáo
+  khóa luận cần chạy `--mode full` ít nhất 1 lần trước khi viết kết luận
+  cuối. Ước tính thời gian dài do rate limit tier `judge`
+  (`gemini-3-flash-preview`, quan sát chậm ~15-20s/lệnh) — cân nhắc chạy
+  qua đêm hoặc giảm xuống `judge_sample` (chấm 1 phần câu, module doc đã
+  liệt kê mode này nhưng chưa implement riêng — hiện `smoke` đóng vai trò
+  đó).
+- **`judge_sample`/`human_review` mode (nêu trong `modules/05_evaluation_engine.md`)
+  chưa implement riêng** — `smoke` (stratified fixed-size) dùng tạm cho
+  cả 2 mục đích "chạy nhanh" và "review mẫu", chưa có cách chọn N câu
+  random để judge trên một `full` run đã có sẵn kết quả retrieval.
+- **RAGAS/DeepEval không tích hợp** (task gốc trong module doc) — dùng
+  custom judge (Gemini qua gateway `judge` tier) thay vì thư viện có sẵn.
+  Lý do: RAGAS baseline hướng tiếng Anh, cần validate lại prompt/parser
+  cho tiếng Việt; custom judge kiểm soát được rubric và cache, chi phí
+  triển khai thấp hơn debug RAGAS với model tiếng Việt free-tier. Ghi
+  nhận là lựa chọn có chủ đích, không phải thiếu sót quên làm.
+- **Ambiguous category (20 câu, `requires_clarification=True`) không có
+  cơ chế đánh giá riêng** — hệ thống hiện KHÔNG hỏi lại người dùng (chưa
+  có clarification flow), nên các câu này được chấm y hệt câu factoid
+  thường (refusal_accuracy dựa trên `requires_refusal=False`). Việc hệ
+  thống có "chọn 1 nhánh trả lời + nêu điều kiện" hay "trả lời sai vì
+  chọn nhầm nhánh" hiện chỉ thấy được qua đọc `reasoning` của judge trong
+  cache/report, không có metric riêng.
+- **Context relevance/faithfulness/answer_relevance/hallucination đều từ
+  1 judge model duy nhất** (`gemini-3-flash-preview` qua tier `judge`) —
+  chưa có judge thứ 2 (khác provider/model) để đo độ đồng thuận
+  (inter-judge agreement); toàn bộ 4 con số này phụ thuộc vào 1 model có
+  thể tự thiên vị theo phong cách trả lời gần giống cách nó tự sinh văn
+  bản.
+- **`cost_usd` trong report kế thừa hạn chế đã ghi ở Phase 7** (giá niêm
+  yết free-tier, không phải phí thật đã trả) — `avg_cost_usd` trong eval
+  report có cùng hạn chế, không dùng trực tiếp cho báo cáo "đã chi bao
+  nhiêu" khóa luận mà không chú thích.
 
 ---
 
