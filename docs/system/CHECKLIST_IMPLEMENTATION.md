@@ -571,37 +571,77 @@ thần "chọn bằng số liệu, không cảm tính", và là material tốt c
 
 ### Task
 
-- [ ] Cấu hình LiteLLM.
-- [ ] Tạo gateway config.
-- [ ] Implement model tier: cheap/balanced/strong/judge.
-- [ ] Implement fallback.
-- [ ] Implement timeout policy.
-- [ ] Implement cost tracking.
-- [ ] Implement budget warning.
-- [ ] Integrate runtime với gateway.
+- [x] Cấu hình LiteLLM — `docker-compose.yml` service `litellm` (ghcr.io/berriai/litellm:main-stable), healthcheck qua `/health/liveliness`.
+- [x] Tạo gateway config — `config/litellm_config.yaml`: 12 model_list entry (4 tier × 3 chặng fallback).
+- [x] Implement model tier: cheap/balanced/strong/judge — mirror đúng `config/model_gateway.yaml` đã có từ Phase 1/2.
+- [x] Implement fallback — Gemini key 1 → Gemini key 2 → **Ollama local** (`qwen2.5:7b`, `host.docker.internal`). Verify thật bằng container cô lập với key giả: cascade qua cả 2 Gemini lỗi, rơi xuống Ollama thành công.
+- [x] Implement timeout policy — `router_settings.timeout: 30` (khớp `default_timeout_seconds` model_gateway.yaml), `cooldown_time: 60`, `allowed_fails: 1`.
+- [x] Implement cost tracking — đọc thật từ header `x-litellm-response-cost` (giá niêm yết, không phải phí thật vì đang free tier), không tự tính.
+- [x] Implement budget warning — so `cumulative_cost_usd` (tích luỹ trong tiến trình server) với `budget.daily_usd`, gắn `error_labels: ["budget_warning"]` khi vượt.
+- [x] Integrate runtime với gateway — `src/rag/litellm_gateway.py::LiteLLMGateway` thay `GeminiGateway` (Phase 5) trong `src/api/routes/qa.py`.
+
+**Bug thật phát hiện khi test fallback cascade:** khai `fallbacks:
+{primary: [secondary, local]}` (list 2 phần tử trong 1 dòng) KHÔNG hoạt
+động như tưởng — LiteLLM không tự nối tiếp danh sách khi secondary cũng
+lỗi. Phải khai 2 chặng riêng (`primary: [secondary]`,
+`secondary: [local]`). Chi tiết + lý do trong `litellm_config.yaml` và
+`modules/03_rag_runtime_model_gateway.md`.
 
 ### Đầu ra
 
-- Runtime gọi model qua gateway.
-- Gateway route/fallback report.
+- [x] Runtime gọi model qua gateway — verify thật qua `/qa/debug`, response `model.provider="litellm"`.
+- [x] Gateway route/fallback report — trace ghi `fallback_hop`/`attempted_fallbacks`/`cost_usd`/`cumulative_cost_usd` mỗi request.
 
 ### Kiểm tra dự kiến
 
 ```bash
-python scripts/test_model_gateway.py
-pytest tests/integration/test_model_gateway.py
+docker compose up -d litellm
+pytest tests/integration/test_litellm_gateway.py   # tự skip nếu proxy tắt
+uvicorn src.api.main:app --port 8000
+curl -X POST http://localhost:8000/qa/debug -d @question.json
 ```
 
 ### Definition of Done
 
-- [ ] Không còn direct provider call trong runtime.
-- [ ] Fallback test pass.
-- [ ] Cost/token log xuất hiện trong trace.
+- [x] Không còn direct provider call trong runtime — `qa.py`/`service.py` chỉ biết `Gateway` protocol, không import Gemini SDK nữa (script Phase 3/4/6 offline vẫn dùng SDK trực tiếp có chủ đích, xem "Chưa tốt").
+- [x] Fallback test pass — verify thủ công bằng container cô lập (key Gemini giả → cascade tới Ollama thành công, 1.6s) + 3 test tự động cho nhánh Gemini thật (`tests/integration/test_litellm_gateway.py`).
+- [x] Cost/token log xuất hiện trong trace — `cost_usd`, `cumulative_cost_usd`, `input_tokens`, `output_tokens` verify thật qua `GET /qa/traces/{id}`.
 
 ### Rủi ro
 
-- Provider key thiếu: test gateway bằng mock trước.
-- Cost tăng: dùng cheap model cho smoke.
+- Provider key thiếu: test gateway bằng mock trước. *(MockGateway Phase 5 vẫn giữ cho unit test; integration test dùng proxy thật.)*
+- Cost tăng: dùng cheap model cho smoke. *(Free tier hiện tại cost thật = 0; budget warning đã có sẵn cho khi hết free tier.)*
+
+### Chưa tốt / cần cải thiện
+
+**Làm tốt, nên giữ nguyên cách làm:** verify fallback bằng container cô
+lập với key giả (không đụng service đang chạy thật) — phát hiện đúng 1
+bug cấu hình thật (list fallback không tự nối tiếp) mà chỉ đọc doc sẽ
+không thấy; chọn model Ollama bằng đo thật trên phần cứng thay vì tin
+benchmark chung chung (qwen3:4b tốt hơn trên giấy nhưng thua qwen2.5:7b
+trên máy này).
+
+**Còn thiếu, cần quay lại:**
+- **Test fallback-tới-Ollama chưa tự động hoá được** trong
+  `tests/integration/` — verify bằng container Docker cô lập thủ công
+  (key giả), không chạy được trong CI vì cần Ollama chạy trên host thật.
+  Cân nhắc: mock Ollama endpoint bằng WireMock hoặc tách thành 1 test
+  đánh dấu `@pytest.mark.manual`.
+- **Streaming chưa expose ra runtime** dù LiteLLM proxy đã hỗ trợ ở tầng
+  dưới — `Gateway.generate()` vẫn là request/response đồng bộ. Chưa
+  phase nào cần UX streaming thật nên để lại.
+- **`cost_usd` là giá niêm yết, không phải phí thật đã trả** (đang free
+  tier) — dùng được để CẢNH BÁO ngân sách nhưng không dùng được để báo
+  cáo "đã chi bao nhiêu" trong báo cáo khóa luận mà không chú thích rõ.
+- **`cumulative_cost_usd` reset về 0 mỗi khi restart server** — không
+  bền qua nhiều lần chạy; Phase 10 (Langfuse) mới có cost tracking bền
+  vững qua thời gian.
+- **Ollama fallback chỉ test với 1 câu hỏi đơn giản** (chưa chạy qua bộ
+  golden set thật) — chưa biết chất lượng câu trả lời Ollama trên các câu
+  hỏi phức tạp/nhiều citation của domain IUH thật.
+- **litellm image `main-stable`** không pin version cụ thể — lần build
+  lại sau có thể kéo bản khác, rủi ro nhỏ về reproducibility; nên pin tag
+  version cụ thể khi ổn định.
 
 ---
 

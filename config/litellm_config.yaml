@@ -1,0 +1,104 @@
+# LiteLLM proxy config — Phase 7 (Module 3 Model Gateway).
+# Mirrors config/model_gateway.yaml's tier structure (cheap/balanced/
+# strong/judge) but this file is what LiteLLM itself reads; the .yaml
+# above stays the abstract, provider-agnostic tier declaration read by
+# scripts (docs/system/contracts/config_schemas.md). Runtime giờ gọi qua
+# LiteLLM (src/rag/litellm_gateway.py), không còn gọi thẳng Gemini SDK.
+#
+# Mỗi tier có 3-bậc fallback CÓ THỨ TỰ (router_settings.fallbacks, không
+# phải load-balancing giữa các deployment cùng tên):
+#   1. primary   — Gemini, GEMINI_API_KEY
+#   2. secondary — Gemini model khác, GEMINI_API_KEY_2 (project Google
+#                  khác — né chung quota, xem bài học Phase 4/6)
+#   3. local     — Ollama qwen2.5:7b chạy trên máy host (không phải
+#                  qwen3:4b: đo thật cho thấy qwen3:4b "suy nghĩ" nội bộ
+#                  77-90s/câu dù đã set think:false, đôi khi lẫn tiếng
+#                  Anh/sai số liệu — xem CHECKLIST Phase 7 "Chưa tốt").
+#                  Chỉ kích hoạt khi CẢ HAI Gemini key đều lỗi (rate
+#                  limit/outage) — latency cao (~15-20s) chấp nhận được
+#                  cho một fallback hiếm khi chạm tới.
+
+model_list:
+  - model_name: cheap-primary
+    litellm_params:
+      model: gemini/gemini-3.1-flash-lite
+      api_key: os.environ/GEMINI_API_KEY
+  - model_name: cheap-secondary
+    litellm_params:
+      model: gemini/gemini-3-flash-preview
+      api_key: os.environ/GEMINI_API_KEY_2
+  - model_name: cheap-local
+    litellm_params:
+      model: ollama_chat/qwen2.5:7b
+      api_base: http://host.docker.internal:11434
+      num_ctx: 4096
+
+  - model_name: balanced-primary
+    litellm_params:
+      model: gemini/gemini-3.1-flash-lite
+      api_key: os.environ/GEMINI_API_KEY
+  - model_name: balanced-secondary
+    litellm_params:
+      model: gemini/gemini-3-flash-preview
+      api_key: os.environ/GEMINI_API_KEY_2
+  - model_name: balanced-local
+    litellm_params:
+      model: ollama_chat/qwen2.5:7b
+      api_base: http://host.docker.internal:11434
+      num_ctx: 4096
+
+  - model_name: strong-primary
+    litellm_params:
+      model: gemini/gemini-3-flash-preview
+      api_key: os.environ/GEMINI_API_KEY
+  - model_name: strong-secondary
+    litellm_params:
+      model: gemini/gemini-3.1-flash-lite
+      api_key: os.environ/GEMINI_API_KEY_2
+  - model_name: strong-local
+    litellm_params:
+      model: ollama_chat/qwen2.5:7b
+      api_base: http://host.docker.internal:11434
+      num_ctx: 4096
+
+  - model_name: judge-primary
+    litellm_params:
+      model: gemini/gemini-3-flash-preview
+      api_key: os.environ/GEMINI_API_KEY
+  - model_name: judge-secondary
+    litellm_params:
+      model: gemini/gemini-3.1-flash-lite
+      api_key: os.environ/GEMINI_API_KEY_2
+  - model_name: judge-local
+    litellm_params:
+      model: ollama_chat/qwen2.5:7b
+      api_base: http://host.docker.internal:11434
+      num_ctx: 4096
+
+router_settings:
+  # QUAN TRỌNG: LiteLLM KHÔNG tự nối tiếp danh sách — khi model_group X lỗi,
+  # nó tra cứu fallback CHO ĐÚNG TÊN X, không tiếp tục đi xuống các phần tử
+  # sau trong 1 list đã dùng cho model_group khác. Đo thật (2026-07-11): khai
+  # `cheap-primary: [cheap-secondary, cheap-local]` rồi cheap-secondary cũng
+  # lỗi -> log "No fallback model group found for original model_group=
+  # cheap-secondary" -> KHÔNG rơi xuống cheap-local. Phải khai từng chặng.
+  fallbacks:
+    - cheap-primary: [cheap-secondary]
+    - cheap-secondary: [cheap-local]
+    - balanced-primary: [balanced-secondary]
+    - balanced-secondary: [balanced-local]
+    - strong-primary: [strong-secondary]
+    - strong-secondary: [strong-local]
+    - judge-primary: [judge-secondary]
+    - judge-secondary: [judge-local]
+  num_retries: 1
+  timeout: 30           # khớp default_timeout_seconds trong model_gateway.yaml
+  allowed_fails: 1       # 1 lỗi là chuyển fallback ngay — free tier 429 không tự phục hồi trong giây lát
+  cooldown_time: 60
+
+litellm_settings:
+  drop_params: true      # bỏ qua param provider đích không hỗ trợ thay vì lỗi cứng
+  set_verbose: false
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY

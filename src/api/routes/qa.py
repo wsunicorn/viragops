@@ -23,7 +23,7 @@ from functools import lru_cache
 from fastapi import APIRouter, HTTPException
 
 from src.common.settings import get_settings
-from src.rag.gateway_client import GeminiGateway
+from src.rag.litellm_gateway import LiteLLMGateway
 from src.rag.prompt_builder import RegistryPromptProvider
 from src.rag.schemas import QADebugResponse, QARequest, QAResponse
 from src.rag.service import RagService
@@ -35,8 +35,11 @@ logger = logging.getLogger(__name__)
 @lru_cache(maxsize=1)
 def get_service() -> RagService:
     settings = get_settings()
+    # Phase 7: runtime không còn gọi thẳng Gemini SDK (GeminiGateway, Phase
+    # 5) — mọi model call đi qua LiteLLM proxy (docker-compose `litellm`,
+    # config/litellm_config.yaml), có routing/fallback/budget thật.
     return RagService(
-        gateway=GeminiGateway(),
+        gateway=LiteLLMGateway(base_url=settings.litellm_base_url, master_key=settings.litellm_master_key),
         qdrant_url=settings.qdrant_url,
         prompt_provider=RegistryPromptProvider(settings.postgres_dsn),
     )

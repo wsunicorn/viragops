@@ -1,8 +1,10 @@
 # ============================================================
 # LLMOps RAG Platform — Docker Compose
 # Phase 1: hạ tầng lõi (api, qdrant, postgres, valkey).
+# Phase 7: litellm (model gateway — routing/fallback/cost, xem
+# config/litellm_config.yaml; fallback cuối cùng gọi Ollama chạy trên
+# host qua host.docker.internal, KHÔNG chạy trong compose).
 # Mở rộng theo phase (xem docs/system/operations/deployment_docker_compose.md):
-#   Phase 7  -> litellm
 #   Phase 10 -> langfuse-web/worker, clickhouse, minio, prometheus, grafana
 #   Phase 8+ -> mlflow
 # ============================================================
@@ -30,6 +32,31 @@ services:
         condition: service_started
       valkey:
         condition: service_healthy
+      litellm:
+        condition: service_healthy
+
+  litellm:
+    image: ghcr.io/berriai/litellm:main-stable
+    ports:
+      - "4000:4000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_API_KEY_2=${GEMINI_API_KEY_2}
+      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:?set LITELLM_MASTER_KEY in .env}
+    volumes:
+      - ./config/litellm_config.yaml:/app/config.yaml:ro
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
+    # host.docker.internal -> để container gọi được Ollama chạy trên máy
+    # host Windows (fallback local, xem config/litellm_config.yaml).
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      # image không có curl/wget — dùng python (đã có sẵn trong base image).
+      test: ["CMD", "python3", "-c", "import urllib.request as u; u.urlopen('http://localhost:4000/health/liveliness', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
 
   qdrant:
     image: qdrant/qdrant:v1.15.4

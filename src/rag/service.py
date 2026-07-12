@@ -52,6 +52,7 @@ CHUNKS_DIR = PROJECT_ROOT / "data" / "chunks"
 RETRIEVAL_CONFIG_PATH = PROJECT_ROOT / "config" / "retrieval.yaml"
 INGEST_CONFIG_PATH = PROJECT_ROOT / "config" / "ingest.yaml"
 PROMPTS_CONFIG_PATH = PROJECT_ROOT / "config" / "prompts.yaml"
+GATEWAY_CONFIG_PATH = PROJECT_ROOT / "config" / "model_gateway.yaml"
 
 
 class RagService:
@@ -103,6 +104,15 @@ class RagService:
         if not state_path.exists():
             state_path = CHUNKS_DIR / f"bm25_state_{self.data_version}.json"
         self._bm25 = BM25Sparse.from_state(json.loads(state_path.read_text(encoding="utf-8")))
+
+        gwcfg = yaml.safe_load(GATEWAY_CONFIG_PATH.read_text(encoding="utf-8"))
+        # Budget warning (Phase 7): tổng cost_usd trong tiến trình server so
+        # với budget.daily_usd. Reset về 0 khi restart — CHƯA phải cost
+        # tracking bền vững qua nhiều lần chạy (Phase 10/Langfuse). Free
+        # tier Gemini cost=0 thật, nhưng litellm vẫn tính "giá niêm yết" nếu
+        # hết free tier — cảnh báo này bắt được ngày mai cost thật phát sinh.
+        self._daily_budget_usd: float = gwcfg.get("budget", {}).get("daily_usd", 0.0)
+        self._cumulative_cost_usd: float = 0.0
 
     # --- per-request pipeline -------------------------------------------
 
@@ -160,15 +170,36 @@ class RagService:
         gen = self._gateway.generate(tier=req.mode, prompt=prompt)
         parsed = parse_model_output(gen.text, chunks, require_citation=self._require_citation)
 
+        # Gateway.generate() trả GenerationResult (protocol Phase 5); khi
+        # transport là LiteLLM (Phase 7), gen thực ra là LiteLLMResult với
+        # thêm fallback_hop/cost_usd đọc từ header proxy — MockGateway/
+        # GeminiGateway (Phase 5) không có các field này, dùng getattr để
+        # runtime không phụ thuộc cứng vào transport cụ thể.
+        fallback_hop = getattr(gen, "fallback_hop", "n/a")
+        attempted_fallbacks = getattr(gen, "attempted_fallbacks", 0)
+        cost_usd = getattr(gen, "cost_usd", 0.0)
+        self._cumulative_cost_usd += cost_usd
+        budget_warning = (
+            self._daily_budget_usd > 0 and self._cumulative_cost_usd > self._daily_budget_usd
+        )
+
         error_labels = []
         if parsed.parse_error:
             error_labels.append(parsed.parse_error)
         if parsed.invalid_citations:
             error_labels.append("invalid_citations_dropped")
+        if fallback_hop not in ("primary", "n/a"):
+            error_labels.append(f"served_by_fallback:{fallback_hop}")
+        if budget_warning:
+            error_labels.append("budget_warning")
 
         trace.update(
             model_provider=gen.provider,
             model_name=gen.model,
+            fallback_hop=fallback_hop,
+            attempted_fallbacks=attempted_fallbacks,
+            cost_usd=cost_usd,
+            cumulative_cost_usd=round(self._cumulative_cost_usd, 6),
             input_tokens=gen.input_tokens,
             output_tokens=gen.output_tokens,
             generation_ms=gen.latency_ms,
@@ -188,7 +219,7 @@ class RagService:
             usage=Usage(
                 input_tokens=gen.input_tokens,
                 output_tokens=gen.output_tokens,
-                cost_usd=0.0,  # Gemini free tier — cost model thật ở Phase 10
+                cost_usd=cost_usd,
                 latency_ms=int((time.perf_counter() - t_start) * 1000),
             ),
             chunks=chunks,

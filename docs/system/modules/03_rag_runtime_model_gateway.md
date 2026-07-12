@@ -131,14 +131,62 @@ Quyết định triển khai đáng chú ý:
 - **Embedder có key-rotation:** 429 quota ngày trên key chính → tự thử
   `GEMINI_API_KEY_2` (bài học quota 1000/ngày từ Phase 4).
 
+## Kết quả thật (Phase 7, 2026-07-12)
+
+Thay `GeminiGateway` (Phase 5, gọi thẳng SDK) bằng `LiteLLMGateway`
+(`src/rag/litellm_gateway.py`) — runtime giờ chỉ nói chuyện với **LiteLLM
+proxy** (`docker-compose` service `litellm`, port 4000, config
+`config/litellm_config.yaml`) qua HTTP OpenAI-compatible; proxy tự quyết
+định provider/model/fallback, runtime hoàn toàn không biết Gemini hay
+Ollama đang phục vụ.
+
+- **Fallback 3 chặng THẬT cho mỗi tier** (cheap/balanced/strong/judge):
+  Gemini key 1 → Gemini key 2 (project khác) → **Ollama local**
+  (`qwen2.5:7b`, chạy trên máy host qua `host.docker.internal`). Verify
+  thật bằng container cô lập với 2 key Gemini giả: request tới
+  `cheap-primary` → cascade qua cả 2 Gemini lỗi → **rơi xuống Ollama
+  thành công**, trả lời đúng, 1.6s tổng (đã cooldown từ lần thử trước).
+- **Bug thật phát hiện khi test cascade:** cấu hình `fallbacks:
+  {primary: [secondary, local]}` (1 dòng, list 2 phần tử) KHÔNG hoạt động
+  như tưởng — LiteLLM không tự nối tiếp danh sách, khi secondary cũng lỗi
+  nó báo "No fallback model group found for original model_group=
+  secondary" thay vì thử tiếp phần tử thứ 3. Phải khai 2 chặng riêng
+  (`primary: [secondary]`, `secondary: [local]`). Đã sửa + ghi chú ngay
+  trong `litellm_config.yaml` để không lặp lại.
+- **Chọn Ollama `qwen2.5:7b` thay vì `qwen3:4b`** dù benchmark web
+  (Qwen3 vượt Gemma3 rõ rệt trên tiếng Việt — 75.2 vs 45.2 điểm đa ngôn
+  ngữ) gợi ý Qwen3 tốt hơn: đo thật trên máy (RTX 3050 4GB VRAM) cho
+  thấy `qwen3:4b` luôn "suy nghĩ" nội bộ dù set `think:false` (77-90s/câu
+  qua Ollama API, có lúc lẫn tiếng Anh/sai số liệu). `qwen2.5:7b` (đã có
+  sẵn, không cần pull) trả lời sạch, đúng số liệu, 9-17s — chấp nhận được
+  cho 1 fallback hiếm khi chạm tới. Bài học: benchmark tổng quát không
+  thay được đo thật trên phần cứng + toolchain cụ thể.
+- **Cost tracking thật qua header `x-litellm-response-cost`** (không phải
+  tự tính) — verify thật: 1 câu hỏi tier `balanced` qua Gemini
+  `gemini-3-flash-preview` → cost=$0.00085 (giá niêm yết, KHÔNG phải phí
+  thật bị trừ vì đang dùng free tier — litellm không biết trạng thái free
+  tier, đây là ước tính "nếu phải trả phí" hữu ích để giám sát ngân sách).
+  `fallback_hop`/`attempted_fallbacks` đọc từ header
+  `x-litellm-model-group`/`x-litellm-attempted-fallbacks`, đáng tin hơn
+  field `model` trong body (không nhất quán giữa lúc hit-primary và lúc
+  đã fallback — đo thật thấy 2 định dạng khác nhau).
+- **Budget warning** so `cumulative_cost_usd` (tích luỹ trong tiến trình
+  server) với `budget.daily_usd` (model_gateway.yaml), gắn cờ
+  `error_labels: ["budget_warning"]` vào trace khi vượt — chưa kích hoạt
+  thật vì free tier cost≈0.
+- **Timeout/retry chuyển hẳn sang LiteLLM** (`router_settings.timeout`,
+  `num_retries`, `cooldown_time` trong litellm_config.yaml) thay vì logic
+  retry viết tay rải rác từng script (đúng hướng đã ghi ở Phase 3 "Chưa
+  tốt": nên rút thành 1 chỗ chung — giờ chỗ chung đó chính là LiteLLM).
+
 ## Checklist hoàn tất
 
-- [x] QA endpoint hoạt động — verify thật bằng curl, cả 3 kịch bản trên.
-- [x] Streaming endpoint hoạt động hoặc có lý do bỏ qua — **bỏ qua có lý do**: gateway hiện là REST đơn giản, streaming để Phase 7 (LiteLLM có sẵn streaming) — tránh viết 2 lần.
+- [x] QA endpoint hoạt động — verify thật bằng curl, cả 3 kịch bản Phase 5 + 1 kịch bản Phase 7 (qua LiteLLM).
+- [x] Streaming endpoint hoạt động hoặc có lý do bỏ qua — **vẫn bỏ qua có lý do**: LiteLLM đã hỗ trợ streaming ở tầng proxy nhưng runtime (Gateway protocol) chưa expose — để lại cho phase cần UX streaming thật (chưa phase nào yêu cầu).
 - [x] Retrieval tích hợp runtime — dùng đúng best config `hybrid_dbsf_v2` từ Phase 4, load 1 lần lúc init.
 - [x] PromptOps tích hợp runtime — `p1_grounded_v1` (active_version của prompts.yaml) render trong `prompt_builder.py`; registry DB là Phase 6, call site không đổi.
-- [ ] LiteLLM tích hợp runtime — **Phase 7 theo kế hoạch** (gateway interface đã tách sẵn chỗ cắm).
+- [x] LiteLLM tích hợp runtime — `LiteLLMGateway` thay `GeminiGateway`; verify thật fallback 3 chặng gồm Ollama local.
 - [x] Citation validation hoạt động — unit test 7 case (fence, bịa id, dedupe, downgrade-to-refusal...).
 - [x] Refusal logic hoạt động — 2 lớp, verify thật với câu ngoài domain.
-- [x] Trace đầy đủ — retrieval/generation span, token, versions, JSONL + in-memory, endpoint GET hoạt động.
+- [x] Trace đầy đủ — retrieval/generation span, token, versions, JSONL + in-memory, endpoint GET hoạt động, **+ fallback_hop/attempted_fallbacks/cost_usd/cumulative_cost_usd (Phase 7)**.
 
