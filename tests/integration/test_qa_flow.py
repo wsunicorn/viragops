@@ -57,6 +57,7 @@ def test_in_domain_question_returns_answer_with_citation(service):
     assert not resp.refusal
     assert resp.citations, "câu trong domain phải có citation"
     assert resp.model.provider == "mock"
+    assert resp.confidence is not None and 0.0 <= resp.confidence <= 1.0
     # citation phải trỏ về chunk THẬT đã retrieve, không bịa
     trace = service.get_trace(resp.trace_id)
     retrieved_ids = {r["chunk_id"] for r in trace["retrieved"]}
@@ -80,6 +81,25 @@ def test_model_refusal_passes_through(service):
     assert resp.refusal
     assert resp.citations == []
     assert resp.answer  # vẫn có message giải thích cho user
+    assert resp.confidence is None  # không có "độ tin cậy của việc từ chối"
+
+
+def test_pre_llm_refusal_on_low_score(service, monkeypatch):
+    """min_score enforcement (calibrated 2026-07-13, xem config/retrieval.yaml
+    + src/rag/service.py docstring) — điểm DBSF đỉnh dưới threshold phải
+    refuse TRƯỚC khi gọi LLM, không tốn generation call."""
+    import src.rag.service as service_mod
+
+    def _fake_retrieve(*args, **kwargs):
+        return [{"chunk_id": "chunk_fake_low_score", "score": 0.01, "text": "x"}] * 3
+
+    monkeypatch.setattr(service_mod, "retrieve", _fake_retrieve)
+    resp = service.answer(QARequest(question="Câu hỏi bất kỳ trong domain"))
+    assert resp.refusal is True
+    assert resp.model.provider == "none"  # không gọi LLM
+    trace = service.get_trace(resp.trace_id)
+    assert trace["refusal_stage"] == "pre_llm"
+    assert trace["error_labels"] == ["low_score"]
 
 
 def test_trace_recorded_with_versions(service):

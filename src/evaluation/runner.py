@@ -48,6 +48,26 @@ class QuestionResult:
     error_labels: list[str] = field(default_factory=list)
     trace_id: str = ""
     question: str = ""
+    judge2: dict[str, Any] | None = None
+    ambiguity_handled: bool | None = None
+
+
+def _run_judge(
+    judge: GeminiJudge, question: str, answer: str, context_text: str, ground_truth: str
+) -> dict[str, Any]:
+    try:
+        score = judge.score(question, answer, context_text, ground_truth)
+        result = {
+            "faithfulness": score.faithfulness,
+            "answer_relevance": score.answer_relevance,
+            "context_relevance": score.context_relevance,
+            "hallucination": score.hallucination,
+        }
+        if not score.from_cache:
+            time.sleep(JUDGE_CALL_DELAY)
+        return result
+    except GatewayError as exc:
+        return {"error": str(exc)[:200]}
 
 
 def run_question(
@@ -57,6 +77,7 @@ def run_question(
     chunks_by_doc: dict,
     chunk_text_by_id: dict[str, str],
     eval_k: int = 5,
+    judge2: GeminiJudge | None = None,
 ) -> QuestionResult:
     req = QARequest(question=item["question"], mode="balanced", debug=True)
     resp = service.answer(req)
@@ -77,21 +98,19 @@ def run_question(
     cited_ids = [c.chunk_id for c in resp.citations]
     cit_acc = em.citation_accuracy(cited_ids, groups) if not resp.refusal else None
 
+    amb_handled: bool | None = None
+    if item["category"] == "ambiguous" and not resp.refusal:
+        amb_handled = em.ambiguity_handled(resp.answer)
+
     judge_result: dict[str, Any] | None = None
-    if judge is not None and not resp.refusal:
+    judge2_result: dict[str, Any] | None = None
+    if (judge is not None or judge2 is not None) and not resp.refusal:
         context_text = "\n\n".join(chunk_text_by_id.get(cid, "") for cid in retrieved_ids)
-        try:
-            score = judge.score(item["question"], resp.answer, context_text, item.get("ground_truth", ""))
-            judge_result = {
-                "faithfulness": score.faithfulness,
-                "answer_relevance": score.answer_relevance,
-                "context_relevance": score.context_relevance,
-                "hallucination": score.hallucination,
-            }
-            if not score.from_cache:
-                time.sleep(JUDGE_CALL_DELAY)
-        except GatewayError as exc:
-            judge_result = {"error": str(exc)[:200]}
+        ground_truth = item.get("ground_truth", "")
+        if judge is not None:
+            judge_result = _run_judge(judge, item["question"], resp.answer, context_text, ground_truth)
+        if judge2 is not None:
+            judge2_result = _run_judge(judge2, item["question"], resp.answer, context_text, ground_truth)
 
     return QuestionResult(
         question_id=item["id"],
@@ -110,6 +129,8 @@ def run_question(
         error_labels=trace.get("error_labels") or [],
         trace_id=resp.trace_id,
         question=item["question"],
+        judge2=judge2_result,
+        ambiguity_handled=amb_handled,
     )
 
 
@@ -124,6 +145,35 @@ def _percentile(sorted_values: list[float], pct: float) -> float | None:
     return round(sorted_values[idx], 1)
 
 
+_NUMERIC_CRITERIA = ("faithfulness", "answer_relevance", "context_relevance")
+
+
+def inter_judge_agreement(results: list[QuestionResult]) -> dict[str, Any] | None:
+    """So sánh judge chính (tier=judge, gemini-3-flash-preview) với judge phụ
+    (tier=cheap, gemini-3.1-flash-lite) trên CÙNG (question, answer, context)
+    — 2 model Gemini khác nhau (cùng provider, chưa có key OpenAI/Anthropic,
+    xem config/model_gateway.yaml), không phải giả lập đa dạng judge. Mục
+    đích: đo judge rẻ có đáng tin để thay judge đắt hay không, không phải
+    "đúng tuyệt đối" (không có judge nào là ground truth)."""
+    pairs = [
+        (r.judge, r.judge2) for r in results
+        if r.judge and "error" not in r.judge and r.judge2 and "error" not in r.judge2
+    ]
+    if not pairs:
+        return None
+
+    agreement: dict[str, Any] = {"n_pairs": len(pairs)}
+    for crit in _NUMERIC_CRITERIA:
+        diffs = [abs(j1[crit] - j2[crit]) for j1, j2 in pairs]
+        agreement[f"{crit}_mean_abs_diff"] = round(_mean(diffs), 3)
+        agreement[f"{crit}_exact_match_rate"] = round(
+            sum(1 for d in diffs if d == 0.0) / len(diffs), 3
+        )
+    hallu_matches = sum(1 for j1, j2 in pairs if j1["hallucination"] == j2["hallucination"])
+    agreement["hallucination_agreement_rate"] = round(hallu_matches / len(pairs), 3)
+    return agreement
+
+
 def aggregate(results: list[QuestionResult], eval_k: int = 5) -> dict[str, Any]:
     n = len(results)
     if n == 0:
@@ -135,6 +185,7 @@ def aggregate(results: list[QuestionResult], eval_k: int = 5) -> dict[str, Any]:
     ctx_precisions = [r.context_precision for r in results if r.context_precision is not None]
     judged = [r.judge for r in results if r.judge and "error" not in r.judge]
     cit_accs = [r.citation_accuracy for r in results if r.citation_accuracy is not None]
+    amb_handled = [r.ambiguity_handled for r in results if r.ambiguity_handled is not None]
 
     latencies = sorted(r.latency_ms for r in results if r.latency_ms)
     fallback_used = [
@@ -163,4 +214,10 @@ def aggregate(results: list[QuestionResult], eval_k: int = 5) -> dict[str, Any]:
         # Semantic cache chưa implement trong RAG runtime (ngoài scope Phase
         # 8) -> không có số thật để báo, không bịa 0.0 như thể đã đo được.
         "cache_hit_rate": None,
+        "inter_judge_agreement": inter_judge_agreement(results),
+        # Chỉ có giá trị khi n>0 (chỉ category="ambiguous" mới gán
+        # ambiguity_handled) — None khi không câu nào thuộc category này
+        # trong tập results, không bịa 0.0.
+        "ambiguity_handling_rate": _mean([1.0 if h else 0.0 for h in amb_handled]),
+        "n_ambiguity_scored": len(amb_handled),
     }

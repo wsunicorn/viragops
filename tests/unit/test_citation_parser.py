@@ -61,3 +61,59 @@ def test_duplicate_citations_deduped():
            '"refusal": false}')
     out = parse_model_output(raw, CHUNKS)
     assert len(out.citations) == 1
+
+
+# --- Ollama local fallback (qwen2.5:7b) đo thật 2026-07-13: model rút gọn
+# chunk_id dài thành hậu tố ngắn (vd "chunk_doc_..._structure_aware_0060"
+# -> "0060") thay vì chép nguyên văn — không phải context-window overflow
+# (test cả num_ctx=4096/8192 ra kết quả giống hệt, xem CHECKLIST Phase 8).
+# _resolve_chunk_id() cứu được các trường hợp hậu tố khớp DUY NHẤT 1 chunk
+# trong tập đã retrieve, vẫn fail-closed khi mơ hồ hoặc quá ngắn.
+_LONG_CHUNKS = [
+    {"chunk_id": "chunk_doc_qd1482_quy_che_tin_chi_structure_aware_0060",
+     "document_id": "doc_qd1482", "section": "Điều 12", "page_start": 5, "text": "Nội dung." * 5},
+    {"chunk_id": "chunk_doc_sotay_2024_structure_aware_0007",
+     "document_id": "doc_sotay", "section": None, "page_start": 2, "text": "Nội dung khác."},
+]
+
+
+def test_suffix_match_recovers_truncated_chunk_id():
+    raw = '{"answer": "X", "citations": [{"chunk_id": "0060"}], "refusal": false}'
+    out = parse_model_output(raw, _LONG_CHUNKS)
+    assert not out.refusal
+    assert [c.chunk_id for c in out.citations] == [
+        "chunk_doc_qd1482_quy_che_tin_chi_structure_aware_0060"
+    ]
+    assert out.citations[0].document_id == "doc_qd1482"
+    assert out.invalid_citations == []
+
+
+def test_suffix_match_ambiguous_between_2_retrieved_chunks_stays_invalid():
+    ambiguous_chunks = [
+        {"chunk_id": "chunk_doc_a_structure_aware_0060", "document_id": "doc_a",
+         "section": None, "page_start": None, "text": "A"},
+        {"chunk_id": "chunk_doc_b_structure_aware_0060", "document_id": "doc_b",
+         "section": None, "page_start": None, "text": "B"},
+    ]
+    raw = '{"answer": "X", "citations": [{"chunk_id": "0060"}], "refusal": false}'
+    out = parse_model_output(raw, ambiguous_chunks)
+    assert out.refusal  # không citation nào valid -> fail-closed
+    assert out.invalid_citations == ["0060"]
+
+
+def test_suffix_match_too_short_stays_invalid():
+    raw = '{"answer": "X", "citations": [{"chunk_id": "60"}], "refusal": false}'
+    out = parse_model_output(raw, _LONG_CHUNKS)
+    assert out.refusal
+    assert out.invalid_citations == ["60"]
+
+
+def test_full_id_and_its_own_truncated_suffix_not_double_counted():
+    raw = (
+        '{"answer": "X", "citations": ['
+        '{"chunk_id": "chunk_doc_qd1482_quy_che_tin_chi_structure_aware_0060"}, '
+        '{"chunk_id": "0060"}], "refusal": false}'
+    )
+    out = parse_model_output(raw, _LONG_CHUNKS)
+    assert len(out.citations) == 1
+    assert out.citations[0].chunk_id == "chunk_doc_qd1482_quy_che_tin_chi_structure_aware_0060"

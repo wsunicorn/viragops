@@ -1,0 +1,72 @@
+{
+ "ba6a09374ef39e8d47f5cd3a": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác và đầy đủ dựa trên nội dung tại Khoản 1 Điều 12 trong ngữ cảnh được cung cấp."
+ },
+ "ae9acb3963a5d494464cc653": {
+  "faithfulness": 0.5,
+  "answer_relevance": 0.5,
+  "context_relevance": 1.0,
+  "hallucination": true,
+  "reasoning": "Hệ thống xác định sai đối tượng chịu trách nhiệm làm hồ sơ (theo văn bản là TBM/CNBM chứ không phải giảng viên chấm phúc khảo) và tự đưa thêm thông tin về quy trình điều chỉnh điểm trắc nghiệm trên phần mềm PMT không được nêu rõ trong phần quy định về trách nhiệm chuyển hồ sơ."
+ },
+ "22b5def8d0afb0cd25af790c": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác dựa trên Điều 35 của ngữ cảnh, đã giải đáp được xếp hạng cho con số cụ thể 3.75 và nêu rõ điều kiện giảm hạng."
+ },
+ "1827b4a94e98b6573ddf601d": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác và dựa trên ngữ cảnh được cung cấp về điều kiện cảnh báo kết quả học tập cho sinh viên năm thứ hai."
+ },
+ "c5e8211b7a42eb2c5b246d55": {
+  "faithfulness": 1.0,
+  "answer_relevance": 0.5,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống trả lời đúng về người quy định mức học phí nhưng thiếu ý giải thích về căn cứ thu học phí (chi phí hoạt động giảng dạy, học tập và cơ sở vật chất)."
+ },
+ "00bff7f46bd04fe3f310845e": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời bám sát ngữ cảnh Điều 24 khoản 2 và 3, giải quyết đúng và đầy đủ trọng tâm câu hỏi về quy trình chấm thi tiểu luận/đồ án cuối kỳ tại IUH."
+ },
+ "e61e70e387cbc4714ac540ec": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Hệ thống đã trả lời chính xác dựa trên ngữ cảnh rằng không có con số tiền cụ thể trong tài liệu, đồng thời trích dẫn đúng quy định tại Điều 13 về việc thu học phí theo bậc đào tạo và không được miễn giảm."
+ },
+ "ba5f2149da16ed9d09bbff78": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn trùng khớp với nội dung được quy định tại mục f, khoản 4 của ngữ cảnh được cung cấp, trả lời đúng trọng tâm câu hỏi."
+ },
+ "da60b760bf8bd96ad2e2820e": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn chính xác theo ngữ cảnh, khẳng định danh sách không được liệt kê cụ thể mà chỉ dẫn chiếu đến quy định của Bộ Giáo dục và Đào tạo."
+ },
+ "b343b0fbb2cc34bd616a9536": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời bám sát và tổng hợp chính xác thông tin từ cả hai nguồn trong ngữ cảnh về việc giáo vụ khoa chuyển tiếp hồ sơ cho Phòng Khảo thí và Đảm bảo chất lượng hoặc Chủ nhiệm bộ môn."
+ }
+}

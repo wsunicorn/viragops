@@ -58,6 +58,12 @@ def main() -> int:
         help="bỏ qua lệnh gọi judge (chỉ tính retrieval/context/refusal, không tốn quota generation cho chất lượng câu trả lời)",
     )
     parser.add_argument(
+        "--second-judge", action="store_true",
+        help="chấm thêm 1 judge phụ (tier=cheap, gemini-3.1-flash-lite) trên cùng câu trả lời "
+        "để đo inter-judge agreement với judge chính (tier=judge, gemini-3-flash-preview) — "
+        "tốn thêm 1 lệnh judge/câu, không dùng --no-judge cùng lúc",
+    )
+    parser.add_argument(
         "--prompt-version", default=None,
         help="ghim 1 phiên bản prompt cụ thể (kể cả status='testing', chưa activate) thay vì "
         "dùng active version — dùng để so sánh candidate prompt trên eval engine trước khi activate",
@@ -82,9 +88,17 @@ def main() -> int:
     )
 
     judge = None
+    judge2 = None
     if not args.no_judge:
         judge_gateway = LiteLLMGateway(base_url=settings.litellm_base_url, master_key=settings.litellm_master_key)
         judge = GeminiJudge(judge_gateway, JudgeCache(EVAL_DIR / f"judge_cache_{manifest['data_version']}.json"))
+        if args.second_judge:
+            judge2_gateway = LiteLLMGateway(base_url=settings.litellm_base_url, master_key=settings.litellm_master_key)
+            judge2 = GeminiJudge(
+                judge2_gateway,
+                JudgeCache(EVAL_DIR / f"judge2_cache_{manifest['data_version']}.json"),
+                tier="cheap",
+            )
 
     meta = {
         "data_version": service.data_version,
@@ -99,7 +113,9 @@ def main() -> int:
     for i, item in enumerate(items, start=1):
         print(f"[{i}/{len(items)}] {item['id']} ({item['category']}) ...", end=" ", flush=True)
         try:
-            r = run_question(service, judge, item, chunks_by_doc, chunk_text_by_id, eval_k=eval_k)
+            r = run_question(
+                service, judge, item, chunks_by_doc, chunk_text_by_id, eval_k=eval_k, judge2=judge2
+            )
         except Exception as exc:  # noqa: BLE001 - 1 câu lỗi không được làm sập cả run
             print(f"ERROR: {exc}")
             continue

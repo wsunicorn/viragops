@@ -10,12 +10,19 @@ are owned by later phases: semantic cache -> Phase 8, LiteLLM transport
     trace -> respond.
 
 Refusal policy, two layers:
-1. Pre-LLM: fewer than `thresholds.min_context_chunks` chunks retrieved
-   -> refuse without spending a generation call. (`thresholds.min_score`
-   is NOT enforced yet: DBSF fused scores are on a different scale than
-   the cosine-like values that threshold was written for — enforcing it
-   blind would over-refuse. Logged per-trace for calibration; see
-   CHECKLIST Phase 5 "Chưa tốt".)
+1. Pre-LLM: fewer than `thresholds.min_context_chunks` chunks retrieved,
+   OR top-1 DBSF fused score below `thresholds.min_score` -> refuse
+   without spending a generation call. `min_score` was calibrated
+   2026-07-13 from 875 real traces (scripts/calibrate_min_score.py,
+   data/traces/traces.jsonl) instead of the earlier guessed 0.15 (written
+   for a cosine-like scale, never matched DBSF's actual range ~0.9-2.7):
+   should_answer/should_refuse top-1 scores overlap heavily (medians 2.02
+   vs 1.63) so this threshold is a weak, secondary signal — it is set at
+   1.10 specifically because in the calibration sample it wrongly refused
+   ZERO of 720 real answerable questions while still catching a handful
+   of degenerate-retrieval cases (2/147 should_refuse below it at that
+   level; the real adversarial/out_of_scope refusal work is done by the
+   LLM itself in the post-LLM layer below, not by this score).
 2. Post-LLM: the model may declare refusal, and an answer whose every
    citation failed validation is downgraded to refusal (citation.py).
 """
@@ -34,6 +41,7 @@ from src.dataops import embedder
 from src.dataops.sparse_bm25 import BM25Sparse
 from src.dataops.vietnamese_normalizer import normalize_for_search
 from src.rag.citation import parse_model_output
+from src.rag.confidence import compute_confidence
 from src.rag.gateway_client import Gateway
 from src.rag.prompt_builder import PromptProvider, build_qa_prompt
 from src.rag.schemas import (
@@ -85,6 +93,7 @@ class RagService:
         self.index_version: str | None = rcfg.get("index_version")
         self._query_normalization: bool = rcfg.get("query_normalization", True)
         self._min_context_chunks: int = rcfg["thresholds"]["min_context_chunks"]
+        self._min_score: float = rcfg["thresholds"]["min_score"]
         self._require_citation: bool = pcfg["policy"]["require_citation"]
 
         fusion = rcfg["retrieval"]["fusion"]["method"]
@@ -158,9 +167,12 @@ class RagService:
             ],
         }
 
-        # --- refusal pre-check: không đủ ngữ cảnh thì không tốn 1 lần gọi LLM
-        if len(chunks) < self._min_context_chunks:
-            trace.update(refusal=True, refusal_stage="pre_llm", error_labels=["no_context"])
+        # --- refusal pre-check: không đủ ngữ cảnh (số lượng HOẶC score đỉnh
+        # quá thấp, xem docstring đầu file) thì không tốn 1 lần gọi LLM
+        top_score = max((c["score"] for c in chunks), default=0.0)
+        if len(chunks) < self._min_context_chunks or top_score < self._min_score:
+            error_label = "no_context" if len(chunks) < self._min_context_chunks else "low_score"
+            trace.update(refusal=True, refusal_stage="pre_llm", error_labels=[error_label])
             self._traces.record(trace)
             return self._respond(
                 req, request_id, trace_id,
@@ -217,6 +229,17 @@ class RagService:
         )
         self._traces.record(trace)
 
+        confidence = (
+            None
+            if parsed.refusal
+            else compute_confidence(
+                top_score=top_score,
+                n_valid_citations=len(parsed.citations),
+                n_invalid_citations=len(parsed.invalid_citations),
+                fallback_hop=fallback_hop,
+            )
+        )
+
         return self._respond(
             req, request_id, trace_id,
             answer=parsed.answer, citations=parsed.citations, refusal=parsed.refusal,
@@ -228,16 +251,21 @@ class RagService:
                 latency_ms=int((time.perf_counter() - t_start) * 1000),
             ),
             chunks=chunks,
+            confidence=confidence,
         )
 
     def _respond(self, req, request_id, trace_id, *, answer, citations, refusal,
-                 model, usage, chunks) -> QAResponse | QADebugResponse:
+                 model, usage, chunks, confidence=None) -> QAResponse | QADebugResponse:
         base = {
             "request_id": request_id,
             "trace_id": trace_id,
             "answer": answer,
             "citations": citations,
-            "confidence": None,  # cần calibration thật (Phase 8) — không bịa số
+            # Heuristic có căn cứ (retrieval score + citation validity +
+            # fallback hop), KHÔNG phải xác suất calibrate qua ground-truth
+            # correctness (chưa có nhãn đó) — xem src/rag/confidence.py.
+            # None cho câu refusal (không có "độ tin cậy của việc từ chối").
+            "confidence": confidence,
             "refusal": refusal,
             "model": model,
             "usage": usage,

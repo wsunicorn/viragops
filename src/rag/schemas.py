@@ -49,6 +49,8 @@ class QAResponse(BaseModel):
     trace_id: str
     answer: str
     citations: list[Citation]
+    # Heuristic có căn cứ (src/rag/confidence.py), KHÔNG phải xác suất
+    # calibrate qua ground-truth correctness. None khi refusal=True.
     confidence: float | None = None
     refusal: bool
     model: ModelInfo

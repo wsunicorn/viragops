@@ -21,6 +21,26 @@ from src.rag.schemas import Citation
 
 _JSON_BLOCK_RE = re.compile(r"\{.*\}", re.DOTALL)
 
+# Ollama local fallback (qwen2.5:7b, xem config/litellm_config.yaml) đo thật
+# 2026-07-13: model không chép nguyên chunk_id dài
+# ("chunk_doc_qd1482_quy_che_tin_chi_structure_aware_0060") mà tự rút gọn
+# thành hậu tố số ("0060") — không phải lỗi context-window (đã test cả
+# num_ctx=4096 và 8192, kết quả giống hệt, xem CHECKLIST Phase 8), là hạn
+# chế thật của model 7B khi phải chép nguyên văn 1 chuỗi dài. Suffix match
+# CHỈ chấp nhận khi hậu tố khớp DUY NHẤT 1 chunk trong tập đã retrieve cho
+# đúng request này (không tra toàn bộ corpus) — tránh biến 1 model yếu
+# thành nguồn trích dẫn sai mà tưởng đúng.
+_MIN_SUFFIX_LEN = 3
+
+
+def _resolve_chunk_id(raw_id: str, by_id: dict[str, dict]) -> str | None:
+    if raw_id in by_id:
+        return raw_id
+    if len(raw_id) < _MIN_SUFFIX_LEN:
+        return None
+    candidates = [cid for cid in by_id if cid.endswith(raw_id)]
+    return candidates[0] if len(candidates) == 1 else None
+
 
 @dataclass
 class ParsedAnswer:
@@ -69,20 +89,25 @@ def parse_model_output(
     by_id = {c["chunk_id"]: c for c in retrieved_chunks}
     citations: list[Citation] = []
     invalid: list[str] = []
-    seen: set[str] = set()
+    seen_raw: set[str] = set()
+    seen_resolved: set[str] = set()
     for item in data.get("citations") or []:
-        chunk_id = item.get("chunk_id") if isinstance(item, dict) else None
-        if not chunk_id or chunk_id in seen:
+        raw_id = item.get("chunk_id") if isinstance(item, dict) else None
+        if not raw_id or raw_id in seen_raw:
             continue
-        seen.add(chunk_id)
-        chunk = by_id.get(chunk_id)
-        if chunk is None:
-            invalid.append(chunk_id)
+        seen_raw.add(raw_id)
+        resolved_id = _resolve_chunk_id(raw_id, by_id)
+        if resolved_id is None:
+            invalid.append(raw_id)
             continue
+        if resolved_id in seen_resolved:
+            continue  # 2 raw_id khác nhau (vd bản đầy đủ + hậu tố rút gọn) cùng trỏ 1 chunk thật
+        seen_resolved.add(resolved_id)
+        chunk = by_id[resolved_id]
         citations.append(
             Citation(
                 document_id=chunk["document_id"],
-                chunk_id=chunk_id,
+                chunk_id=resolved_id,
                 section=chunk.get("section"),
                 page=chunk.get("page_start"),
                 quote=chunk["text"][:200],

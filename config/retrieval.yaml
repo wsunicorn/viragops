@@ -63,5 +63,15 @@ reranker:
   # đo thêm 1 bước qua model thật trước khi đổi production config.
   top_k_after: 5
 thresholds:
-  min_score: 0.15
+  # Calibrated 2026-07-13 từ 875 trace thật (litellm/gemini, KHÔNG tính
+  # mock) qua scripts/calibrate_min_score.py — số 0.15 cũ là đoán cho 1
+  # thang điểm cosine-like, không khớp thang DBSF thật (~0.9-2.7), nên
+  # CHƯA TỪNG được enforce trong src/rag/service.py (xem docstring đầu
+  # file đó). 1.10 = ngưỡng lớn nhất mà tại đó KHÔNG câu should_answer nào
+  # trong mẫu calibration (n=720) bị refuse nhầm; should_answer/
+  # should_refuse overlap mạnh (median 2.02 vs 1.63) nên đây là lưới an
+  # toàn phụ cho retrieval suy biến, KHÔNG phải cơ chế refuse chính cho
+  # adversarial/out_of_scope (cơ chế chính là LLM tự refuse ở tầng
+  # post-LLM). Full log: xem CHECKLIST Phase 8 "Chưa tốt".
+  min_score: 1.10
   min_context_chunks: 2

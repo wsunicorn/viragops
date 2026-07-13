@@ -80,6 +80,8 @@ def _failure_cases(results: list[QuestionResult], limit: int = 30) -> list[dict]
                 reasons.append("hallucination")
         if r.judge and "error" in r.judge:
             reasons.append("judge_error")
+        if r.ambiguity_handled is False:
+            reasons.append("ambiguity_unhandled (chốt 1 nhánh, không hỏi lại/bao quát)")
         if r.error_labels:
             reasons.append("trace_error:" + ",".join(r.error_labels))
         if reasons:
@@ -134,12 +136,15 @@ def write_csv(mode: str, results: list[QuestionResult], ts: str) -> Path:
         "question_id", "category", "requires_refusal", "got_refusal", "refusal_correct",
         "recall_at_k", "hit_at_k", "mrr", "ndcg_at_k", "context_precision", "citation_accuracy",
         "faithfulness", "answer_relevance", "context_relevance", "hallucination",
+        "judge2_faithfulness", "judge2_answer_relevance", "judge2_context_relevance",
+        "judge2_hallucination", "ambiguity_handled",
         "latency_ms", "cost_usd", "fallback_hop", "error_labels",
     ]
     with csv_path.open("w", encoding="utf-8") as f:
         f.write(",".join(cols) + "\n")
         for r in results:
             j = r.judge or {}
+            j2 = r.judge2 or {}
             row = {
                 "question_id": r.question_id,
                 "category": r.category,
@@ -156,6 +161,11 @@ def write_csv(mode: str, results: list[QuestionResult], ts: str) -> Path:
                 "answer_relevance": j.get("answer_relevance", ""),
                 "context_relevance": j.get("context_relevance", ""),
                 "hallucination": j.get("hallucination", ""),
+                "judge2_faithfulness": j2.get("faithfulness", ""),
+                "judge2_answer_relevance": j2.get("answer_relevance", ""),
+                "judge2_context_relevance": j2.get("context_relevance", ""),
+                "judge2_hallucination": j2.get("hallucination", ""),
+                "ambiguity_handled": r.ambiguity_handled if r.ambiguity_handled is not None else "",
                 "latency_ms": r.latency_ms,
                 "cost_usd": r.cost_usd,
                 "fallback_hop": r.fallback_hop,
@@ -228,16 +238,57 @@ def write_markdown(
         "## Theo category",
         "",
         "| Category | n | Recall@k | Refusal Acc | Citation Acc | Faithfulness | "
-        "Answer Rel. | Hallucination |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|",
+        "Answer Rel. | Hallucination | Ambiguity handled |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for c in _category_breakdown(results):
         cret = c.get("retrieval", {})
+        amb_col = (
+            f"{_fmt(c['ambiguity_handling_rate'])} ({c['n_ambiguity_scored']})"
+            if c["n_ambiguity_scored"]
+            else "-"
+        )
         lines.append(
             f"| {c['category']} | {c['n']} | {_fmt(cret.get('recall_at_k'))} | "
             f"{_fmt(c['refusal_accuracy'])} | {_fmt(c['citation_accuracy'])} | "
             f"{_fmt(c['faithfulness'])} | {_fmt(c['answer_relevance'])} | "
-            f"{_fmt(c['hallucination_rate'])} |"
+            f"{_fmt(c['hallucination_rate'])} | {amb_col} |"
+        )
+    lines += [
+        "",
+        "> **Ambiguity handled** (chỉ category `ambiguous`, requires_clarification=True): "
+        "% câu trả lời hoặc hỏi lại người dùng để làm rõ, hoặc bao quát đủ các nhánh điều "
+        "kiện thay vì chốt 1 nhánh duy nhất — đo bằng heuristic văn bản "
+        "(`src/evaluation/metrics.py::ambiguity_handled`), không tốn thêm lệnh gọi judge. "
+        "Hệ thống hiện KHÔNG có prompt/cơ chế hỏi lại làm rõ (xem "
+        "src/promptops/templates.py) nên `refusal_accuracy` luôn 'đúng' một cách vô nghĩa "
+        "cho category này (requires_refusal=False, hệ thống không refuse) — cột này là "
+        "chỉ số thật duy nhất phản ánh có xử lý mơ hồ hợp lý hay không.",
+    ]
+
+    agreement = overall.get("inter_judge_agreement")
+    if agreement:
+        lines += [
+            "",
+            "## Inter-judge agreement",
+            "",
+            f"> Judge chính (`judge` tier, gemini-3-flash-preview) so với judge phụ "
+            f"(`cheap` tier, gemini-3.1-flash-lite) trên cùng {agreement['n_pairs']} cặp "
+            "(question, answer, context). Cả 2 đều là Gemini (chưa có key OpenAI/Anthropic — "
+            "xem config/model_gateway.yaml) nên đây là so sánh giữa model MẠNH và model NHẸ "
+            "cùng provider, không phải đa dạng provider thật; không có judge nào là ground "
+            "truth tuyệt đối, agreement thấp không tự động nghĩa là 1 trong 2 sai.",
+            "",
+            "| Tiêu chí | Mean abs diff | Exact match rate |",
+            "|---|---:|---:|",
+        ]
+        for crit in ("faithfulness", "answer_relevance", "context_relevance"):
+            lines.append(
+                f"| {crit} | {_fmt(agreement[f'{crit}_mean_abs_diff'])} | "
+                f"{_fmt(agreement[f'{crit}_exact_match_rate'])} |"
+            )
+        lines.append(
+            f"| hallucination (bool) | - | {_fmt(agreement['hallucination_agreement_rate'])} |"
         )
 
     failures = _failure_cases(results)

@@ -1,0 +1,72 @@
+{
+ "ba6a09374ef39e8d47f5cd3a": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống bám sát hoàn toàn thông tin tại Điều 12, khoản 1 của ngữ cảnh được cung cấp."
+ },
+ "ae9acb3963a5d494464cc653": {
+  "faithfulness": 0.5,
+  "answer_relevance": 0.5,
+  "context_relevance": 1.0,
+  "hallucination": true,
+  "reasoning": "Hệ thống xác định sai đối tượng chịu trách nhiệm làm hồ sơ (theo ngữ cảnh là Trưởng bộ môn hoặc Giảng viên tùy đoạn, nhưng hệ thống chỉ nêu Giảng viên) và tự suy diễn quy trình cho môn trắc nghiệm mà không chỉ rõ đơn vị nhận hồ sơ chỉnh sửa điểm như câu hỏi yêu cầu."
+ },
+ "22b5def8d0afb0cd25af790c": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống đã xác định đúng hạng tốt nghiệp cho điểm 3.75 dựa trên Điều 35 trong ngữ cảnh và giải thích được các trường hợp bị giảm hạng."
+ },
+ "1827b4a94e98b6573ddf601d": {
+  "faithfulness": 0.0,
+  "answer_relevance": 0.0,
+  "context_relevance": 0.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời không có căn cứ trong ngữ cảnh và hoàn toàn không giải quyết được câu hỏi."
+ },
+ "c5e8211b7a42eb2c5b246d55": {
+  "faithfulness": 0.0,
+  "answer_relevance": 0.0,
+  "context_relevance": 0.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời đề cập đến thông tin không có trong ngữ cảnh cung cấp, và không giải quyết được câu hỏi về mức học phí do ai quy định."
+ },
+ "00bff7f46bd04fe3f310845e": {
+  "faithfulness": 0.0,
+  "answer_relevance": 0.0,
+  "context_relevance": 0.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời không bám sát ngữ cảnh, không giải quyết được câu hỏi và ngữ cảnh cung cấp không liên quan đến nội dung cần đánh giá."
+ },
+ "e61e70e387cbc4714ac540ec": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống bám sát ngữ cảnh, xác định đúng là không có thông tin về con số cụ thể và chỉ ra cách tính học phí theo quy định tại Điều 13."
+ },
+ "ba5f2149da16ed9d09bbff78": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời của hệ thống hoàn toàn khớp với mục f trong ngữ cảnh được cung cấp."
+ },
+ "da60b760bf8bd96ad2e2820e": {
+  "faithfulness": 0.0,
+  "answer_relevance": 0.0,
+  "context_relevance": 0.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời không bám sát ngữ cảnh, không giải quyết được câu hỏi và ngữ cảnh cung cấp không liên quan đến danh sách các trường THPT chuyên."
+ },
+ "b343b0fbb2cc34bd616a9536": {
+  "faithfulness": 0.0,
+  "answer_relevance": 0.0,
+  "context_relevance": 0.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời đưa ra thông tin không có trong ngữ cảnh, cụ thể là đề cập đến giáo vụ khoa tập hợp hồ sơ và chuyển sang nhiều đơn vị khác nhau một cách thiếu chính xác. Theo ngữ cảnh cung cấp, sau khi giáo vụ khoa nhận được hồ sơ (đơn và biên lai), chúng sẽ được chuyển tiếp trực tiếp đến Phòng Khảo thí và Đảm bảo chất lượng để xử lý."
+ }
+}
