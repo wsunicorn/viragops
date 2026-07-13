@@ -133,9 +133,11 @@ Xây pipeline quản lý vòng đời tài liệu tiếng Việt từ nguồn th
   collection đặt tên theo `index_version` (không ghi đè, cho phép
   rollback), hybrid search qua Query API RRF fusion server-side
   (`qdrant-client>=1.10`, khớp `qdrant server v1.15.4`).
-- `sql/schema.sql` + `scripts/init_postgres_schema.py` — bảng
+- `sql/migrations/` + `scripts/init_postgres_schema.py` — bảng
   `documents`/`chunks` trong Postgres làm metadata registry (vector +
-  payload retrieval vẫn ở Qdrant).
+  payload retrieval vẫn ở Qdrant). Đổi từ file `schema.sql` đơn lẻ sang
+  migration runner có đánh số + bảng `schema_migrations` track lịch sử
+  (2026-07-13, xem CHECKLIST Phase 3 "Chưa tốt").
 - `scripts/ingest_data.py` — orchestrator đầy đủ, đã chạy thật thành
   công trên snapshot `src_20260710`: **9 document → 220 chunk
   structure_aware → 0 lỗi critical (114 warning, chủ yếu

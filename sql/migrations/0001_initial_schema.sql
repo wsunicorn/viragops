@@ -1,9 +1,7 @@
--- Phase 3 (Module 1 DataOps/RAGOps) — documents/chunks metadata registry.
+-- Phase 3 (Module 1 DataOps/RAGOps) — documents/chunks metadata registry,
+-- + Phase 6 (Module 4 PromptOps) — prompt registry.
 -- Postgres is the source of truth for document/chunk METADATA; vectors +
--- payload for retrieval live in Qdrant (see src/dataops/indexer.py). No
--- migration tool is set up yet (no alembic/ dir in this repo) — this is
--- applied directly via scripts/init_postgres_schema.py, idempotent via
--- IF NOT EXISTS, matching this project's current "no ORM yet" convention.
+-- payload for retrieval live in Qdrant (see src/dataops/indexer.py).
 
 CREATE TABLE IF NOT EXISTS documents (
     document_id     TEXT PRIMARY KEY,

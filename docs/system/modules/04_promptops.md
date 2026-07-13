@@ -85,7 +85,7 @@ Mỗi prompt version cần có:
 
 ## Kết quả thật (Phase 6, 2026-07-11)
 
-- **Registry**: bảng `prompts` (PostgreSQL, sql/schema.sql) đủ metadata
+- **Registry**: bảng `prompts` (PostgreSQL, `sql/migrations/0001_initial_schema.sql`) đủ metadata
   bắt buộc; partial unique index đảm bảo mỗi prompt_id chỉ 1 version
   active kể cả khi ghi đua. Template validate với `variables` khai báo
   ngay lúc ghi (renderer.validate_template) — data hỏng không tới runtime.

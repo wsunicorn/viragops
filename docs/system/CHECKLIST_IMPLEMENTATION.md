@@ -312,9 +312,16 @@ Docker/API thật trước khi commit (không dừng ở "test pass") —
 - Token counting dùng `tiktoken cl100k_base` làm xấp xỉ (không phải
   tokenizer thật của Gemini) — đủ để quyết định ranh giới chunk, không
   chính xác nếu cần tính cost/latency theo token thật.
-- Không có migration tool cho Postgres (`sql/schema.sql` áp dụng thủ
-  công, `CREATE TABLE IF NOT EXISTS`) — ổn ở quy mô hiện tại (2 bảng),
-  khó track lịch sử nếu schema đổi nhiều.
+- ~~Không có migration tool cho Postgres~~ → **Đã thêm (2026-07-13)**:
+  `sql/migrations/NNNN_*.sql` (đánh số, áp theo thứ tự) + bảng
+  `schema_migrations` (filename, applied_at) track lịch sử thật, thay
+  file `schema.sql` đơn lẻ sửa tại chỗ trước đây. `scripts/
+  init_postgres_schema.py` viết lại thành migration runner, mỗi file
+  chạy trong 1 transaction riêng, bỏ qua file đã áp dụng. Verify thật:
+  chạy trên Postgres đang có dữ liệu thật (8 prompt, 10 document, 222
+  chunk) — không mất dữ liệu, `schema_migrations` ghi đúng
+  `0001_initial_schema.sql`, chạy lại lần 2 skip đúng (idempotent). Vẫn
+  cố ý không dùng Alembic/ORM đầy đủ — quy mô 3 bảng chưa cần.
 - Môi trường có phần phụ thuộc máy cụ thể của user (Docker Desktop
   registry-mirror workaround, Ollama cài sẵn dù cuối cùng không dùng) —
   người khác clone repo cần tự set up.
@@ -532,7 +539,7 @@ Quản lý prompt versions, prompt diff, comparison và active prompt policy.
 
 ### Task
 
-- [x] Tạo prompt registry schema — bảng `prompts` trong `sql/schema.sql` (13 field metadata + partial unique index "1 active/prompt_id").
+- [x] Tạo prompt registry schema — bảng `prompts` trong `sql/migrations/0001_initial_schema.sql` (13 field metadata + partial unique index "1 active/prompt_id"; đổi từ `sql/schema.sql` đơn lẻ sang thư mục migrations có đánh số 2026-07-13).
 - [x] Implement CRUD prompt — `src/promptops/registry.py` + API routes `/prompts` (create/versions/diff/activate).
 - [x] Tạo 6 prompt variants P0-P5 — `src/promptops/templates.py` seed vào registry (`scripts/seed_prompts.py`, idempotent); cùng biến + cùng JSON contract để mọi variant đi qua chung citation parser.
 - [x] Implement prompt renderer — `src/promptops/renderer.py` (str.format + validate biến khai báo vs biến dùng thật, chặn từ lúc ghi registry).
