@@ -1,8 +1,21 @@
-# Quality gate config — nguồn ngưỡng chuẩn: docs/system/contracts/metric_definitions.md
+# Quality gate config — schema chuẩn: docs/system/contracts/config_schemas.md
+# QUY TẮC: threshold ở đây phải khớp target đã dùng để đọc report Phase 8
+# (src/evaluation/report.py::TARGETS) — 2 nơi lệch nhau sẽ tạo ra tình
+# huống "report nói ĐẠT nhưng gate nói BLOCK" (hoặc ngược lại), khó tin.
+#
+# Gate KHÔNG tự chạy eval — nhận aggregate JSON đã có sẵn từ
+# scripts/run_evaluation.py (src/evaluation/report.py::write_summary_json),
+# đúng tách trách nhiệm "đo" (Phase 8) khỏi "quyết định" (Phase 9).
 gate_config_id: gate_default_v1
 eval_modes:
-  ci: smoke        # 50 câu
-  nightly: full    # 300 câu
+  ci: smoke        # 50 câu — chạy được trong vài phút, dùng cho mỗi PR/config change
+  nightly: full    # 300 câu — baseline chính thức
+
+# min/max lấy từ contracts/metric_definitions.md + report.py::TARGETS — đây
+# là target ĐÍCH hệ thống nên đạt, KHÔNG phải baseline đo được thật (baseline
+# thật hiện thấp hơn ở citation_accuracy/refusal_accuracy tuỳ run, xem
+# CHECKLIST Phase 8 "Chưa tốt"). Baseline so sánh regression lấy từ 1 eval
+# run cụ thể (--baseline), không phải các số min/max cố định này.
 critical_metrics:
   recall_at_5:
     min: 0.85

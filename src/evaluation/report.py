@@ -8,6 +8,7 @@ that's what this writes, consistent with the project's no-fabrication rule).
 
 from __future__ import annotations
 
+import json
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -311,11 +312,30 @@ def write_markdown(
     return doc_path
 
 
+def write_summary_json(
+    mode: str, results: list[QuestionResult], meta: dict[str, Any], ts: str, eval_k: int = 5
+) -> Path:
+    """Machine-readable aggregate for Phase 9's Quality Gate
+    (src/qualitygate/gate.py) — the CSV is per-question detail and the
+    Markdown is for humans; neither is a stable, parseable input for an
+    automated PASS/WARN/BLOCK decision. This is the same aggregate() dict
+    the Markdown report renders, just persisted as-is instead of formatted
+    into a table, so the gate reads the exact numbers a human reading the
+    report would see (no separate recomputation path to drift out of sync)."""
+    EVAL_DIR.mkdir(parents=True, exist_ok=True)
+    summary_path = EVAL_DIR / f"eval_{mode}_{ts}_summary.json"
+    payload = {"mode": mode, "generated_at": ts, "meta": meta, **aggregate(results, eval_k=eval_k)}
+    summary_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    return summary_path
+
+
 def write_outputs(
     mode: str, results: list[QuestionResult], meta: dict[str, Any], eval_k: int = 5
 ) -> None:
     ts = datetime.now(UTC).strftime("%Y%m%d_%H%M")
     csv_path = write_csv(mode, results, ts)
     doc_path = write_markdown(mode, results, meta, ts, eval_k=eval_k)
+    summary_path = write_summary_json(mode, results, meta, ts, eval_k=eval_k)
     print(f"\nCSV -> {csv_path.relative_to(PROJECT_ROOT)}")
     print(f"Report -> {doc_path.relative_to(PROJECT_ROOT)}")
+    print(f"Summary JSON (for quality gate) -> {summary_path.relative_to(PROJECT_ROOT)}")

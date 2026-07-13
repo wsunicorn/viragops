@@ -1,6 +1,18 @@
-# CI skeleton — Phase 1: lint + unit tests.
-# Phase 9 sẽ thêm job quality-gate: smoke eval 50 câu + regression check
-# (xem docs/system/modules/06_quality_gate_cicd.md).
+# CI — Phase 1: lint + unit tests. Phase 9 (Quality Gate, xem
+# docs/system/modules/06_quality_gate_cicd.md): gate DECISION LOGIC
+# (src/qualitygate/gate.py + 16-simulated-changes suite trong
+# tests/unit/test_quality_gate.py) chạy Ở ĐÂY, trong job lint-test bên
+# dưới — pure Python, không cần service nào.
+#
+# CHƯA implement: job chạy 1 smoke eval THẬT (50 câu qua RagService) rồi
+# gate nó ngay trong CI, như module doc hình dung. Lý do thật: data/chunks/
+# (chunk+embedding) bị gitignore (xem .gitignore) — 1 runner CI mới hoàn
+# toàn không có Qdrant collection nào để retrieve, sẽ phải re-ingest+
+# re-embed từ đầu mỗi lần chạy (tốn quota Gemini thật mỗi PR, cần
+# GEMINI_API_KEY secret chưa cấu hình, và caching 1 Qdrant snapshot giữa
+# các run CI chưa được thiết kế). Chạy tay hiện tại:
+#   python scripts/run_evaluation.py --mode smoke
+#   python scripts/check_gate.py --mode smoke --latest [--baseline <path>]
 name: CI
 
 on:
@@ -29,12 +41,14 @@ jobs:
       - name: Lint (ruff)
         run: ruff check src tests
 
-      - name: Unit tests
+      - name: Unit tests (bao gồm quality gate decision logic + 16 thay đổi giả lập)
         run: pytest tests/unit -q
 
-  # quality-gate:   # Phase 9 — placeholder
+  # quality-gate-live:   # Phase 9 — CHƯA implement, xem lý do ở comment đầu file.
   #   needs: lint-test
   #   runs-on: ubuntu-latest
+  #   services: { qdrant: ..., postgres: ..., litellm: ... }  # cần thiết kế Qdrant snapshot/cache
+  #   env: { GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }} }  # cần thêm secret
   #   steps:
   #     - run: python scripts/run_evaluation.py --mode smoke
-  #     - run: python scripts/check_gate.py --config config/quality_gate.yaml
+  #     - run: python scripts/check_gate.py --mode smoke --latest

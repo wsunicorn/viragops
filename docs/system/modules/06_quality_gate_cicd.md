@@ -77,13 +77,41 @@ Critical metric mặc định:
 | CI quá chậm | Chạy full eval mọi PR | Smoke set 50 câu trong CI, full eval nightly |
 | Report khó đọc | Chỉ log console | Xuất Markdown report |
 
+## Kết quả thật (Phase 9, 2026-07-13)
+
+- **Gate là pure function** (`src/qualitygate/gate.py::evaluate_gate()`)
+  nhận aggregate dict từ `src/evaluation/report.py::write_summary_json()`
+  — không tự chạy eval, không đụng Qdrant/Postgres/LiteLLM, test được
+  100% offline.
+- **Verify trên số liệu thật**: transcribe số liệu run smoke thật
+  (2026-07-13, đã biết trước là xấu vì 100% fallback) vào summary JSON,
+  chạy `scripts/check_gate.py` → gate **BLOCK đúng** với đúng 4 lý do
+  (hallucination, refusal, latency, error rate) khớp phân tích tay trước
+  đó — `docs/system/experiments/results_quality_gate_20260713_0540.md`.
+- **16 thay đổi giả lập** (`tests/unit/test_quality_gate.py`, 9 xấu/4
+  warning/3 tốt): 9/9 thay đổi xấu bị BLOCK (module doc chỉ yêu cầu
+  >=8), 0 false negative, không thay đổi tốt/warning nào bị BLOCK nhầm.
+- **Regression margin verify riêng**: 1 metric giảm 0.05 (vẫn > ngưỡng
+  tuyệt đối 0.85) nhưng vượt `max_quality_drop=0.03` so baseline → vẫn
+  BLOCK — đúng ý đồ "chặn suy giảm từ từ", không chỉ chặn khi chạm đáy.
+- **CHƯA làm**: CI chưa thật sự chạy live smoke eval (cần Qdrant snapshot
+  + `GEMINI_API_KEY` secret trong GitHub Actions, ngoài phạm vi lần này —
+  xem CHECKLIST_IMPLEMENTATION.md Phase 9 "Chưa tốt"); nightly full-eval
+  job; baseline tự động chọn; rollback tự động (hiện chỉ dừng ở quyết
+  định + report).
+
 ## Checklist hoàn tất
 
-- [ ] Có quality gate config.
-- [ ] Gate CLI hoạt động.
-- [ ] GitHub Actions workflow có smoke eval.
-- [ ] Gate report có metric và decision.
-- [ ] Baseline comparison hoạt động.
-- [ ] Có test thay đổi tốt/xấu giả lập.
-- [ ] BLOCK giữ version cũ.
+- [x] Có quality gate config — `config/quality_gate.yaml`.
+- [x] Gate CLI hoạt động — `scripts/check_gate.py`, verify thật với
+      summary JSON transcribe từ report thật.
+- [ ] GitHub Actions workflow có smoke eval — job offline (test logic +
+      16 thay đổi giả lập) đã chạy trong CI; job live-eval-in-CI vẫn
+      comment, thiếu hạ tầng (Qdrant snapshot + secret).
+- [x] Gate report có metric và decision — Markdown, bảng critical/warning
+      + baseline + chi tiết vi phạm.
+- [x] Baseline comparison hoạt động — `test_regression_blocks_even_above_absolute_floor`.
+- [x] Có test thay đổi tốt/xấu giả lập — 16 case, 9 xấu đều bị chặn.
+- [ ] BLOCK giữ version cũ — gate BLOCK dừng ở quyết định + report, chưa
+      có bước tự động rollback prompt/config active trong registry.
 

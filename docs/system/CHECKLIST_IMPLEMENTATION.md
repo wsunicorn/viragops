@@ -984,21 +984,21 @@ Quality gate quyết định PASS/WARN/BLOCK cho thay đổi prompt/model/data/r
 
 ### Task
 
-- [ ] Tạo `quality_gate.yaml`.
-- [ ] Implement gate decision logic.
-- [ ] Implement baseline comparison.
-- [ ] Implement gate report.
-- [ ] Add GitHub Actions workflow.
-- [ ] Chạy 16 thay đổi giả lập.
-- [ ] Đo true positive/false negative.
-- [ ] Chỉnh threshold.
+- [x] Tạo `quality_gate.yaml` — `config/quality_gate.yaml`, threshold khớp `src/evaluation/report.py::TARGETS` (tránh 2 nơi lệch nhau).
+- [x] Implement gate decision logic — `src/qualitygate/gate.py::evaluate_gate()`, pure function trên aggregate dict, không đụng Qdrant/Postgres/LiteLLM.
+- [x] Implement baseline comparison — regression check (`regression.max_quality_drop`) chạy riêng với threshold check tuyệt đối; BLOCK nếu 1 trong 2 vi phạm, kể cả khi metric còn trên ngưỡng tuyệt đối.
+- [x] Implement gate report — `src/qualitygate/report.py::write_markdown()`, cùng pattern CSV/Markdown-không-dashboard-tool của Phase 8.
+- [x] Add GitHub Actions workflow — job `lint-test` giờ chạy `test_quality_gate.py` (logic thuần, không cần service); job `quality-gate-live` (smoke eval thật + gate trong CI) mới ở dạng comment, xem "Chưa tốt".
+- [x] Chạy 16 thay đổi giả lập — `tests/unit/test_quality_gate.py::SIMULATED_CHANGES` (9 xấu/4 warning/3 tốt).
+- [x] Đo true positive/false negative — `test_16_simulated_changes_suite`: 9/9 thay đổi xấu bị BLOCK đúng (true positive), 0 false negative.
+- [x] Chỉnh threshold — không cần chỉnh, threshold gốc từ contracts/report.py TARGETS pass thẳng test đầu tiên.
 
 ### Đầu ra
 
-- Quality gate CLI.
-- GitHub Actions workflow.
-- Gate report.
-- Regression test report.
+- [x] Quality gate CLI — `scripts/check_gate.py` (`--eval-run`/`--baseline`/`--mode --latest`).
+- [x] GitHub Actions workflow — cập nhật `.github/workflows/ci.yml` (phần thật đã chạy; phần live-eval-in-CI còn comment, xem "Chưa tốt").
+- [x] Gate report — Markdown, `docs/system/experiments/results_quality_gate_<ts>.md`.
+- [x] Regression test report — `test_16_simulated_changes_suite` đóng vai trò báo cáo regression (assert TP>=8, FN=0).
 
 ### Kiểm tra dự kiến
 
@@ -1007,17 +1007,61 @@ python scripts/check_gate.py --eval-run eval_001 --baseline eval_base
 pytest tests/unit/test_quality_gate.py
 ```
 
+**Đã chạy thật (2026-07-13):**
+```bash
+python scripts/check_gate.py --eval-run <summary.json> --baseline <summary.json>
+python scripts/check_gate.py --mode smoke --latest
+pytest tests/unit/test_quality_gate.py -v   # 9/9 pass
+```
+
 ### Definition of Done
 
-- [ ] Gate PASS/WARN/BLOCK đúng.
-- [ ] Gate chặn được thay đổi xấu giả lập.
-- [ ] Gate report dễ đọc.
-- [ ] CI smoke eval hoạt động.
+- [x] Gate PASS/WARN/BLOCK đúng — 9 unit test riêng cho logic lõi (identical-to-baseline=PASS, absolute-threshold=BLOCK, warning-only=WARN, missing-metric=fail-closed-BLOCK, regression-above-floor=BLOCK, no-baseline-skips-regression=PASS).
+- [x] Gate chặn được thay đổi xấu giả lập — 9/9 (module doc chỉ yêu cầu >=8).
+- [x] Gate report dễ đọc — bảng critical/warning + baseline + mark ✅/❌ + chi tiết vi phạm.
+- [ ] CI smoke eval hoạt động — **CHƯA**, xem "Chưa tốt".
 
 ### Rủi ro
 
-- Gate quá chặt: dùng regression margin.
-- Gate quá chậm: CI chỉ chạy smoke.
+- Gate quá chặt: dùng regression margin. *(Verify thật: `test_regression_blocks_even_above_absolute_floor` — 0.95→0.90 vẫn > min 0.85 nhưng giảm 0.05 > margin 0.03 → vẫn BLOCK, đúng ý đồ "không để suy giảm từ từ lọt qua".)*
+- Gate quá chậm: CI chỉ chạy smoke. *(`eval_modes.ci: smoke` trong config — nhưng xem "Chưa tốt", CI chưa thật sự chạy live eval nào.)*
+
+### Chưa tốt / cần cải thiện
+
+**Làm tốt, nên giữ nguyên cách làm:** gate là pure function nhận aggregate dict
+đã có sẵn (`src/evaluation/report.py::write_summary_json()`), không tự chạy
+lại eval hay đụng service nào — logic quyết định (Phase 9) tách bạch hoàn
+toàn khỏi việc đo (Phase 8), test được 100% offline; **verify trên số liệu
+THẬT (không chỉ giả lập)**: transcribe đúng số liệu từ
+`results_evaluation_smoke.md` (run 2026-07-13 bị 100% fallback, đã biết
+trước là xấu qua phân tích tay) vào summary JSON rồi chạy gate — gate
+**BLOCK đúng** với 4 lý do khớp chính xác các vấn đề đã tìm ra bằng tay
+(hallucination_rate 0.10>0.05, refusal_accuracy 0.409<0.90,
+p95_latency_seconds 26.2>6.0, error_rate 1.0>0.01) — xem
+`docs/system/experiments/results_quality_gate_20260713_0540.md`.
+
+**Còn thiếu, cần quay lại:**
+- **CI chưa thật sự chạy live smoke eval + gate** (job `quality-gate-live`
+  trong `.github/workflows/ci.yml` vẫn ở dạng comment) — lý do thật:
+  `data/chunks/` (chunk+embedding) bị gitignore, 1 GitHub Actions runner
+  mới hoàn toàn không có Qdrant collection nào để retrieve, sẽ phải
+  re-ingest+re-embed từ đầu mỗi lần chạy (tốn quota Gemini thật mỗi PR,
+  cần `GEMINI_API_KEY` secret chưa cấu hình, và chưa thiết kế cách cache
+  1 Qdrant snapshot giữa các lần chạy CI). Job `lint-test` hiện tại đã
+  chạy được phần offline (`test_quality_gate.py`, logic quyết định + 16
+  thay đổi giả lập) — phần còn thiếu là hạ tầng, không phải logic gate.
+- **`nightly full eval` chưa có job/cron riêng** — module doc nêu full
+  eval 300 câu chạy nightly, hiện chỉ chạy tay qua
+  `scripts/run_evaluation.py --mode full`.
+- **Chưa có cơ chế lưu/chọn baseline tự động** — `--baseline` phải trỏ tay
+  vào 1 summary JSON cụ thể; chưa có khái niệm "baseline hiện hành" được
+  ghi nhận ở đâu đó (vd 1 file `data/eval/current_baseline.json` được cập
+  nhật khi 1 version mới PASS gate và được deploy).
+- **`rollback/version keep policy`** (nêu trong module doc "Task triển
+  khai") chưa implement thành cơ chế tự động — hiện tại BLOCK chỉ dừng ở
+  in ra quyết định + report, không có bước nào tự phục hồi prompt/config
+  active trước đó trong registry (PromptRegistry Phase 6 đã có
+  archive/active riêng, có thể tái dùng cho việc này ở lần làm sau).
 
 ---
 
