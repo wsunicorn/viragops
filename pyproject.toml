@@ -26,6 +26,7 @@ dev = [
     "pytest>=8.2",
     "pytest-asyncio>=0.23",
     "ruff>=0.5",
+    "rank-bm25>=0.2",   # reference BM25Okapi impl, test-only: validates src/dataops/sparse_bm25.py's formula
 ]
 # Phase 2-3: trích xuất/làm sạch tài liệu nguồn (Module 1 DataOps).
 # Cố ý tách nhóm riêng — chưa cần cho API runtime.
