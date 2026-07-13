@@ -1,7 +1,7 @@
 # Relevant chunks linking report
 
-> Sinh bởi `scripts/link_relevant_chunks.py` lúc 2026-07-12T09:50:50.653522+00:00.
-> Chunk source: `structure_aware_data_20260712.jsonl` (strategy `structure_aware`, data_20260712).
+> Sinh bởi `scripts/link_relevant_chunks.py` lúc 2026-07-13T04:34:13.490302+00:00.
+> Chunk source: `structure_aware_data_20260713.jsonl` (strategy `structure_aware`, data_20260713).
 
 - Câu không-refusal đã gán relevant_chunks: **249**
 - Citation khớp structural (parse Điều/Khoản + range): **200**

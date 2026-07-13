@@ -9,12 +9,17 @@
 #   (0.906) > sparse (0.865) > dense (0.882 — sparse/dense đổi chỗ nhẹ so
 #   với lần đầu, chênh lệch nhỏ trong margin nhiễu).
 retrieval_config_id: hybrid_dbsf_v2
-data_version: data_20260712
-index_version: idx_20260712_geminiembedding001
+data_version: data_20260713
+index_version: idx_20260713_geminiembedding001
 # 2026-07-12: re-ingest thêm doc_camnang_dangky_hocphan (D14) khi mở rộng
 # golden set 76->300 câu (222 chunk structure_aware, +2 so với 220 trước
 # đó). Đã re-run đủ 8-config experiment trên bộ 300 câu (249 câu có căn cứ)
 # — kết luận GIỮ NGUYÊN, không cần đổi fusion/threshold.
+# 2026-07-13: re-ingest lại (222 chunk, số lượng KHÔNG đổi) chỉ để mang
+# page_start/page_end thật vào chunk (trước đó luôn None — xem CHECKLIST
+# Phase 3 "Chưa tốt"; fix: src/dataops/vietnamese_normalizer.py
+# tag_pages/extract_page_range). Không đổi nội dung/text chunk theo cách
+# ảnh hưởng embedding — không cần chạy lại Phase 4 experiment.
 query_normalization: true
 retrieval:
   type: hybrid              # dense | sparse | hybrid

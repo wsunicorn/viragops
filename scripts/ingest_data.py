@@ -35,10 +35,15 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.common.settings import get_settings  # noqa: E402
 from src.dataops import embedder, indexer, quality_checker, version_manager  # noqa: E402
-from src.dataops.chunker import CHUNKERS, RawChunk  # noqa: E402
+from src.dataops.chunker import CHUNKERS, RawChunk, count_tokens  # noqa: E402
 from src.dataops.metadata_extractor import load_documents  # noqa: E402
 from src.dataops.sparse_bm25 import BM25Sparse  # noqa: E402
-from src.dataops.vietnamese_normalizer import clean_text, normalize_for_search  # noqa: E402
+from src.dataops.vietnamese_normalizer import (  # noqa: E402
+    clean_text_keep_pages,
+    extract_page_range,
+    normalize_for_search,
+    strip_page_sentinels,
+)
 
 CHUNKS_DIR = PROJECT_ROOT / "data" / "chunks"
 GATEWAY_CONFIG = PROJECT_ROOT / "config" / "model_gateway.yaml"
@@ -66,22 +71,39 @@ def build_chunks_for_strategy(
             rc.chunk_index: f"chunk_{doc.document_id}_{strategy}_{rc.chunk_index:04d}"
             for rc in raw_chunks
         }
-        for rc in raw_chunks:
+        # Carry-forward page tracking: chunk_index follows document reading
+        # order for all 4 strategies, so a chunk with no [PG:N] sentinel of
+        # its own is on whatever page the last-seen sentinel said — it must
+        # be, since no page boundary occurred between them. Genuinely
+        # page-less documents (HTML-sourced, never had OCR markers) keep
+        # page_start/page_end = None honestly instead of a guessed value.
+        last_page: int | None = None
+        for rc in sorted(raw_chunks, key=lambda r: r.chunk_index):
+            chunk_start_page = last_page
+            page_min, page_max = extract_page_range(rc.text)
+            if page_min is not None:
+                page_start = chunk_start_page if chunk_start_page is not None else page_min
+                page_end = page_max
+                last_page = page_max
+            else:
+                page_start = page_end = chunk_start_page
+
             chunk_id = local_id_by_index[rc.chunk_index]
             parent_chunk_id = (
                 local_id_by_index.get(rc.parent_index) if rc.parent_index is not None else None
             )
+            clean_chunk_text = strip_page_sentinels(rc.text).strip()
             out.append(
                 {
                     "chunk_id": chunk_id,
                     "document_id": doc.document_id,
                     "data_version": data_version,
                     "chunk_index": rc.chunk_index,
-                    "text": rc.text,
-                    "normalized_text": normalize_for_search(rc.text),
-                    "token_count": rc.token_count,
-                    "page_start": None,
-                    "page_end": None,
+                    "text": clean_chunk_text,
+                    "normalized_text": normalize_for_search(clean_chunk_text),
+                    "token_count": count_tokens(clean_chunk_text),
+                    "page_start": page_start,
+                    "page_end": page_end,
                     "section": rc.section,
                     "chunking_strategy": rc.chunking_strategy,
                     "parent_chunk_id": parent_chunk_id,
@@ -175,7 +197,11 @@ def main() -> int:
     print(f"Loaded {len(documents)} documents from {cfg['source']['snapshot']}")
 
     for doc in documents:
-        doc.text = clean_text(doc.text)
+        # Keep [PG:N] page sentinels through chunking (build_chunks_for_
+        # strategy reads + strips them per-chunk) instead of deleting page
+        # markers upfront — that used to be the reason page_start/page_end
+        # were always None (see CHECKLIST Phase 3 "Chưa tốt").
+        doc.text = clean_text_keep_pages(doc.text)
 
     data_version = version_manager.make_data_version()
     default_strategy = cfg["chunking"]["default_strategy"]

@@ -49,7 +49,13 @@ services:
       - api
 
   litellm:
-    image: ghcr.io/berriai/litellm:main-stable
+    # Pinned by digest (2026-07-13) — "main-stable" is a moving tag, would
+    # silently pull a different litellm build on a future `docker compose
+    # pull`/rebuild (real reproducibility risk, flagged in CHECKLIST Phase
+    # 7 "Chưa tốt"). Digest below = litellm 1.92.0 at pin time. Bump
+    # deliberately: `docker run --rm --entrypoint litellm
+    # ghcr.io/berriai/litellm:main-stable --version` then update the digest.
+    image: ghcr.io/berriai/litellm@sha256:9ef6f45bc0104940571765e610c52a1d761b5ec85efcd193795281086ee61277
     ports:
       - "4000:4000"
     environment:
