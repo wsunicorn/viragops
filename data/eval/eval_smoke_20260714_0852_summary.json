@@ -1,0 +1,38 @@
+{
+  "mode": "smoke",
+  "generated_at": "20260714_0852",
+  "meta": {
+    "data_version": "data_20260713",
+    "index_version": "idx_20260713_geminiembedding001",
+    "retrieval_config_id": "hybrid_dbsf_v2",
+    "prompt_version": "p5_concise_v1"
+  },
+  "n_questions": 50,
+  "eval_k": 5,
+  "retrieval": {
+    "n_questions": 37,
+    "recall_at_k": 0.9054054054054054,
+    "hit_rate": 0.918918918918919,
+    "mrr": 0.8243243243243243,
+    "ndcg_at_k": 0.8274179856701128
+  },
+  "context_precision": 0.18918918918918928,
+  "context_recall": 0.9054054054054054,
+  "context_relevance": 0.975,
+  "faithfulness": 0.9625,
+  "answer_relevance": 0.95,
+  "hallucination_rate": 0.075,
+  "citation_accuracy": 0.8194444444444444,
+  "refusal_accuracy": 0.9,
+  "n_judged": 40,
+  "n_judge_errors": 0,
+  "p50_latency_ms": 1251,
+  "p95_latency_ms": 2129,
+  "avg_cost_usd": 0.0007044999999999998,
+  "error_rate": 0.0,
+  "fallback_rate": 0.0,
+  "cache_hit_rate": null,
+  "inter_judge_agreement": null,
+  "ambiguity_handling_rate": 0.6666666666666666,
+  "n_ambiguity_scored": 3
+}

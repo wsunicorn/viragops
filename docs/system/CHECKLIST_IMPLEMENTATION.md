@@ -588,13 +588,29 @@ refusal 0.00; refusal-aware 0.75 thua grounded thường 1.00) — đúng tinh
 thần "chọn bằng số liệu, không cảm tính", và là material tốt cho báo cáo.
 
 **Còn thiếu, cần quay lại:**
-- **Smoke set 12 câu là quá nhỏ để kết luận chắc** — khoảng tin cậy rộng
-  (refusal chỉ có 4 câu → 1 câu sai = 25%). Kết quả đủ để chọn baseline
-  p1 nhưng Phase 8 (Evaluation Engine, LLM-judge + full set) phải chạy
-  lại 6 variant trước khi kết luận trong báo cáo.
+- ~~Smoke set 12 câu là quá nhỏ để kết luận chắc... Phase 8 phải chạy lại
+  6 variant~~ → **Đã chạy lại (2026-07-14)**, xem
+  `experiments/results_prompt_comparison_p8.md`: cả 5 variant còn lại
+  (p0/p2/p3/p4/p5, p1 đã archived từ lâu) chạy qua Evaluation Engine đầy
+  đủ (50 câu smoke/variant, retrieval thật + LLM-judge 4 tiêu chí, 0%
+  fallback contamination cả 6 lần chạy — số liệu sạch). Kết luận Phase 6
+  ĐƯỢC XÁC NHẬN LẠI bằng dữ liệu lớn hơn nhiều (p0 baseline yếu đúng thiết
+  kế: Refusal Acc 0.740, Hallucination 0.293; p2/p3/p4 đều dưới target
+  Refusal Acc 0.90). **Phát hiện mới quan trọng:** `p5_concise_v1` cạnh
+  tranh rất sát bản production `p7_citation_complete_safe_v1` — THẮNG ở
+  Faithfulness (0.963 vs 0.950) và Hallucination (0.075 vs 0.100), hoà
+  Refusal Accuracy (0.900) và Error rate (0.000), chỉ thua nhẹ ở Citation
+  Accuracy (0.819 vs 0.838, cả 2 đều dưới target 0.85). Xác nhận đúng gợi
+  ý bỏ ngỏ từ Phase 6 ("ứng viên cost-aware chờ Phase 8 xác nhận") — p5
+  không đánh đổi chất lượng đáng kể để giảm token. **Không activate** (đúng
+  policy, cần eval_result_id + xác nhận người dùng) — ghi nhận làm gợi ý
+  hướng cải thiện tương lai ("p8 = quy tắc citation của p7 + phong cách
+  p5"), chưa implement.
 - **Comparison chưa đo faithfulness/answer-relevance** (cần LLM-judge,
   Phase 8) — grounded_citation_rate mới là proxy (citation trúng
-  relevant_chunks), chưa đánh giá nội dung answer đúng/sai.
+  relevant_chunks), chưa đánh giá nội dung answer đúng/sai. *(Đã giải
+  quyết cùng lúc với mục trên — `results_prompt_comparison_p8.md` có đủ
+  cả 2 số liệu này qua LLM-judge thật.)*
 - **`POST /prompts/{id}/compare` (contract) chưa có dạng HTTP** — chạy
   offline qua script vì 72 lượt LLM không hợp request đồng bộ; thành job
   async khi có eval engine (Phase 8).
