@@ -1101,9 +1101,26 @@ re-ingest:
   phải chất lượng p7 thật. **Đã sửa**: `scripts/seed_prompts.py` giờ có
   hằng số `PRODUCTION_PROMPT_VERSION = "p7_citation_complete_safe_v1"`,
   bootstrap activate đúng bản này (override có log, dẫn chiếu tới chuỗi
-  so sánh dữ liệu thật p1→p6→p7 đã có). Lần chạy CI tiếp theo sẽ test
-  đúng prompt production thật — **chưa re-run để lấy số liệu p7 sạch từ
-  CI** (việc tiếp theo hợp lý).
+  so sánh dữ liệu thật p1→p6→p7 đã có).
+- **Re-run CI ngay sau khi sửa (2026-07-14, job `29302992016`, 7m3s,
+  fallback_rate=0.000) xác nhận fix đúng** — `prompt_version=p7_citation_complete_safe_v1`
+  thật trong report, Citation Accuracy nhích lên **0.838** (so 0.800 của
+  p1, đúng hướng nhưng vẫn dưới target 0.85, khớp gap đã biết). **Gate
+  quyết định BLOCK lần này — vi phạm THẬT, không phải lỗi hạ tầng**:
+  `hallucination_rate=0.100 > 0.05`. Đọc kỹ failure cases xác nhận đây
+  KHÔNG phải nhiễu ngẫu nhiên mà là biểu hiện khác của gap multi-hop
+  đã biết (item 9, đang chặn bởi quota) — 2/4 câu hallucination thuộc
+  category `multi_hop` (n=5, mẫu nhỏ nên 1 câu đã kéo tỷ lệ category lên
+  0.400), 1 câu factoid do `retrieval_miss` (hit@k=0, model không có gì
+  để bám nên "hallucinate" đúng nghĩa fail-closed ngược — không có context
+  đúng thì không thể trả lời có căn cứ), 1 câu procedural (n=2, mẫu quá
+  nhỏ để kết luận). Kết quả: **toàn bộ hệ thống Phase 9 (snapshot restore
+  → seed đúng prompt production → smoke eval → gate BLOCK đúng lý do)
+  hoạt động đúng thiết kế trên dữ liệu thật, không giả lập** — đây chính
+  là use case gốc của quality gate: tự động phát hiện lại đúng gap đã biết
+  mà không cần con người tự đọc report. Báo cáo:
+  `results_evaluation_smoke.md` + `results_quality_gate_20260714_0320.md`
+  + `data/eval/eval_smoke_20260714_0320_summary.json` (đã commit).
 - **`nightly full eval` chưa có job/cron riêng** — module doc nêu full
   eval 300 câu chạy nightly, hiện chỉ chạy tay qua
   `scripts/run_evaluation.py --mode full`.
