@@ -1,16 +1,24 @@
-"""Seed the prompt registry with the 6 initial variants P0-P5 (Phase 6).
+"""Seed the prompt registry with the initial prompt variants (Phase 6).
 
 Idempotent: existing versions are left untouched (create_version
 if_absent=True) — reruns never overwrite templates that may have been
 evaluated/activated since. New versions land as status='testing' (they
 are the planned experiment set, not ad-hoc drafts).
 
-Bootstrap activation: p1_grounded_v1 is activated with an EXPLICIT LOGGED
-OVERRIDE if (and only if) the prompt has no active version yet — the
-runtime needs one active prompt to serve, and p1 is the template already
-verified end-to-end in Phase 5. The comparison flow
-(scripts/run_prompt_comparison.py) supersedes this with a data-driven
-activation.
+Bootstrap activation: PRODUCTION_PROMPT_VERSION is activated with an
+EXPLICIT LOGGED OVERRIDE if (and only if) the prompt has no active
+version yet — the runtime needs one active prompt to serve. This constant
+tracks the REAL, already-validated activation decision chain
+(p1 -> p6 -> p7, see docs/system/CHECKLIST_IMPLEMENTATION.md Phase 8
+"Sửa citation accuracy multi-hop/ambiguous" for the live comparison data
+behind each step) — it exists because that decision only ever got applied
+to whichever Postgres was running locally at the time via
+PromptRegistry.activate(); a fresh database (a new dev machine, or CI's
+snapshot-restored Postgres — see .github/workflows/ci.yml
+quality-gate-live) has no memory of it and would otherwise silently
+bootstrap back to the outdated p1 default. Bumping this constant is the
+one line that needs to change here when a future comparison run
+supersedes p7 for real.
 
 Usage:
     python scripts/seed_prompts.py
@@ -27,6 +35,8 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from src.common.settings import get_settings  # noqa: E402
 from src.promptops.registry import PromptRegistry, PromptVersion, RegistryError  # noqa: E402
 from src.promptops.templates import COMMON_METADATA, SEED_PROMPTS  # noqa: E402
+
+PRODUCTION_PROMPT_VERSION = "p7_citation_complete_safe_v1"
 
 
 def main() -> int:
@@ -53,16 +63,18 @@ def main() -> int:
         print(f"active version: {active.prompt_version}")
     except RegistryError:
         registry.activate(
-            prompt_id, "p1_grounded_v1",
+            prompt_id, PRODUCTION_PROMPT_VERSION,
             actor="seed_script_phase6",
             override=True,
             override_reason=(
-                "bootstrap: chua co eval run chinh thuc; p1 da verify end-to-end o Phase 5 "
-                "(xem modules/03). Se duoc thay bang activation theo so lieu tu "
-                "run_prompt_comparison.py"
+                f"bootstrap: database moi khong co lich su activate — {PRODUCTION_PROMPT_VERSION} "
+                "la ket qua that cua chuoi so sanh du lieu that p1->p6->p7 (xem "
+                "docs/system/CHECKLIST_IMPLEMENTATION.md Phase 8 'Sua citation accuracy "
+                "multi-hop/ambiguous'), replay lai quyet dinh do cho database nay thay vi "
+                "quay ve p1 mac dinh cu"
             ),
         )
-        print("bootstrap-activated p1_grounded_v1 (override, logged)")
+        print(f"bootstrap-activated {PRODUCTION_PROMPT_VERSION} (override, logged)")
 
     print(f"done: {created} new version(s)")
     return 0

@@ -1077,6 +1077,33 @@ re-ingest:
   trigger trên MỌI push/PR mà quota hay cạn (đã xảy ra nhiều lần trong dự
   án này), cân nhắc đổi `on:` của job thành `workflow_dispatch` (chạy tay
   khi cần) thay vì tự động.
+- **CI job THẬT ĐÃ CHẠY (2026-07-14), verify live thành công — job
+  `quality-gate-live` xanh trong 10m40s** (không phải hàng giờ như lo
+  ngại ban đầu — theo dõi qua CLI có lúc báo "in_progress" rất lâu dù
+  job đã xong thật, do trễ đồng bộ của tool theo dõi, không phải job bị
+  treo). Kết quả THẬT, chạy sạch 100% qua Gemini primary (`fallback_rate:
+  0.000`, p95 latency 1.37s): Recall@5 0.905, Faithfulness 0.971, Answer
+  Relevance 0.971, Hallucination 0.029, Refusal Accuracy 0.920, Error
+  rate 0 — toàn bộ critical metric ĐẠT. **Quyết định gate: WARN** (đúng,
+  không phải PASS giả) — `citation_accuracy=0.800 < 0.85` (warning
+  threshold), khớp đúng gap citation-accuracy multi-hop đã biết từ trước
+  (item 9 chưa fix). Report: `results_quality_gate_20260714_0305.md`.
+- **Phát hiện thật từ lần chạy CI đầu tiên, đã sửa ngay:** eval chạy với
+  `prompt_version=p1_grounded_v1` — KHÔNG phải `p7_citation_complete_safe_v1`
+  (bản production thật, đã activate qua so sánh dữ liệu thật ở Phase 8).
+  Nguyên nhân: `scripts/seed_prompts.py` chỉ bootstrap-activate p1 khi
+  database chưa có prompt active nào — đúng cho lần seed ĐẦU TIÊN của dự
+  án, nhưng quyết định activate p7 sau đó chỉ áp dụng vào Postgres LOCAL
+  qua `PromptRegistry.activate()` thủ công, không được ghi lại ở đâu khác.
+  CI dùng Postgres MỚI HOÀN TOÀN mỗi lần chạy (snapshot chỉ phục hồi
+  Qdrant + file local, không phục hồi Postgres) nên luôn quay lại bootstrap
+  p1 — số liệu citation_accuracy 0.800 ở trên vì vậy phản ánh p1, KHÔNG
+  phải chất lượng p7 thật. **Đã sửa**: `scripts/seed_prompts.py` giờ có
+  hằng số `PRODUCTION_PROMPT_VERSION = "p7_citation_complete_safe_v1"`,
+  bootstrap activate đúng bản này (override có log, dẫn chiếu tới chuỗi
+  so sánh dữ liệu thật p1→p6→p7 đã có). Lần chạy CI tiếp theo sẽ test
+  đúng prompt production thật — **chưa re-run để lấy số liệu p7 sạch từ
+  CI** (việc tiếp theo hợp lý).
 - **`nightly full eval` chưa có job/cron riêng** — module doc nêu full
   eval 300 câu chạy nightly, hiện chỉ chạy tay qua
   `scripts/run_evaluation.py --mode full`.
