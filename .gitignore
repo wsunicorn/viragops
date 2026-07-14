@@ -40,3 +40,8 @@ data/experiments/query_embeddings_*.json
 
 # Trace runtime (JSONL, thay bang Langfuse o Phase 10)
 data/traces/*
+
+# CI snapshot bundle (scripts/export_ci_snapshot.py) — build lai duoc tu
+# Qdrant/data/chunks hien co, upload thu cong len GitHub Release (Phase 9,
+# xem CHECKLIST Phase 9), khong commit truc tiep (vai MB binary).
+dist/

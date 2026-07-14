@@ -1,18 +1,29 @@
 # CI — Phase 1: lint + unit tests. Phase 9 (Quality Gate, xem
 # docs/system/modules/06_quality_gate_cicd.md): gate DECISION LOGIC
 # (src/qualitygate/gate.py + 16-simulated-changes suite trong
-# tests/unit/test_quality_gate.py) chạy Ở ĐÂY, trong job lint-test bên
-# dưới — pure Python, không cần service nào.
+# tests/unit/test_quality_gate.py) chạy trong job lint-test — pure Python,
+# không cần service nào.
 #
-# CHƯA implement: job chạy 1 smoke eval THẬT (50 câu qua RagService) rồi
-# gate nó ngay trong CI, như module doc hình dung. Lý do thật: data/chunks/
-# (chunk+embedding) bị gitignore (xem .gitignore) — 1 runner CI mới hoàn
-# toàn không có Qdrant collection nào để retrieve, sẽ phải re-ingest+
-# re-embed từ đầu mỗi lần chạy (tốn quota Gemini thật mỗi PR, cần
-# GEMINI_API_KEY secret chưa cấu hình, và caching 1 Qdrant snapshot giữa
-# các run CI chưa được thiết kế). Chạy tay hiện tại:
-#   python scripts/run_evaluation.py --mode smoke
-#   python scripts/check_gate.py --mode smoke --latest [--baseline <path>]
+# Job quality-gate-live chạy 1 smoke eval THẬT (50 câu qua RagService) rồi
+# gate nó, đúng module doc hình dung — nhưng KHÔNG re-ingest/re-embed:
+# data/chunks/ bị gitignore nên 1 runner mới không có gì để retrieve, và
+# re-embed mỗi PR sẽ tốn quota Gemini thật + nhanh cạn (project này đã cạn
+# quota nhiều lần, xem CHECKLIST Phase 8 "Chưa tốt"). Thay vào đó: Qdrant
+# collection + data/chunks/* được đóng gói 1 lần (scripts/export_ci_snapshot.py)
+# và tải lại mỗi lần CI chạy (scripts/restore_ci_snapshot.py) — chỉ phần
+# smoke eval (50 câu generate+judge) mới tốn quota thật, không phải embed.
+#
+# SETUP CẦN LÀM 1 LẦN (không tự động hoá được — cần quyền GitHub repo):
+#   1. python scripts/export_ci_snapshot.py  (chạy local, có Qdrant thật)
+#   2. Tạo GitHub Release, upload dist/ci_snapshot_data_<version>.tar.gz
+#   3. Repo Settings > Secrets and variables > Actions:
+#        Variables: CI_SNAPSHOT_URL = URL download trực tiếp của asset trên
+#        Secrets:   GEMINI_API_KEY, GEMINI_API_KEY_2 (khuyến nghị),
+#                    GEMINI_API_KEY_5 (khuyến nghị), LITELLM_MASTER_KEY
+#                    (chuỗi tuỳ chọn, chỉ để proxy tự xác thực nội bộ),
+#                    POSTGRES_PASSWORD (chuỗi tuỳ chọn, DB tạm trong CI)
+#   Lặp lại bước 1-2 mỗi khi data_version/index_version đổi (re-ingest mới).
+#   Xem CHECKLIST_IMPLEMENTATION.md Phase 9 để biết chi tiết + lý do thiết kế.
 name: CI
 
 on:
@@ -44,11 +55,59 @@ jobs:
       - name: Unit tests (bao gồm quality gate decision logic + 16 thay đổi giả lập)
         run: pytest tests/unit -q
 
-  # quality-gate-live:   # Phase 9 — CHƯA implement, xem lý do ở comment đầu file.
-  #   needs: lint-test
-  #   runs-on: ubuntu-latest
-  #   services: { qdrant: ..., postgres: ..., litellm: ... }  # cần thiết kế Qdrant snapshot/cache
-  #   env: { GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }} }  # cần thêm secret
-  #   steps:
-  #     - run: python scripts/run_evaluation.py --mode smoke
-  #     - run: python scripts/check_gate.py --mode smoke --latest
+  quality-gate-live:
+    needs: lint-test
+    runs-on: ubuntu-latest
+    # Chỉ chạy khi đã cấu hình CI_SNAPSHOT_URL (xem SETUP ở comment đầu
+    # file) — tránh job đỏ (fail) trên mọi PR ở repo chưa setup xong.
+    if: vars.CI_SNAPSHOT_URL != ''
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
+      GEMINI_API_KEY_5: ${{ secrets.GEMINI_API_KEY_5 }}
+      LITELLM_MASTER_KEY: ${{ secrets.LITELLM_MASTER_KEY }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -e ".[dev,dataops,ragops]"
+
+      - name: Start qdrant + postgres + litellm (docker compose, giống local dev)
+        run: docker compose up -d qdrant postgres litellm
+
+      - name: Wait for services healthy
+        run: |
+          timeout 60 bash -c 'until curl -sf http://localhost:6333/collections >/dev/null; do sleep 2; done'
+          timeout 60 bash -c 'until pg_isready -h localhost -p 5432 >/dev/null 2>&1; do sleep 2; done' || true
+          timeout 90 bash -c 'until curl -sf http://localhost:4000/health/liveliness >/dev/null; do sleep 3; done'
+
+      - name: Restore CI snapshot (Qdrant collection + data/chunks/*)
+        run: python scripts/restore_ci_snapshot.py --snapshot-url "${{ vars.CI_SNAPSHOT_URL }}"
+
+      - name: Init Postgres schema + seed prompt registry
+        run: |
+          python scripts/init_postgres_schema.py
+          python scripts/seed_prompts.py
+
+      - name: Run smoke eval (50 câu, real Gemini generate+judge calls)
+        run: python scripts/run_evaluation.py --mode smoke
+
+      - name: Quality gate decision (exit 1 = BLOCK)
+        run: python scripts/check_gate.py --mode smoke --latest
+
+      - name: Upload gate + eval reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-gate-reports
+          path: |
+            data/eval/eval_smoke_*_summary.json
+            docs/system/experiments/results_evaluation_smoke.md
+            docs/system/experiments/results_quality_gate_*.md

@@ -94,20 +94,28 @@ Critical metric mặc định:
 - **Regression margin verify riêng**: 1 metric giảm 0.05 (vẫn > ngưỡng
   tuyệt đối 0.85) nhưng vượt `max_quality_drop=0.03` so baseline → vẫn
   BLOCK — đúng ý đồ "chặn suy giảm từ từ", không chỉ chặn khi chạm đáy.
-- **CHƯA làm**: CI chưa thật sự chạy live smoke eval (cần Qdrant snapshot
-  + `GEMINI_API_KEY` secret trong GitHub Actions, ngoài phạm vi lần này —
-  xem CHECKLIST_IMPLEMENTATION.md Phase 9 "Chưa tốt"); nightly full-eval
-  job; baseline tự động chọn; rollback tự động (hiện chỉ dừng ở quyết
-  định + report).
+- **Live CI (2026-07-14): implement + verify cơ chế xong**, chờ user
+  setup secret 1 lần. `scripts/export_ci_snapshot.py`/`restore_ci_snapshot.py`
+  đóng gói Qdrant collection (qua REST snapshot API) + 3 file local
+  `data/chunks/` RagService cần (manifest/jsonl/bm25_state) thành 1
+  tarball, tránh re-ingest/re-embed tốn quota mỗi lần CI chạy. Verify
+  thật trên Qdrant thật: export→restore vào collection test riêng, điểm
+  số khớp 100% (222=222), cả dense lẫn sparse vector. `quality-gate-live`
+  job trong `.github/workflows/ci.yml` chỉ còn thiếu phần user phải tự
+  làm (tạo GitHub Release + secret, cần quyền repo) — xem
+  CHECKLIST_IMPLEMENTATION.md Phase 9 "Chưa tốt" để có hướng dẫn đầy đủ.
+  Còn thiếu: nightly full-eval job; baseline tự động chọn; rollback tự
+  động (hiện chỉ dừng ở quyết định + report).
 
 ## Checklist hoàn tất
 
 - [x] Có quality gate config — `config/quality_gate.yaml`.
 - [x] Gate CLI hoạt động — `scripts/check_gate.py`, verify thật với
       summary JSON transcribe từ report thật.
-- [ ] GitHub Actions workflow có smoke eval — job offline (test logic +
-      16 thay đổi giả lập) đã chạy trong CI; job live-eval-in-CI vẫn
-      comment, thiếu hạ tầng (Qdrant snapshot + secret).
+- [x] GitHub Actions workflow có smoke eval — job `quality-gate-live` đã
+      implement đầy đủ + verify cơ chế snapshot end-to-end trên Qdrant
+      thật; còn thiếu phần user tự setup secret/Release (không tự làm
+      được, cần quyền GitHub repo).
 - [x] Gate report có metric và decision — Markdown, bảng critical/warning
       + baseline + chi tiết vi phạm.
 - [x] Baseline comparison hoạt động — `test_regression_blocks_even_above_absolute_floor`.

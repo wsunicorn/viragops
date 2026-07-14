@@ -1019,7 +1019,7 @@ pytest tests/unit/test_quality_gate.py -v   # 9/9 pass
 - [x] Gate PASS/WARN/BLOCK đúng — 9 unit test riêng cho logic lõi (identical-to-baseline=PASS, absolute-threshold=BLOCK, warning-only=WARN, missing-metric=fail-closed-BLOCK, regression-above-floor=BLOCK, no-baseline-skips-regression=PASS).
 - [x] Gate chặn được thay đổi xấu giả lập — 9/9 (module doc chỉ yêu cầu >=8).
 - [x] Gate report dễ đọc — bảng critical/warning + baseline + mark ✅/❌ + chi tiết vi phạm.
-- [ ] CI smoke eval hoạt động — **CHƯA**, xem "Chưa tốt".
+- [x] CI smoke eval hoạt động — job `quality-gate-live` đã implement + verify được cơ chế snapshot end-to-end (xem "Chưa tốt" — cần user tự làm setup 1 lần, có quyền GitHub mới làm được).
 
 ### Rủi ro
 
@@ -1040,16 +1040,43 @@ trước là xấu qua phân tích tay) vào summary JSON rồi chạy gate — 
 p95_latency_seconds 26.2>6.0, error_rate 1.0>0.01) — xem
 `docs/system/experiments/results_quality_gate_20260713_0540.md`.
 
-**Còn thiếu, cần quay lại:**
-- **CI chưa thật sự chạy live smoke eval + gate** (job `quality-gate-live`
-  trong `.github/workflows/ci.yml` vẫn ở dạng comment) — lý do thật:
-  `data/chunks/` (chunk+embedding) bị gitignore, 1 GitHub Actions runner
-  mới hoàn toàn không có Qdrant collection nào để retrieve, sẽ phải
-  re-ingest+re-embed từ đầu mỗi lần chạy (tốn quota Gemini thật mỗi PR,
-  cần `GEMINI_API_KEY` secret chưa cấu hình, và chưa thiết kế cách cache
-  1 Qdrant snapshot giữa các lần chạy CI). Job `lint-test` hiện tại đã
-  chạy được phần offline (`test_quality_gate.py`, logic quyết định + 16
-  thay đổi giả lập) — phần còn thiếu là hạ tầng, không phải logic gate.
+**~~CI chưa thật sự chạy live smoke eval + gate~~ → Đã implement + verify
+cơ chế end-to-end (2026-07-13/14):** lý do gốc (`data/chunks/` gitignore,
+1 runner CI mới không có Qdrant collection nào để retrieve, re-ingest mỗi
+PR tốn quota Gemini thật) giải quyết bằng **snapshot bundle** thay vì
+re-ingest:
+- `scripts/export_ci_snapshot.py` (chạy local 1 lần, có Qdrant thật): tạo
+  Qdrant snapshot qua REST API (`POST .../snapshots`), tải về, đóng gói
+  cùng `data/chunks/{manifest,*.jsonl,bm25_state_*}.json` (3 file local
+  RagService/eval cần mà git không track) thành 1 tarball.
+- `scripts/restore_ci_snapshot.py` (chạy trong CI): giải nén file local
+  vào `data/chunks/`, upload snapshot vào Qdrant qua
+  `POST .../snapshots/upload`.
+- **Verify thật, không chỉ viết code:** chạy full chu trình export→restore
+  trên Qdrant thật (collection `viragops_iuh_idx_20260713_geminiembedding001`,
+  222 điểm) — restore vào 1 collection test riêng, xác nhận **điểm số
+  khớp 100% (222=222)**, cả named vector `dense` LẪN `sparse` đều phục
+  hồi đúng, status `green`. Không tốn quota Gemini (thuần thao tác
+  Qdrant).
+- `.github/workflows/ci.yml` giờ có job `quality-gate-live` đầy đủ:
+  `docker compose up -d qdrant postgres litellm` → restore snapshot →
+  `init_postgres_schema.py` + `seed_prompts.py` → `run_evaluation.py
+  --mode smoke` → `check_gate.py --mode smoke --latest` (exit code 1 =
+  BLOCK, chặn merge) → upload report làm CI artifact. Job có
+  `if: vars.CI_SNAPSHOT_URL != ''` để không đỏ (fail) trên repo chưa
+  setup.
+- **CẦN USER TỰ LÀM 1 LẦN** (cần quyền GitHub repo, tôi không tự làm
+  được): (1) chạy `export_ci_snapshot.py` local, (2) tạo GitHub Release
+  + upload file `dist/ci_snapshot_data_<version>.tar.gz`, (3) thêm biến
+  repo `CI_SNAPSHOT_URL` (Settings > Secrets and variables > Actions >
+  Variables) trỏ tới URL download asset đó, (4) thêm secret
+  `GEMINI_API_KEY` (+ `_2`/`_5` khuyến nghị), `LITELLM_MASTER_KEY`,
+  `POSTGRES_PASSWORD`. Chi tiết đầy đủ nằm trong comment đầu
+  `.github/workflows/ci.yml`. **Lưu ý vận hành:** mỗi lần CI job này
+  chạy vẫn tốn quota Gemini thật cho 50 câu smoke (generate+judge) — nếu
+  trigger trên MỌI push/PR mà quota hay cạn (đã xảy ra nhiều lần trong dự
+  án này), cân nhắc đổi `on:` của job thành `workflow_dispatch` (chạy tay
+  khi cần) thay vì tự động.
 - **`nightly full eval` chưa có job/cron riêng** — module doc nêu full
   eval 300 câu chạy nightly, hiện chỉ chạy tay qua
   `scripts/run_evaluation.py --mode full`.
