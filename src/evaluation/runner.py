@@ -78,8 +78,12 @@ def run_question(
     chunk_text_by_id: dict[str, str],
     eval_k: int = 5,
     judge2: GeminiJudge | None = None,
+    mode: str = "balanced",
 ) -> QuestionResult:
-    req = QARequest(question=item["question"], mode="balanced", debug=True)
+    # mode param (Phase 11): mặc định "balanced" giữ nguyên hành vi cũ cho
+    # mọi caller hiện có (Phase 8 baseline reproducibility) — chỉ
+    # scripts/run_experiment_optimization.py truyền "auto" để đo O5 routing.
+    req = QARequest(question=item["question"], mode=mode, debug=True)
     resp = service.answer(req)
     trace = service.get_trace(resp.trace_id) or {}
 

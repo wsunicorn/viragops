@@ -48,6 +48,9 @@ def get_service() -> RagService:
         langfuse=make_langfuse_client(
             settings.langfuse_host, settings.langfuse_public_key, settings.langfuse_secret_key
         ),
+        enable_semantic_cache=settings.semantic_cache_enabled,
+        enable_context_compression=settings.context_compression_enabled,
+        enable_dynamic_top_k=settings.dynamic_top_k_enabled,
     )
 
 

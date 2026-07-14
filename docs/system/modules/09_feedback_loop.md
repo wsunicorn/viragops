@@ -89,13 +89,46 @@ Biến feedback người dùng, trace và evaluation failure thành backlog cả
 | Cải tiến làm regression | Sửa trực tiếp production | Mọi improvement qua quality gate |
 | Quá nhiều lỗi lẻ | Không clustering | Gom theo label + embedding |
 
+## Kết quả thật (Phase 11, 2026-07-14)
+
+- **Feedback KHÔNG giả lập** — `scripts/seed_feedback_from_eval.py` đọc
+  `data/eval/eval_full_20260712_0938.csv` (298 câu, `p1_grounded_v1`,
+  đường sạch `fallback_hop=primary` — kiểm tra kỹ 2 file full-eval hiện có
+  và loại bỏ file kia vì 293/298 câu bị Ollama fallback), join thật sang
+  `trace_id` qua `data/traces/traces.jsonl`. Kết quả: 26/26 câu match được
+  trace (0 skip) → 2 cluster thật: `citation_error`×`multi_hop`=17,
+  `citation_error`×`ambiguous`=9.
+- **API verify thật qua server chạy sống**: `POST /qa/query` thật →
+  `POST /feedback` với `trace_id` vừa nhận → `GET /feedback/queue` (27→26
+  sau `POST /feedback/{id}/review`) → `GET /feedback/clusters` khớp đúng
+  26 record + 2 cluster từ seed script.
+- **Improvement backlog thật**: `scripts/export_improvement_backlog.py` →
+  `results_improvement_backlog_20260714_1354.md`, 2 TICKET, đề xuất sửa
+  "prompt" cho cả 2 (đúng mapping `citation_error→prompt`).
+- **1 vòng cải tiến ĐẦY ĐỦ, KẾT QUẢ THẬT LÀ TIÊU CỰC** (không phải thành
+  công giả định): `p8_citation_multipart_v1` (p7 + bước self-check tường
+  minh cho câu nhiều vế) → smoke eval 48/50 câu → so Quality Gate với
+  baseline p7 → **BLOCK** (citation_accuracy 0.838→0.775 TỆ HƠN, p95
+  latency +63%). Chi tiết + phân tích nguyên nhân:
+  `results_prompt_p8_citation_multipart_v1_vs_p7.md`. Không activate —
+  đúng chính sách áp dụng nhất quán mọi lần trước (p6/p7 chỉ activate khi
+  số liệu thật chứng minh cải thiện).
+- Error classifier rule-based (`src/feedback/classifier.py`) đọc thẳng
+  field thật đã có sẵn trong trace (`error_labels`/`invalid_citations`/
+  `refusal`/`fallback_hop`) — không cần thêm logic phân tích riêng, tái
+  dùng đúng dữ liệu Phase 5-10 đã ghi.
+- Clustering (`src/feedback/clustering.py`) group theo `(error_label,
+  category)` — KHÔNG dùng embedding API (tránh tốn quota Gemini cho một
+  tính năng backend/bookkeeping); lexical Jaccard overlap chỉ dùng để
+  chọn tối đa 3 câu mẫu/cluster hiển thị cho reviewer.
+
 ## Checklist hoàn tất
 
-- [ ] Feedback API hoạt động.
-- [ ] Feedback linked với trace.
-- [ ] Error taxonomy được dùng nhất quán.
-- [ ] Error clustering hoạt động.
-- [ ] Human review queue hoạt động.
-- [ ] Improvement backlog xuất được.
-- [ ] Chạy được feedback-improved experiment.
+- [x] Feedback API hoạt động — verify thật qua server sống.
+- [x] Feedback linked với trace — `trace_id` bắt buộc, tra qua `RagService.get_trace()`.
+- [x] Error taxonomy được dùng nhất quán — 9 nhãn khớp module doc + DB CHECK constraint.
+- [x] Error clustering hoạt động — 2 cluster thật, verify qua `GET /feedback/clusters`.
+- [x] Human review queue hoạt động — verify thật (27→26 sau review).
+- [x] Improvement backlog xuất được — `results_improvement_backlog_20260714_1354.md`.
+- [x] Chạy được feedback-improved experiment — p8, kết quả thật (tiêu cực), không activate.
 

@@ -123,6 +123,20 @@ decision:
   block_if: any_critical_violated
 ```
 
+## Optimization config (Phase 11, Module 8)
+
+```yaml
+semantic_cache:
+  similarity_threshold: 0.97
+context_compression:
+  max_chars_per_chunk: 800
+dynamic_top_k:
+  base_k: 5
+  max_k: 10
+budget:
+  hard_block: false
+```
+
 ## Ingest config
 
 ```yaml

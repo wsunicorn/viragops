@@ -58,11 +58,15 @@ from src.dataops.sparse_bm25 import BM25Sparse
 from src.dataops.vietnamese_normalizer import normalize_for_search
 from src.observability import metrics as obs_metrics
 from src.observability import tracing as obs_tracing
+from src.optimization import routing as opt_routing
+from src.optimization.compression import compress_chunks
+from src.optimization.semantic_cache import SemanticCache
 from src.rag.citation import parse_model_output
 from src.rag.confidence import compute_confidence
 from src.rag.gateway_client import Gateway
 from src.rag.prompt_builder import PromptProvider, build_qa_prompt
 from src.rag.schemas import (
+    Citation,
     ModelInfo,
     QADebugResponse,
     QARequest,
@@ -79,6 +83,7 @@ RETRIEVAL_CONFIG_PATH = PROJECT_ROOT / "config" / "retrieval.yaml"
 INGEST_CONFIG_PATH = PROJECT_ROOT / "config" / "ingest.yaml"
 PROMPTS_CONFIG_PATH = PROJECT_ROOT / "config" / "prompts.yaml"
 GATEWAY_CONFIG_PATH = PROJECT_ROOT / "config" / "model_gateway.yaml"
+OPTIMIZATION_CONFIG_PATH = PROJECT_ROOT / "config" / "optimization.yaml"
 
 
 class RagService:
@@ -92,6 +97,9 @@ class RagService:
         prompt_provider: PromptProvider,
         embed_fn=None,
         langfuse=None,
+        enable_semantic_cache: bool = False,
+        enable_context_compression: bool = False,
+        enable_dynamic_top_k: bool = False,
     ) -> None:
         self._gateway = gateway
         self._client = QdrantClient(url=qdrant_url)
@@ -151,6 +159,26 @@ class RagService:
         self._daily_budget_usd: float = gwcfg.get("budget", {}).get("daily_usd", 0.0)
         self._cumulative_cost_usd: float = 0.0
 
+        # Phase 11 (Module 8): mọi optimization feature mặc định TẮT
+        # (constructor flag = False) — bật sau khi đã đo qua O1-O8
+        # experiment, cùng nguyên tắc "đo trước khi đổi default production"
+        # đã áp dụng cho reranker (Phase 4) và top_k_after (Phase 8).
+        ocfg = yaml.safe_load(OPTIMIZATION_CONFIG_PATH.read_text(encoding="utf-8"))
+        self._budget_hard_block: bool = ocfg["budget"]["hard_block"]
+        self._compression_max_chars: int = ocfg["context_compression"]["max_chars_per_chunk"]
+        self._dynamic_top_k_base: int = ocfg["dynamic_top_k"]["base_k"]
+        self._dynamic_top_k_max: int = ocfg["dynamic_top_k"]["max_k"]
+        self._enable_context_compression = enable_context_compression
+        self._enable_dynamic_top_k = enable_dynamic_top_k
+        self._semantic_cache: SemanticCache | None = None
+        if enable_semantic_cache:
+            self._semantic_cache = SemanticCache(
+                self._client,
+                index_version=self.index_version or "unversioned",
+                vector_size=self._dense_cfg["output_dimensionality"],
+                similarity_threshold=ocfg["semantic_cache"]["similarity_threshold"],
+            )
+
     # --- per-request pipeline -------------------------------------------
 
     def _embed_query(self, question: str) -> list[float]:
@@ -169,11 +197,31 @@ class RagService:
         lf_span = obs_tracing.start_qa_span(self._langfuse, trace_id, req.question)
 
         query = normalize_for_search(req.question) if self._query_normalization else req.question
+        # Phase 11: "auto" resolves a real tier via query-complexity rules
+        # (src/optimization/routing.py) — an explicit mode is always
+        # respected as-is, "auto" is opt-in per request.
+        tier = opt_routing.resolve_tier(req.question) if req.mode == "auto" else req.mode
 
         t0 = time.perf_counter()
         dense_q = self._embed_fn(req.question)  # embedding giữ nguyên dấu câu gốc
+
+        if self._semantic_cache is not None:
+            cached = self._semantic_cache.lookup(dense_q, self._prompt.version)
+            if cached is not None:
+                return self._respond_from_cache(req, request_id, trace_id, tier, cached, lf_span, t_start)
+
         sparse_q = self._bm25.vectorize_query(query)
-        chunks = retrieve(self._client, self._collection, self._ret_cfg, dense_q, sparse_q)
+        # Dynamic top-k (Phase 11): over-fetch to max_k, decide the real
+        # cut client-side from the returned scores — avoids a 2nd Qdrant
+        # round-trip (retriever.py's fetch_limit already supports this).
+        fetch_limit = self._dynamic_top_k_max if self._enable_dynamic_top_k else None
+        chunks = retrieve(self._client, self._collection, self._ret_cfg, dense_q, sparse_q, fetch_limit=fetch_limit)
+        if self._enable_dynamic_top_k:
+            k = opt_routing.dynamic_top_k(
+                [c["score"] for c in chunks], self._min_score,
+                base_k=self._dynamic_top_k_base, max_k=self._dynamic_top_k_max,
+            )
+            chunks = chunks[:k]
         retrieval_ms = int((time.perf_counter() - t0) * 1000)
 
         trace: dict[str, Any] = {
@@ -190,6 +238,7 @@ class RagService:
             "retrieved": [
                 {"chunk_id": c["chunk_id"], "score": round(c["score"], 4)} for c in chunks
             ],
+            "cache_result": "miss" if self._semantic_cache is not None else None,
         }
 
         # --- refusal pre-check: không đủ ngữ cảnh (số lượng HOẶC score đỉnh
@@ -206,18 +255,37 @@ class RagService:
             self._traces.record(trace)
             obs_tracing.end_qa_span(lf_span, trace, confidence=None)
             obs_metrics.record_request(trace, total_latency_ms)
+            if self._semantic_cache is not None:
+                self._semantic_cache.store(dense_q, self._prompt.version, {
+                    "answer": pre_llm_answer, "citations": [], "refusal": True,
+                    "model_provider": "none", "model_name": "none", "confidence": None,
+                })
             return self._respond(
                 req, request_id, trace_id,
                 answer=pre_llm_answer,
                 citations=[], refusal=True,
-                model=ModelInfo(provider="none", model="none", routing_policy=req.mode),
+                model=ModelInfo(provider="none", model="none", routing_policy=tier),
                 usage=Usage(latency_ms=total_latency_ms),
                 chunks=chunks,
             )
 
-        prompt = build_qa_prompt(req.question, chunks, self._prompt.template)
-        lf_gen = obs_tracing.start_generation_span(lf_span, prompt, req.mode)
-        gen = self._gateway.generate(tier=req.mode, prompt=prompt)
+        # Budget hard-block (Phase 11): nếu đã vượt daily_usd TỪ CÁC request
+        # trước đó và ocfg.budget.hard_block=true, hạ tier xuống "cheap" cho
+        # request NÀY thay vì chỉ cảnh báo (hành vi cũ vẫn giữ khi false —
+        # xem budget_warning bên dưới, tính SAU khi có cost_usd thật).
+        over_budget_before = self._daily_budget_usd > 0 and self._cumulative_cost_usd >= self._daily_budget_usd
+        budget_downgraded = self._budget_hard_block and over_budget_before and tier != "cheap"
+        if budget_downgraded:
+            tier = "cheap"
+
+        chunks_for_prompt = (
+            compress_chunks(chunks, req.question, max_chars=self._compression_max_chars)
+            if self._enable_context_compression
+            else chunks
+        )
+        prompt = build_qa_prompt(req.question, chunks_for_prompt, self._prompt.template)
+        lf_gen = obs_tracing.start_generation_span(lf_span, prompt, tier)
+        gen = self._gateway.generate(tier=tier, prompt=prompt)
         parsed = parse_model_output(gen.text, chunks, require_citation=self._require_citation)
 
         # Gateway.generate() trả GenerationResult (protocol Phase 5); khi
@@ -243,6 +311,8 @@ class RagService:
             error_labels.append(f"served_by_fallback:{fallback_hop}")
         if budget_warning:
             error_labels.append("budget_warning")
+        if budget_downgraded:
+            error_labels.append("budget_downgrade")
 
         trace.update(
             model_provider=gen.provider,
@@ -278,10 +348,19 @@ class RagService:
         total_latency_ms = int((time.perf_counter() - t_start) * 1000)
         obs_metrics.record_request(trace, total_latency_ms)
 
+        if self._semantic_cache is not None:
+            self._semantic_cache.store(dense_q, self._prompt.version, {
+                "answer": parsed.answer,
+                "citations": [c.model_dump() for c in parsed.citations],
+                "refusal": parsed.refusal,
+                "model_provider": gen.provider, "model_name": gen.model,
+                "confidence": confidence,
+            })
+
         return self._respond(
             req, request_id, trace_id,
             answer=parsed.answer, citations=parsed.citations, refusal=parsed.refusal,
-            model=ModelInfo(provider=gen.provider, model=gen.model, routing_policy=req.mode),
+            model=ModelInfo(provider=gen.provider, model=gen.model, routing_policy=tier),
             usage=Usage(
                 input_tokens=gen.input_tokens,
                 output_tokens=gen.output_tokens,
@@ -290,6 +369,56 @@ class RagService:
             ),
             chunks=chunks,
             confidence=confidence,
+        )
+
+    def _respond_from_cache(
+        self, req, request_id, trace_id, tier, cached, lf_span, t_start
+    ) -> QAResponse | QADebugResponse:
+        """Cache hit (Phase 11): skip retrieval AND generation entirely."""
+        total_latency_ms = int((time.perf_counter() - t_start) * 1000)
+        trace: dict[str, Any] = {
+            "trace_id": trace_id,
+            "request_id": request_id,
+            "session_id": req.session_id,
+            "question": req.question,
+            "normalized_query": req.question,
+            "data_version": self.data_version,
+            "index_version": self.index_version,
+            "retrieval_config_id": self.retrieval_config_id,
+            "prompt_version": self._prompt.version,
+            "retrieval_ms": 0,
+            "retrieved": [],
+            "cache_result": "hit",
+            "model_provider": cached["model_provider"],
+            "model_name": cached["model_name"],
+            "fallback_hop": "cache",
+            "attempted_fallbacks": 0,
+            "cost_usd": 0.0,
+            "cumulative_cost_usd": round(self._cumulative_cost_usd, 6),
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "generation_ms": 0,
+            "refusal": cached["refusal"],
+            "refusal_stage": "cache" if cached["refusal"] else None,
+            "citations": [c["chunk_id"] for c in cached["citations"]],
+            "invalid_citations": [],
+            "error_labels": [],
+            "answer": cached["answer"],
+        }
+        self._traces.record(trace)
+        obs_tracing.end_qa_span(lf_span, trace, cached.get("confidence"))
+        obs_metrics.record_request(trace, total_latency_ms)
+        return self._respond(
+            req, request_id, trace_id,
+            answer=cached["answer"],
+            citations=[Citation(**c) for c in cached["citations"]],
+            refusal=cached["refusal"],
+            model=ModelInfo(
+                provider=cached["model_provider"], model=cached["model_name"], routing_policy=f"cache:{tier}"
+            ),
+            usage=Usage(latency_ms=total_latency_ms),
+            chunks=[],
+            confidence=cached.get("confidence"),
         )
 
     def _respond(self, req, request_id, trace_id, *, answer, citations, refusal,

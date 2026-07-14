@@ -111,3 +111,86 @@ def test_trace_recorded_with_versions(service):
     assert trace["data_version"] == "data_20260713"
     assert trace["retrieved"], "trace phải ghi danh sách chunk đã retrieve"
     assert "retrieval_ms" in trace
+
+
+# --- Phase 11: optimization flags (mặc định tắt trên `service` fixture,
+# bật riêng cho các test này qua service instance mới) ---------------------
+
+
+@pytest.fixture(scope="module")
+def cached_service() -> RagService:
+    # index_version thật (từ retrieval.yaml) -> collection cache thật đặt
+    # tên semantic_cache_<index_version> — xoá sau khi module test xong để
+    # không để rác lâu dài trong Qdrant thật (cùng collection production sẽ
+    # dùng nếu bật semantic_cache_enabled).
+    svc = RagService(
+        gateway=MockGateway(), qdrant_url=QDRANT_URL,
+        prompt_provider=_PROVIDER, embed_fn=_fake_embed,
+        enable_semantic_cache=True,
+    )
+    yield svc
+    from qdrant_client import QdrantClient as _QC
+
+    _QC(url=QDRANT_URL).delete_collection(f"semantic_cache_{svc.index_version}")
+
+
+def test_semantic_cache_hit_on_repeated_question(cached_service):
+    q = "Điều kiện tốt nghiệp đại học cần những gì?"
+    first = cached_service.answer(QARequest(question=q))
+    first_trace = cached_service.get_trace(first.trace_id)
+    assert first_trace["cache_result"] == "miss"
+
+    second = cached_service.answer(QARequest(question=q))
+    second_trace = cached_service.get_trace(second.trace_id)
+    assert second_trace["cache_result"] == "hit"
+    assert second.answer == first.answer
+    assert second.usage.cost_usd == 0.0
+    assert second.model.routing_policy.startswith("cache:")
+
+
+def test_semantic_cache_miss_on_different_prompt_version(cached_service):
+    q = "Câu hỏi cache riêng cho test prompt version khác nhau?"
+    cached_service.answer(QARequest(question=q))
+    other_provider = StaticPromptProvider(template=_P1["template"], version="p1_grounded_v1_variant_x")
+    other_service = RagService(
+        gateway=MockGateway(), qdrant_url=QDRANT_URL,
+        prompt_provider=other_provider, embed_fn=_fake_embed,
+        enable_semantic_cache=True,
+    )
+    resp = other_service.answer(QARequest(question=q))
+    trace = other_service.get_trace(resp.trace_id)
+    assert trace["cache_result"] == "miss"
+
+
+def test_context_compression_does_not_break_answer(service):
+    compressing = RagService(
+        gateway=MockGateway(), qdrant_url=QDRANT_URL,
+        prompt_provider=_PROVIDER, embed_fn=_fake_embed,
+        enable_context_compression=True,
+    )
+    resp = compressing.answer(QARequest(question="Điều kiện tốt nghiệp đại học cần những gì?"))
+    assert not resp.refusal
+    assert resp.citations
+
+
+def test_dynamic_top_k_returns_bounded_chunk_count(service):
+    dynamic = RagService(
+        gateway=MockGateway(), qdrant_url=QDRANT_URL,
+        prompt_provider=_PROVIDER, embed_fn=_fake_embed,
+        enable_dynamic_top_k=True,
+    )
+    resp = dynamic.answer(QARequest(question="Điều kiện tốt nghiệp đại học cần những gì?", debug=True))
+    assert 0 < len(resp.retrieved_chunks) <= 10
+
+
+def test_auto_mode_routes_to_a_real_tier(service):
+    resp = service.answer(QARequest(question="Học phí bao nhiêu?", mode="auto"))
+    assert resp.model.model == "mock-cheap"
+    assert resp.model.routing_policy == "cheap"
+
+
+def test_auto_mode_routes_multi_part_question_to_strong(service):
+    q = "Sinh viên vừa bị đình chỉ học vừa nợ học phí thì xử lý ra sao?"
+    resp = service.answer(QARequest(question=q, mode="auto"))
+    assert resp.model.model == "mock-strong"
+    assert resp.model.routing_policy == "strong"

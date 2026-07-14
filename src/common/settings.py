@@ -44,6 +44,13 @@ class Settings(BaseSettings):
     langfuse_public_key: str = ""
     langfuse_secret_key: str = ""
 
+    # --- Optimization/Routing (Phase 11) — mặc định TẮT, xem
+    # config/optimization.yaml cho lý do (đo qua O1-O8 trước khi đổi mặc
+    # định production, cùng nguyên tắc reranker/top_k_after).
+    semantic_cache_enabled: bool = False
+    context_compression_enabled: bool = False
+    dynamic_top_k_enabled: bool = False
+
     @property
     def postgres_dsn(self) -> str:
         return (

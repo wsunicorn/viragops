@@ -11,7 +11,10 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-Mode = Literal["cheap", "balanced", "strong"]
+# "auto" (Phase 11): RagService resolves the real tier via
+# src/optimization/routing.py::resolve_tier() based on query complexity —
+# ModelInfo.routing_policy reports the resolved tier, not "auto" itself.
+Mode = Literal["cheap", "balanced", "strong", "auto"]
 
 
 class QARequest(BaseModel):

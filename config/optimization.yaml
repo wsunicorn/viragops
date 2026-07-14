@@ -1,0 +1,21 @@
+# Optimization/Routing config (Phase 11, Module 8) — schema chuẩn:
+# docs/system/contracts/config_schemas.md.
+#
+# Mọi optimization feature mặc định TẮT ở tầng RagService constructor
+# (src/api/routes/qa.py::get_service() đọc từ Settings, cũng mặc định
+# tắt) — chỉ bật sau khi đã đo qua O1-O8 experiment
+# (docs/system/experiments/results_optimization_o1_o8.md), cùng nguyên
+# tắc "đo trước khi đổi default production" đã áp dụng cho reranker
+# (Phase 4) và top_k_after (Phase 8).
+semantic_cache:
+  similarity_threshold: 0.97
+context_compression:
+  max_chars_per_chunk: 800
+dynamic_top_k:
+  base_k: 5
+  max_k: 10
+budget:
+  # true = vượt budget.daily_usd (model_gateway.yaml) thì tự hạ tier
+  # xuống "cheap" thay vì chỉ gắn error_label cảnh báo (hành vi cũ, vẫn
+  # giữ khi false).
+  hard_block: false

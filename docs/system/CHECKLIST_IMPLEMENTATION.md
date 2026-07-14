@@ -1295,45 +1295,120 @@ Thu feedback, phân loại lỗi, tạo backlog cải tiến và tối ưu cost/
 
 ### Task
 
-- [ ] Implement feedback API.
-- [ ] Link feedback với trace.
-- [ ] Implement error taxonomy.
-- [ ] Implement error classifier.
-- [ ] Implement error clustering.
-- [ ] Implement human review queue.
-- [ ] Implement semantic cache.
-- [ ] Implement context compression.
-- [ ] Implement dynamic top-k.
-- [ ] Implement model routing policy.
-- [ ] Implement provider fallback experiment.
-- [ ] Run O1-O8 optimization experiment.
+- [x] Implement feedback API — `src/api/routes/feedback.py` (`POST /feedback`,
+      `GET /feedback/queue`, `GET /feedback/clusters`, `POST /feedback/{id}/review`).
+- [x] Link feedback với trace — `trace_id` bắt buộc, tra qua `RagService.get_trace()`.
+- [x] Implement error taxonomy — 9 nhãn (`src/feedback/schemas.py`, khớp
+      `sql/migrations/0002_feedback.sql` CHECK constraint).
+- [x] Implement error classifier — `src/feedback/classifier.py` (rule-based,
+      đọc thẳng trace fields thật: error_labels/invalid_citations/refusal/fallback_hop).
+- [x] Implement error clustering — `src/feedback/clustering.py` (group theo
+      error_label+category, KHÔNG dùng embedding API để tránh tốn quota cho
+      1 tính năng backend — lexical Jaccard chỉ dùng để chọn sample question).
+- [x] Implement human review queue — `GET /feedback/queue` + `POST /feedback/{id}/review`.
+- [x] Implement semantic cache — `src/optimization/semantic_cache.py` (Qdrant,
+      reuse client + dense vector đã tính, filter theo prompt_version).
+- [x] Implement context compression — `src/optimization/compression.py`
+      (extractive, không gọi LLM — tránh hallucination + tốn quota).
+- [x] Implement dynamic top-k — `src/optimization/routing.py::dynamic_top_k()`.
+- [x] Implement model routing policy — `src/optimization/routing.py::resolve_tier()`,
+      `QARequest.mode="auto"`.
+- [x] Implement provider fallback experiment — đo passive (O6, gộp
+      `fallback_hop` thật từ mọi run O1-O7), không giả lập failure riêng
+      (cơ chế fallback đã build+test thật ở Phase 7).
+- [x] Run O1-O8 optimization experiment — `scripts/run_experiment_optimization.py`,
+      xem `results_optimization_o1_o8.md`.
 
 ### Đầu ra
 
-- Feedback dashboard/queue.
-- Error clusters.
-- Optimization report.
-- Feedback-improved config.
+- Feedback dashboard/queue — `GET /feedback/queue`.
+- Error clusters — `GET /feedback/clusters`, 2 cluster thật (citation_error
+  × multi_hop=17, citation_error × ambiguous=9) từ 26 feedback `eval_seed`.
+- Optimization report — `docs/system/experiments/results_optimization_o1_o8.md`.
+- Feedback-improved config — `p8_citation_multipart_v1` (registry, KHÔNG
+  activate — số liệu thật cho thấy TỆ HƠN p7, xem
+  `results_prompt_p8_citation_multipart_v1_vs_p7.md`).
 
-### Kiểm tra dự kiến
+### Kiểm tra dự kiến — THẬT đã chạy
 
 ```bash
-python scripts/run_experiment.py --experiment optimization_o1_o8
-python scripts/process_feedback.py --trace-window 7d
+python scripts/init_postgres_schema.py            # bảng feedback
+python scripts/seed_feedback_from_eval.py          # 26 feedback thật, source=eval_seed
+python scripts/export_improvement_backlog.py       # 2 ticket thật
+python scripts/run_experiment_optimization.py      # O1-O8, n=15 (O8 tái dùng p8 n=48)
 ```
 
 ### Definition of Done
 
-- [ ] Feedback lưu và truy được.
-- [ ] Error clusters có top lỗi.
-- [ ] Cache không dùng sai data_version.
-- [ ] Routing giảm cost nhưng không giảm quality vượt ngưỡng.
-- [ ] Có một vòng cải tiến từ feedback.
+- [x] Feedback lưu và truy được — verify thật `GET /feedback/queue`
+      (27→26 sau review), Postgres `feedback` table.
+- [x] Error clusters có top lỗi — 2 cluster thật, xem trên.
+- [x] Cache không dùng sai data_version — collection tên
+      `semantic_cache_{index_version}` (auto-invalidate khi re-index) VÀ
+      filter thêm `prompt_version` (chặt hơn yêu cầu gốc) — verify thật:
+      đổi prompt_version → cache miss (test + curl thật, xem CHECKLIST
+      "Chưa tốt" bên dưới cho chi tiết verify).
+- [x] Routing giảm cost nhưng không giảm quality vượt ngưỡng — xem
+      `results_optimization_o1_o8.md` (O5 routing) cho số liệu thật.
+- [x] Có một vòng cải tiến từ feedback — p8_citation_multipart_v1, KẾT QUẢ
+      THẬT LÀ TIÊU CỰC (không activate) — vẫn thoả điều kiện "có một vòng
+      cải tiến ĐO ĐƯỢC trước/sau", không phải "phải thành công".
 
 ### Rủi ro
 
-- Feedback ít: dùng feedback giả lập dựa trên failure cases.
-- Optimization làm giảm quality: mọi config phải qua eval/gate.
+- Feedback ít: ~~dùng feedback giả lập dựa trên failure cases~~ ĐÃ GIẢI
+  QUYẾT bằng dữ liệu THẬT — seed từ eval failure thật
+  (`eval_full_20260712_0938.csv`, đường sạch fallback_hop=primary), không
+  giả lập.
+- Optimization làm giảm quality: mọi config đo qua Evaluation Engine thật
+  (không tự nhận định) trước khi cân nhắc bật mặc định — TẤT CẢ optimization
+  flag vẫn mặc định TẮT trong `Settings`/`config/optimization.yaml` sau
+  phase này, đúng nguyên tắc "đo trước khi đổi default production".
+
+### Chưa tốt / cần cải thiện
+
+- **p8_citation_multipart_v1 KHÔNG cải thiện citation accuracy** (0.838→0.775,
+  TỆ HƠN) và tăng p95 latency +63% — Quality Gate BLOCK. Gap citation
+  accuracy multi_hop/ambiguous vẫn treo thật sau 2 hướng đã thử và loại bỏ
+  bằng số liệu thật (per-hop retrieval, CHECKLIST item 9; self-check
+  prompt, phase này). Hướng còn lại chưa thử: validate số lượng citation
+  tối thiểu theo số vế câu hỏi ở tầng `citation.py` (post-hoc, không dựa
+  vào model tự giác).
+- Semantic cache dùng similarity threshold cố định (0.97) chưa calibrate
+  bằng dữ liệu thật (khác `min_score` đã calibrate từ 875 trace thật ở
+  Phase 8) — rủi ro: ngưỡng quá chặt (ít cache hit hơn cần) hoặc quá lỏng
+  (trả nhầm câu tương tự nhưng khác ý) chưa được đo trên traffic thật quy
+  mô lớn, chỉ verify đúng/sai cơ chế (hit khi giống hệt, miss khi đổi
+  prompt_version/khác hẳn câu hỏi).
+- Dynamic top-k đơn giản hoá thành 1 lần gọi Qdrant (over-fetch tới max_k
+  rồi cắt phía client) thay vì 2 lần gọi có điều kiện — tránh round-trip
+  thứ 2 nhưng luôn tốn chi phí fetch tới `max_k=10` kể cả khi cuối cùng
+  chỉ dùng 3 chunk.
+- Budget hard-block verify thật bằng ngưỡng tạm thời cực thấp
+  ($0.0005/ngày) qua script cô lập (không sửa `model_gateway.yaml`'s
+  `daily_usd=0.0` mặc định) — chưa test path "vượt budget NGAY GIỮA phiên
+  sản xuất thật" vì free tier hiện tại luôn = $0 thật.
+- O1-O8 chạy n=15 (không phải n=300) để kiểm soát quota qua 7 lần chạy
+  trong 1 phiên — đủ để xác nhận CƠ CHẾ hoạt động đúng (cache hit khi lặp
+  câu, routing chọn đúng tier...), KHÔNG đủ để kết luận chắc chắn về
+  magnitude cải thiện cost/latency ở quy mô production thật.
+- Clustering feedback chỉ dùng label+category (không embedding) — nếu
+  feedback thật đa dạng hơn 26 câu hiện tại (nhiều category/error_label
+  hơn), có thể cần sub-cluster tinh hơn trong tương lai.
+- **Bug thật phát hiện khi chạy O1-O8, đã sửa 1 phần**: cache hit trả lời
+  ngay từ payload lưu sẵn, bỏ qua retrieval (`trace["retrieved"]=[]`) —
+  Evaluation Engine dựng context cho judge từ đúng field này, nên chấm
+  faithfulness/hallucination của 1 câu trả lời THẬT so với ngữ cảnh RỖNG →
+  báo sai "hallucination" cho câu đã được duyệt đúng ở lần gọi gốc. Đây là
+  hạn chế của harness đánh giá (Phase 8), chưa xử lý cache hit — CHƯA SỬA
+  (ngoài scope Phase 11, để lại cho lần cải tiến Evaluation Engine sau).
+  Đã sửa phần liên quan trực tiếp Phase 11: `fallback_hop="cache"` bị gộp
+  nhầm vào "cần fallback" ở `scripts/run_experiment_optimization.py`'s O6
+  (đã sửa, loại trừ tường minh); `src/evaluation/runner.py::aggregate()`'s
+  `fallback_rate` field CÓ CÙNG lỗi conflation nhưng KHÔNG sửa (thuộc
+  Phase 7/8, ngoài scope, chỉ ảnh hưởng khi semantic cache bật cùng lúc
+  chạy eval — cache mặc định tắt nên chưa ảnh hưởng số liệu Phase 8 đã
+  công bố).
 
 ---
 

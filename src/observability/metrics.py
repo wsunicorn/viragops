@@ -45,6 +45,10 @@ RETRIEVED_CHUNKS_COUNT = Histogram(
     "viragops_retrieved_chunks_count", "Số chunk retrieve mỗi request",
     buckets=(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
 )
+CACHE_LOOKUP_TOTAL = Counter(
+    "viragops_semantic_cache_lookups_total", "Tổng số lần tra cứu semantic cache (Phase 11)",
+    ["result"],  # hit | miss
+)
 
 
 def record_request(trace: dict, total_latency_ms: int) -> None:
@@ -83,6 +87,10 @@ def record_request(trace: dict, total_latency_ms: int) -> None:
             FALLBACK_TOTAL.labels(hop=fallback_hop).inc()
 
         RETRIEVED_CHUNKS_COUNT.observe(len(trace.get("retrieved") or []))
+
+        cache_result = trace.get("cache_result")
+        if cache_result:
+            CACHE_LOOKUP_TOTAL.labels(result=cache_result).inc()
 
         provider = trace.get("model_provider")
         model = trace.get("model_name")

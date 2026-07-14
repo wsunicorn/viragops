@@ -1,0 +1,38 @@
+{
+  "mode": "smoke",
+  "generated_at": "20260714_1403",
+  "meta": {
+    "data_version": "data_20260713",
+    "index_version": "idx_20260713_geminiembedding001",
+    "retrieval_config_id": "hybrid_dbsf_v2",
+    "prompt_version": "p8_citation_multipart_v1"
+  },
+  "n_questions": 48,
+  "eval_k": 5,
+  "retrieval": {
+    "n_questions": 35,
+    "recall_at_k": 0.9,
+    "hit_rate": 0.9142857142857143,
+    "mrr": 0.8357142857142857,
+    "ndcg_at_k": 0.8338225403348793
+  },
+  "context_precision": 0.18857142857142867,
+  "context_recall": 0.9,
+  "context_relevance": 0.9473684210526315,
+  "faithfulness": 0.9473684210526315,
+  "answer_relevance": 0.9736842105263158,
+  "hallucination_rate": 0.07894736842105263,
+  "citation_accuracy": 0.7745098039215685,
+  "refusal_accuracy": 0.8958333333333334,
+  "n_judged": 38,
+  "n_judge_errors": 0,
+  "p50_latency_ms": 1291,
+  "p95_latency_ms": 2101,
+  "avg_cost_usd": 0.0009586666666666666,
+  "error_rate": 0.0,
+  "fallback_rate": 0.0,
+  "cache_hit_rate": null,
+  "inter_judge_agreement": null,
+  "ambiguity_handling_rate": 1.0,
+  "n_ambiguity_scored": 1
+}
