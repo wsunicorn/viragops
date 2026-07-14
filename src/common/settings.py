@@ -37,8 +37,10 @@ class Settings(BaseSettings):
     litellm_base_url: str = "http://localhost:4000"
     litellm_master_key: str = ""
 
-    # --- Langfuse ---
-    langfuse_host: str = "http://localhost:3000"
+    # --- Langfuse (Phase 10) — Cloud (free tier), không self-host; xem
+    # CHECKLIST Phase 10 cho lý do quyết định (máy dev hạn chế tài nguyên,
+    # tránh thêm 4 container nặng langfuse-web/worker+clickhouse+minio).
+    langfuse_host: str = "https://cloud.langfuse.com"
     langfuse_public_key: str = ""
     langfuse_secret_key: str = ""
 

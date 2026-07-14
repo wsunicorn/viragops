@@ -1,8 +1,10 @@
 """FastAPI application entrypoint.
 
 Phase 1: health endpoints. Phase 5: QA endpoints (/qa/query, /qa/debug,
-/qa/traces). Ingest/eval/feedback routers are added in their own phases —
-see docs/system/CHECKLIST_IMPLEMENTATION.md.
+/qa/traces). Phase 10: GET /metrics (Prometheus scrape) + Langfuse
+tracing wired into RagService (src/rag/service.py, src/observability/).
+Ingest/eval/feedback routers are added in their own phases — see
+docs/system/CHECKLIST_IMPLEMENTATION.md.
 
 Run local:  uvicorn src.api.main:app --reload --port 8000
 """
@@ -12,7 +14,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.api.routes import health, prompts, qa
+from src.api.routes import health, metrics, prompts, qa
 from src.common.settings import APP_VERSION, get_settings
 
 # Phase 10 (frontend showcase, thêm sớm 2026-07-12): Next.js chạy khác
@@ -49,6 +51,7 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(qa.router)
     app.include_router(prompts.router)
+    app.include_router(metrics.router)
     return app
 
 

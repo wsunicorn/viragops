@@ -56,6 +56,8 @@ from qdrant_client import QdrantClient
 from src.dataops import embedder
 from src.dataops.sparse_bm25 import BM25Sparse
 from src.dataops.vietnamese_normalizer import normalize_for_search
+from src.observability import metrics as obs_metrics
+from src.observability import tracing as obs_tracing
 from src.rag.citation import parse_model_output
 from src.rag.confidence import compute_confidence
 from src.rag.gateway_client import Gateway
@@ -89,10 +91,14 @@ class RagService:
         qdrant_url: str,
         prompt_provider: PromptProvider,
         embed_fn=None,
+        langfuse=None,
     ) -> None:
         self._gateway = gateway
         self._client = QdrantClient(url=qdrant_url)
         self._traces = TraceStore()
+        # Phase 10: Langfuse client injectable (None = tracing tắt, mọi
+        # test/script hiện có không cần đổi gì) — xem src/observability/tracing.py.
+        self._langfuse = langfuse
         # Phase 6: prompt lấy từ registry (Module 4), KHÔNG hard-code —
         # provider injectable để test không cần Postgres.
         self._prompt = prompt_provider.get_active()
@@ -107,6 +113,7 @@ class RagService:
         self.retrieval_config_id: str = rcfg["retrieval_config_id"]
         self.data_version: str | None = rcfg.get("data_version")
         self.index_version: str | None = rcfg.get("index_version")
+        obs_metrics.set_data_version_info(self.data_version)
         self._query_normalization: bool = rcfg.get("query_normalization", True)
         self._min_context_chunks: int = rcfg["thresholds"]["min_context_chunks"]
         self._min_score: float = rcfg["thresholds"]["min_score"]
@@ -159,6 +166,8 @@ class RagService:
         trace_id = new_id("trace")
         t_start = time.perf_counter()
 
+        lf_span = obs_tracing.start_qa_span(self._langfuse, trace_id, req.question)
+
         query = normalize_for_search(req.question) if self._query_normalization else req.question
 
         t0 = time.perf_counter()
@@ -188,18 +197,26 @@ class RagService:
         top_score = max((c["score"] for c in chunks), default=0.0)
         if len(chunks) < self._min_context_chunks or top_score < self._min_score:
             error_label = "no_context" if len(chunks) < self._min_context_chunks else "low_score"
-            trace.update(refusal=True, refusal_stage="pre_llm", error_labels=[error_label])
+            pre_llm_answer = "Tài liệu hiện có không chứa thông tin liên quan để trả lời câu hỏi này."
+            total_latency_ms = int((time.perf_counter() - t_start) * 1000)
+            trace.update(
+                refusal=True, refusal_stage="pre_llm", error_labels=[error_label],
+                answer=pre_llm_answer,
+            )
             self._traces.record(trace)
+            obs_tracing.end_qa_span(lf_span, trace, confidence=None)
+            obs_metrics.record_request(trace, total_latency_ms)
             return self._respond(
                 req, request_id, trace_id,
-                answer="Tài liệu hiện có không chứa thông tin liên quan để trả lời câu hỏi này.",
+                answer=pre_llm_answer,
                 citations=[], refusal=True,
                 model=ModelInfo(provider="none", model="none", routing_policy=req.mode),
-                usage=Usage(latency_ms=int((time.perf_counter() - t_start) * 1000)),
+                usage=Usage(latency_ms=total_latency_ms),
                 chunks=chunks,
             )
 
         prompt = build_qa_prompt(req.question, chunks, self._prompt.template)
+        lf_gen = obs_tracing.start_generation_span(lf_span, prompt, req.mode)
         gen = self._gateway.generate(tier=req.mode, prompt=prompt)
         parsed = parse_model_output(gen.text, chunks, require_citation=self._require_citation)
 
@@ -211,6 +228,7 @@ class RagService:
         fallback_hop = getattr(gen, "fallback_hop", "n/a")
         attempted_fallbacks = getattr(gen, "attempted_fallbacks", 0)
         cost_usd = getattr(gen, "cost_usd", 0.0)
+        obs_tracing.end_generation_span(lf_gen, gen, cost_usd)
         self._cumulative_cost_usd += cost_usd
         budget_warning = (
             self._daily_budget_usd > 0 and self._cumulative_cost_usd > self._daily_budget_usd
@@ -256,6 +274,10 @@ class RagService:
             )
         )
 
+        obs_tracing.end_qa_span(lf_span, trace, confidence)
+        total_latency_ms = int((time.perf_counter() - t_start) * 1000)
+        obs_metrics.record_request(trace, total_latency_ms)
+
         return self._respond(
             req, request_id, trace_id,
             answer=parsed.answer, citations=parsed.citations, refusal=parsed.refusal,
@@ -264,7 +286,7 @@ class RagService:
                 input_tokens=gen.input_tokens,
                 output_tokens=gen.output_tokens,
                 cost_usd=cost_usd,
-                latency_ms=int((time.perf_counter() - t_start) * 1000),
+                latency_ms=total_latency_ms,
             ),
             chunks=chunks,
             confidence=confidence,
@@ -308,3 +330,8 @@ class RagService:
 
     def get_trace(self, trace_id: str) -> dict[str, Any] | None:
         return self._traces.get(trace_id)
+
+    def flush_traces(self) -> None:
+        """Gọi ở cuối 1 tiến trình ngắn hạn (script eval/demo traffic) —
+        API server chạy dài không cần, Langfuse SDK tự flush nền định kỳ."""
+        obs_tracing.flush(self._langfuse)

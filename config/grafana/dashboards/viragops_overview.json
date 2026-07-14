@@ -1,0 +1,105 @@
+{
+  "title": "viRAGops — Observability Overview",
+  "uid": "viragops-overview",
+  "timezone": "browser",
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "panels": [
+    {
+      "id": 1, "title": "Request volume (rate/5m)",
+      "type": "timeseries", "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [{ "expr": "sum(rate(viragops_qa_requests_total[5m])) by (refusal)", "legendFormat": "refusal={{refusal}}" }]
+    },
+    {
+      "id": 2, "title": "Latency p50/p95/p99",
+      "type": "timeseries", "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        { "expr": "histogram_quantile(0.50, sum(rate(viragops_qa_latency_seconds_bucket[5m])) by (le))", "legendFormat": "p50" },
+        { "expr": "histogram_quantile(0.95, sum(rate(viragops_qa_latency_seconds_bucket[5m])) by (le))", "legendFormat": "p95" },
+        { "expr": "histogram_quantile(0.99, sum(rate(viragops_qa_latency_seconds_bucket[5m])) by (le))", "legendFormat": "p99" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] }
+    },
+    {
+      "id": 3, "title": "Retrieval vs Generation latency (p95)",
+      "type": "timeseries", "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum(rate(viragops_retrieval_latency_seconds_bucket[5m])) by (le))", "legendFormat": "retrieval p95" },
+        { "expr": "histogram_quantile(0.95, sum(rate(viragops_generation_latency_seconds_bucket[5m])) by (le))", "legendFormat": "generation p95" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] }
+    },
+    {
+      "id": 4, "title": "Token usage (rate/5m)",
+      "type": "timeseries", "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [{ "expr": "sum(rate(viragops_tokens_total[5m])) by (direction)", "legendFormat": "{{direction}}" }]
+    },
+    {
+      "id": 5, "title": "Cost/request (avg, 1h)",
+      "type": "stat", "gridPos": { "h": 6, "w": 6, "x": 0, "y": 16 },
+      "targets": [{ "expr": "rate(viragops_cost_usd_total[1h]) / clamp_min(rate(viragops_qa_requests_total[1h]), 0.001)" }],
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 6 }, "overrides": [] }
+    },
+    {
+      "id": 6, "title": "Cost tích luỹ (giá niêm yết free-tier)",
+      "type": "stat", "gridPos": { "h": 6, "w": 6, "x": 6, "y": 16 },
+      "targets": [{ "expr": "viragops_cost_usd_total" }],
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 4 }, "overrides": [] }
+    },
+    {
+      "id": 7, "title": "Error rate (%, 15m)",
+      "type": "stat", "gridPos": { "h": 6, "w": 6, "x": 12, "y": 16 },
+      "targets": [{ "expr": "100 * sum(rate(viragops_errors_total[15m])) / clamp_min(sum(rate(viragops_qa_requests_total[15m])), 1)" }],
+      "fieldConfig": { "defaults": { "unit": "percent" }, "overrides": [] }
+    },
+    {
+      "id": 8, "title": "Provider fallback rate (%, 15m)",
+      "type": "stat", "gridPos": { "h": 6, "w": 6, "x": 18, "y": 16 },
+      "targets": [{ "expr": "100 * sum(rate(viragops_fallback_total[15m])) / clamp_min(sum(rate(viragops_qa_requests_total[15m])), 1)" }],
+      "fieldConfig": { "defaults": { "unit": "percent" }, "overrides": [] }
+    },
+    {
+      "id": 9, "title": "Top error labels (24h)",
+      "type": "bargauge", "gridPos": { "h": 8, "w": 12, "x": 0, "y": 22 },
+      "targets": [{ "expr": "sum(increase(viragops_errors_total[24h])) by (label)", "legendFormat": "{{label}}" }]
+    },
+    {
+      "id": 10, "title": "Prompt version — request share (24h)",
+      "type": "piechart", "gridPos": { "h": 8, "w": 12, "x": 12, "y": 22 },
+      "targets": [{ "expr": "sum(increase(viragops_qa_requests_total[24h])) by (prompt_version)", "legendFormat": "{{prompt_version}}" }]
+    },
+    {
+      "id": 11, "title": "Model/provider usage (24h)",
+      "type": "bargauge", "gridPos": { "h": 8, "w": 12, "x": 0, "y": 30 },
+      "targets": [{ "expr": "sum(increase(viragops_model_usage_total[24h])) by (provider, model)", "legendFormat": "{{provider}}/{{model}}" }]
+    },
+    {
+      "id": 12, "title": "Retrieved chunks per request (avg, 15m)",
+      "type": "stat", "gridPos": { "h": 8, "w": 6, "x": 12, "y": 30 },
+      "targets": [{ "expr": "rate(viragops_retrieved_chunks_count_sum[15m]) / clamp_min(rate(viragops_retrieved_chunks_count_count[15m]), 0.001)" }]
+    },
+    {
+      "id": 13, "title": "Data freshness (ngày kể từ ingest)",
+      "type": "stat", "gridPos": { "h": 8, "w": 6, "x": 18, "y": 30 },
+      "targets": [{ "expr": "viragops_data_age_days" }],
+      "fieldConfig": { "defaults": { "unit": "d", "thresholds": { "steps": [
+        { "color": "green", "value": null }, { "color": "yellow", "value": 30 }, { "color": "red", "value": 90 }
+      ] } }, "overrides": [] }
+    },
+    {
+      "id": 14, "title": "Faithfulness / Hallucination / Retrieval Hit Rate",
+      "type": "text", "gridPos": { "h": 6, "w": 12, "x": 0, "y": 38 },
+      "options": { "mode": "markdown", "content": "**Không tính real-time ở đây** — cần LLM-judge/ground-truth relevance, quá tốn quota để chạy mỗi request thật. Xem `docs/system/experiments/results_evaluation_*.md` (Phase 8, Evaluation Engine) và Quality Gate report (Phase 9, `src/qualitygate/`) — gate tự BLOCK/WARN khi hallucination/citation vượt ngưỡng mỗi lần chạy eval, xem `docs/system/CHECKLIST_IMPLEMENTATION.md` Phase 9." }
+    },
+    {
+      "id": 15, "title": "Cache hit rate",
+      "type": "text", "gridPos": { "h": 6, "w": 6, "x": 12, "y": 38 },
+      "options": { "mode": "markdown", "content": "**N/A** — semantic cache chưa implement trong RAG runtime (xem CHECKLIST Phase 8 \"Chưa tốt\")." }
+    },
+    {
+      "id": 16, "title": "Trace timeline / per-request drill-down",
+      "type": "text", "gridPos": { "h": 6, "w": 6, "x": 18, "y": 38 },
+      "options": { "mode": "markdown", "content": "Xem **Langfuse Cloud** (cloud.langfuse.com) — mỗi request có 1 trace đầy đủ input/output/span retrieval+generation/token/cost, tra theo `trace_id` trả về trong response API." }
+    }
+  ]
+}

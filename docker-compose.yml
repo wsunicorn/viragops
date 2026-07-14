@@ -4,8 +4,13 @@
 # Phase 7: litellm (model gateway — routing/fallback/cost, xem
 # config/litellm_config.yaml; fallback cuối cùng gọi Ollama chạy trên
 # host qua host.docker.internal, KHÔNG chạy trong compose).
+# Phase 10: prometheus + grafana (local, /metrics scrape) — Langfuse dùng
+# CLOUD (free tier, user tự tạo tài khoản 2026-07-14), KHÔNG self-host:
+# máy dev hạn chế tài nguyên + dự án đã hay gặp trục trặc stack Docker
+# nặng (xem CHECKLIST Phase 1/3), tự host thêm langfuse-web/worker+
+# clickhouse+minio (4 container nữa) không đáng đánh đổi. Xem CHECKLIST
+# Phase 10 cho quyết định đầy đủ.
 # Mở rộng theo phase (xem docs/system/operations/deployment_docker_compose.md):
-#   Phase 10 -> langfuse-web/worker, clickhouse, minio, prometheus, grafana
 #   Phase 8+ -> mlflow
 # ============================================================
 
@@ -24,7 +29,9 @@ services:
       - QDRANT_URL=http://qdrant:6333
       - VALKEY_URL=redis://valkey:6379/0
       - LITELLM_BASE_URL=http://litellm:4000
-      - LANGFUSE_HOST=http://langfuse-web:3000
+      - LANGFUSE_HOST=${LANGFUSE_HOST:-https://cloud.langfuse.com}
+      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY:-}
+      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY:-}
     depends_on:
       postgres:
         condition: service_healthy
@@ -113,7 +120,38 @@ services:
       timeout: 5s
       retries: 5
 
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./config/prometheus_alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+      - prometheus_data:/prometheus
+    # host.docker.internal -> scrape API chạy trực tiếp trên host (dev,
+    # `uvicorn src.api.main:app`) — khi chạy API qua compose (`api` service)
+    # đổi target trong config/prometheus.yml sang "api:8000".
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  grafana:
+    image: grafana/grafana:11.3.1
+    ports:
+      - "3001:3000"   # 3000 đã dùng cho frontend Next.js
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+    volumes:
+      - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./config/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+
 volumes:
   qdrant_data:
   pg_data:
   valkey_data:
+  prometheus_data:
+  grafana_data:

@@ -23,6 +23,7 @@ from functools import lru_cache
 from fastapi import APIRouter, HTTPException
 
 from src.common.settings import get_settings
+from src.observability.tracing import make_langfuse_client
 from src.rag.litellm_gateway import LiteLLMGateway
 from src.rag.prompt_builder import RegistryPromptProvider
 from src.rag.schemas import QADebugResponse, QARequest, QAResponse
@@ -42,6 +43,11 @@ def get_service() -> RagService:
         gateway=LiteLLMGateway(base_url=settings.litellm_base_url, master_key=settings.litellm_master_key),
         qdrant_url=settings.qdrant_url,
         prompt_provider=RegistryPromptProvider(settings.postgres_dsn),
+        # Phase 10: None nếu thiếu key/SDK — service.py fail-open, request
+        # vẫn chạy bình thường không có tracing (xem src/observability/tracing.py).
+        langfuse=make_langfuse_client(
+            settings.langfuse_host, settings.langfuse_public_key, settings.langfuse_secret_key
+        ),
     )
 
 

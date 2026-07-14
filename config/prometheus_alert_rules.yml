@@ -1,0 +1,63 @@
+# Alert rules — Phase 10 (Module 7), ngưỡng khớp
+# docs/system/operations/observability_runbook.md "Alert và hành động".
+#
+# CHỈ 4/6 alert trong runbook nằm ở đây — 2 alert còn lại (hallucination
+# cao, retrieval hit rate thấp) cần LLM-judge/ground-truth relevance,
+# vốn chỉ tính được qua Evaluation Engine chạy offline (Phase 8), KHÔNG
+# có trong traffic thời gian thực (RagService không gọi judge mỗi
+# request — quá tốn quota). 2 alert đó đã có cơ chế tương đương THẬT ở
+# Quality Gate (Phase 9, src/qualitygate/gate.py): BLOCK/WARN tự động
+# mỗi lần chạy eval, xem CHECKLIST Phase 9. Không tạo alert rule giả ở
+# đây cho 2 chỉ số không có dữ liệu thời gian thực đứng sau.
+#
+# Không có Alertmanager (không có kênh Slack/email thật để gửi tới) —
+# rule ở đây hiện "firing" trong Prometheus UI (localhost:9090/alerts)
+# và Grafana alerting panel, đúng runbook nhưng chưa tự động thông báo
+# ra ngoài. Thêm Alertmanager + kênh nhận là việc thật cho lần sau nếu
+# có kênh notification thật để trỏ vào.
+
+groups:
+  - name: viragops_alerts
+    rules:
+      - alert: HighP95Latency
+        expr: histogram_quantile(0.95, sum(rate(viragops_qa_latency_seconds_bucket[15m])) by (le)) > 6
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "p95 latency > 6s (NFR-002 vượt ngưỡng)"
+          action: "Kiểm reranker/model/provider — xem observability_runbook.md 'Alert và hành động'"
+
+      - alert: ErrorRateHigh
+        expr: |
+          sum(rate(viragops_errors_total[15m]))
+          /
+          clamp_min(sum(rate(viragops_qa_requests_total[15m])), 1)
+          > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Error rate > 5% trong 15 phút gần nhất"
+          action: "Xem error_labels phân bố theo loại, đối chiếu trace_id gần nhất qua Langfuse"
+
+      - alert: ProviderFallbackHigh
+        expr: |
+          sum(rate(viragops_fallback_total[15m]))
+          /
+          clamp_min(sum(rate(viragops_qa_requests_total[15m])), 1)
+          > 0.20
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "> 20% request bị phục vụ bởi fallback hop (không phải primary)"
+          action: "Kiểm provider health/API key/rate limit — xem CHECKLIST Phase 8 'Ollama fallback quality'"
+
+      - alert: CostSpike
+        expr: increase(viragops_cost_usd_total[1h]) > 1.0
+        labels:
+          severity: warning
+        annotations:
+          summary: "Cost tích luỹ tăng > $1 trong 1 giờ (giá niêm yết free-tier, xem CHECKLIST Phase 7)"
+          action: "Kiểm route model/token/cache — xem observability_runbook.md"

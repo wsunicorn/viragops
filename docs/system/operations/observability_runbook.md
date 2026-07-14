@@ -46,13 +46,25 @@ Kiểm tra theo thứ tự:
 
 ## Alert và hành động
 
+> **Implement thật (Phase 10, 2026-07-14):** 4/6 alert dưới đây có rule
+> Prometheus thật (`config/prometheus_alert_rules.yml`, verify
+> `health=ok`) — `p95 latency high`/`cost spike`/`provider fallback
+> high` + `error rate high` (thêm mới, không có trong bảng gốc). 2 alert
+> còn lại (`hallucination high`, `retrieval hit low`) KHÔNG có rule
+> Prometheus vì cần LLM-judge/ground-truth relevance — không tính được
+> real-time trên mỗi request thật (quá tốn quota để judge mỗi câu). Cơ
+> chế tương đương THẬT: Quality Gate (Phase 9, `src/qualitygate/`) tự
+> BLOCK/WARN đúng 2 chỉ số này mỗi lần chạy Evaluation Engine, xem
+> CHECKLIST Phase 9. Chưa có Alertmanager/kênh Slack/email thật — rule
+> hiện "firing" trong Prometheus/Grafana UI, chưa tự động gửi ra ngoài.
+
 | Alert | Ngưỡng | Hành động |
 |---|---|---|
 | p95 latency high | > 6s | Kiểm reranker/model/provider |
 | cost spike | > budget | Kiểm route model, token, cache |
-| hallucination high | > 5% | Chạy targeted eval, sửa prompt/retrieval |
-| retrieval hit low | < 85% | Kiểm index/chunking/embedding |
-| data stale | index age > policy | Reindex |
+| hallucination high | > 5% | Chạy targeted eval, sửa prompt/retrieval — xem Quality Gate (Phase 9) |
+| retrieval hit low | < 85% | Kiểm index/chunking/embedding — xem Quality Gate (Phase 9) |
+| data stale | index age > policy | Reindex — `viragops_data_age_days` (Grafana panel "Data freshness") |
 | provider fallback high | > 20% | Kiểm provider health/API key/rate limit |
 
 ## Báo cáo tuần

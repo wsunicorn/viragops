@@ -47,6 +47,13 @@ ragops = [
     "mmh3>=4.0",              # hashing-trick cho sparse BM25 tự viết
     "tiktoken>=0.7",         # đếm token cho chunk sizing (xấp xỉ, không phải tokenizer thật của Gemini)
 ]
+# Phase 10: tracing (Langfuse Cloud, không self-host — xem CHECKLIST Phase
+# 10) + Prometheus /metrics endpoint. langfuse<4 ghim để dùng API v3 ổn định
+# đã verify (start_span/start_as_current_generation) thay vì v4 mới hơn.
+observability = [
+    "langfuse>=3.15,<4",
+    "prometheus-client>=0.20",
+]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

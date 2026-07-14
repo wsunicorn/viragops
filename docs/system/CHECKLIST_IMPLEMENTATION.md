@@ -1206,22 +1206,22 @@ Trace, dashboard, alert và runbook để debug hệ thống.
 
 ### Task
 
-- [ ] Integrate Langfuse trace.
-- [ ] Add OpenTelemetry spans.
-- [ ] Add Prometheus metrics.
-- [ ] Build Grafana dashboard.
-- [ ] Track token/cost.
-- [ ] Track retrieval hit rate.
-- [ ] Track fallback rate.
-- [ ] Add alert rules.
-- [ ] Viết weekly observability report.
+- [x] Integrate Langfuse trace — `src/observability/tracing.py`, Langfuse **Cloud** (không self-host, xem "Chưa tốt"/rủi ro dưới).
+- [x] Add OpenTelemetry spans — Langfuse v3 SDK dựng trên OTel, span `qa_answer` + generation `llm_generate` lồng bên trong.
+- [x] Add Prometheus metrics — `src/observability/metrics.py` + `GET /metrics` (`src/api/routes/metrics.py`).
+- [x] Build Grafana dashboard — `config/grafana/dashboards/viragops_overview.json`, 16 panel, provision tự động.
+- [x] Track token/cost — cả Langfuse generation (`usage_details`/`cost_details`) lẫn Prometheus counter (`viragops_tokens_total`/`viragops_cost_usd_total`).
+- [~] Track retrieval hit rate — có `viragops_retrieved_chunks_count` (số chunk/request, real-time) nhưng KHÔNG có "hit rate" thật (đúng/sai so ground truth) real-time vì cần relevant_chunks — chỉ Evaluation Engine (Phase 8, offline) đo được; dashboard dẫn chiếu rõ sang đó thay vì bịa số.
+- [x] Track fallback rate — `viragops_fallback_total` + panel + alert rule.
+- [x] Add alert rules — `config/prometheus_alert_rules.yml`, 4/6 rule runbook (2 còn lại dùng Quality Gate Phase 9 thay thế, xem module doc).
+- [ ] Viết weekly observability report — chưa tự động hoá (xem "Chưa tốt").
 
 ### Đầu ra
 
-- Trace dashboard.
-- Grafana dashboard 12+ panel.
-- Alert rules.
-- Observability runbook áp dụng được.
+- [x] Trace dashboard — Langfuse Cloud, verify thật trace landing qua REST API (3 lần: standalone/RagService-mock/API-thật).
+- [x] Grafana dashboard 12+ panel — 16 panel (vượt yêu cầu), verify load qua Grafana API thật.
+- [x] Alert rules — 4 rule, verify `health=ok` trong Prometheus.
+- [x] Observability runbook áp dụng được — `operations/observability_runbook.md` map trực tiếp sang alert rule + Quality Gate.
 
 ### Kiểm tra dự kiến
 
@@ -1230,16 +1230,54 @@ python scripts/generate_demo_traffic.py --n 50
 curl http://localhost:8000/metrics
 ```
 
+**Đã chạy thật (2026-07-14, N=5 thay vì 50 để tiết kiệm quota Gemini —
+đủ để verify pipeline hoạt động đúng, không cần N lớn cho việc này):**
+```bash
+python scripts/generate_demo_traffic.py --n 5 --seed 42 --delay 2
+curl http://localhost:8000/metrics   # verify thật: counter tăng đúng 5
+```
+
 ### Definition of Done
 
-- [ ] Mỗi request có trace.
-- [ ] Dashboard có latency/cost/quality/error.
-- [ ] Alert có runbook.
-- [ ] Cost/request hiển thị đúng.
+- [x] Mỗi request có trace — verify thật cả nhánh trả lời đầy đủ lẫn refusal pre-LLM.
+- [x] Dashboard có latency/cost/quality/error — quality (faithfulness/hallucination) dẫn chiếu Quality Gate thay vì panel giả không có dữ liệu real-time đứng sau.
+- [x] Alert có runbook — mapping 1-1 giữa alert rule và bảng "Alert và hành động" trong runbook.
+- [x] Cost/request hiển thị đúng — verify thật qua Langfuse generation + Prometheus, cùng nguồn số `cost_usd` đã có từ Phase 7 (giá niêm yết free-tier, không phải phí thật đã trả — hạn chế kế thừa, không phải mới).
 
 ### Rủi ro
 
-- Langfuse self-host nặng: bật từng service, có thể tạm dùng Cloud.
+- ~~Langfuse self-host nặng: bật từng service, có thể tạm dùng Cloud.~~ →
+  **Đã quyết định dùng Cloud ngay từ đầu** (không thử self-host trước) —
+  máy dev hạn chế tài nguyên (RTX 3050 4GB) + dự án đã nhiều lần gặp
+  trục trặc stack Docker nặng (CHECKLIST Phase 1/3), không đáng đánh đổi
+  4 container nặng thêm khi Cloud free tier đủ dùng cho quy mô đồ án.
+
+### Chưa tốt / cần cải thiện
+
+**Làm tốt, nên giữ nguyên cách làm:** mọi lời gọi Langfuse/Prometheus là
+BEST-EFFORT, fail-open (try/except bọc kín, log rồi bỏ qua) — quan sát
+không được không được phép chặn request thật, ngược hẳn nguyên tắc
+fail-closed của `src/rag/citation.py` (2 chính sách khác nhau có chủ
+đích cho 2 mục đích khác nhau); dashboard panel "quality" không có dữ
+liệu real-time thật (faithfulness/hallucination/cache hit rate) ghi rõ
+"N/A" hoặc dẫn chiếu sang Quality Gate/Langfuse thay vì hiển thị số 0
+gây hiểu nhầm là đã đo được.
+
+**Còn thiếu, cần quay lại:**
+- OpenTelemetry span mới có 2 loại (`qa_answer`/`llm_generate`), chưa
+  tách riêng span cho retrieval/citation-parse như "Trách nhiệm" module
+  doc liệt kê — latency mỗi bước vẫn có trong trace metadata
+  (`retrieval_ms`/`generation_ms`), chỉ chưa hiển thị dạng span lồng
+  riêng trên Langfuse UI.
+- Alertmanager + kênh thông báo thật (Slack/email) chưa có — 4 alert
+  rule hiện chỉ "firing" trong Prometheus/Grafana UI, chưa tự động gửi
+  ra ngoài. Không tạo kênh giả — cần kênh thật để trỏ vào.
+- Weekly observability report chưa tự động hoá — runbook đã có mục
+  "Báo cáo tuần" với đúng các trường cần ghi, nhưng chưa có script tổng
+  hợp tự động từ Prometheus+Langfuse.
+- `generate_demo_traffic.py` chưa có chế độ `--mock` (dùng MockGateway,
+  không tốn quota) — lần verify Phase 10 này dùng RagService trực tiếp
+  với MockGateway trong Python thay vì qua script cho phần đó.
 
 ---
 
