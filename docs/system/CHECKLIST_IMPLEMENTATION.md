@@ -1072,11 +1072,16 @@ re-ingest:
   Variables) trỏ tới URL download asset đó, (4) thêm secret
   `GEMINI_API_KEY` (+ `_2`/`_5` khuyến nghị), `LITELLM_MASTER_KEY`,
   `POSTGRES_PASSWORD`. Chi tiết đầy đủ nằm trong comment đầu
-  `.github/workflows/ci.yml`. **Lưu ý vận hành:** mỗi lần CI job này
-  chạy vẫn tốn quota Gemini thật cho 50 câu smoke (generate+judge) — nếu
-  trigger trên MỌI push/PR mà quota hay cạn (đã xảy ra nhiều lần trong dự
-  án này), cân nhắc đổi `on:` của job thành `workflow_dispatch` (chạy tay
-  khi cần) thay vì tự động.
+  `.github/workflows/ci.yml`. ~~**Lưu ý vận hành:** mỗi lần CI job này
+  chạy vẫn tốn quota Gemini thật... trigger trên MỌI push/PR~~ →
+  **Đã giới hạn (2026-07-14)**: job `changes` (dùng `dorny/paths-filter@v3`)
+  chỉ cho `quality-gate-live` chạy khi commit thực sự đổi
+  `src/scripts/config/sql/tests/pyproject.toml/docker-compose.yml` —
+  commit chỉ sửa `docs/*.md` (kể cả report CHECKLIST tự ghi) không tự
+  trigger nữa. Phát hiện thật dẫn tới fix này: commit chỉ sửa
+  CHECKLIST_IMPLEMENTATION.md ngay sau lần chạy CI thứ 2 đã vô tình
+  trigger thêm 1 lần smoke eval 50-câu không cần thiết trước khi filter
+  được thêm.
 - **CI job THẬT ĐÃ CHẠY (2026-07-14), verify live thành công — job
   `quality-gate-live` xanh trong 10m40s** (không phải hàng giờ như lo
   ngại ban đầu — theo dõi qua CLI có lúc báo "in_progress" rất lâu dù

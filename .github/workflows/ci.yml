@@ -13,6 +13,13 @@
 # và tải lại mỗi lần CI chạy (scripts/restore_ci_snapshot.py) — chỉ phần
 # smoke eval (50 câu generate+judge) mới tốn quota thật, không phải embed.
 #
+# quality-gate-live chỉ chạy khi commit thực sự đổi src/scripts/config/
+# tests/dependency (job `changes`, dorny/paths-filter) — commit chỉ sửa
+# docs/*.md (kể cả report CHECKLIST tự ghi lại) sẽ KHÔNG tự trigger thêm
+# 1 lần smoke eval tốn quota. Xác nhận thật (2026-07-14): commit chỉ sửa
+# CHECKLIST_IMPLEMENTATION.md sau lần chạy CI thứ 2 đã vô tình trigger
+# thêm 1 lần chạy 50-câu không cần thiết trước khi filter này được thêm.
+#
 # SETUP CẦN LÀM 1 LẦN (không tự động hoá được — cần quyền GitHub repo):
 #   1. python scripts/export_ci_snapshot.py  (chạy local, có Qdrant thật)
 #   2. Tạo GitHub Release, upload dist/ci_snapshot_data_<version>.tar.gz
@@ -55,12 +62,38 @@ jobs:
       - name: Unit tests (bao gồm quality gate decision logic + 16 thay đổi giả lập)
         run: pytest tests/unit -q
 
+  # Chỉ đổi src/scripts/config/tests/dependency mới đáng chạy live smoke
+  # eval (tốn quota Gemini thật) — commit chỉ sửa docs/system/*.md (như
+  # chính commit vừa ghi kết quả CI vào CHECKLIST) không nên tự trigger
+  # thêm 1 lần chạy 50-câu tốn quota nữa.
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            code:
+              - 'src/**'
+              - 'scripts/**'
+              - 'config/**'
+              - 'sql/**'
+              - 'tests/**'
+              - 'pyproject.toml'
+              - 'docker-compose.yml'
+              - '.github/workflows/ci.yml'
+
   quality-gate-live:
-    needs: lint-test
+    needs: [lint-test, changes]
     runs-on: ubuntu-latest
     # Chỉ chạy khi đã cấu hình CI_SNAPSHOT_URL (xem SETUP ở comment đầu
-    # file) — tránh job đỏ (fail) trên mọi PR ở repo chưa setup xong.
-    if: vars.CI_SNAPSHOT_URL != ''
+    # file) VÀ commit này thực sự đổi code (job `changes` ở trên) — tránh
+    # job đỏ (fail) trên repo chưa setup xong, và tránh tốn quota Gemini
+    # cho các commit chỉ sửa docs/report.
+    if: vars.CI_SNAPSHOT_URL != '' && needs.changes.outputs.code == 'true'
     env:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
