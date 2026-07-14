@@ -9,6 +9,22 @@ are owned by later phases: semantic cache -> Phase 8, LiteLLM transport
     prompt (p1_grounded_v1) -> gateway -> parse/validate citations ->
     trace -> respond.
 
+Multi-hop per-hop retrieval — TRIED AND REVERTED (2026-07-14, CHECKLIST
+item 9), negative result with real value, same pattern as the
+top_k_after 5->10 experiment (CHECKLIST Phase 8): query decomposition +
+per-hop retrieval + merge was hypothesized to fix multi_hop's Citation
+Accuracy gap by giving each sub-question its own retrieval pass. Measured
+on the same 30 real multi_hop questions, same prompt, 3 controlled runs:
+single-query baseline (Recall@5=0.856, Citation Accuracy=0.684) beat BOTH
+a raw-score-merge version (0.767 / 0.606) AND a round-robin-merge version
+that fixed a real DBSF-score-not-comparable-across-queries bug in the
+first attempt (0.739 / 0.650) — decomposition never caught up to simply
+sending the whole question to the existing hybrid DBSF retrieval, which
+already handles multi-clause questions better than 2-3 independently
+retrieved and re-merged sub-queries. Full analysis: CHECKLIST Phase 8
+"Sửa citation accuracy multi-hop/ambiguous". The multi_hop citation gap
+remains open; per-hop retrieval is not the fix.
+
 Refusal policy, two layers:
 1. Pre-LLM: fewer than `thresholds.min_context_chunks` chunks retrieved,
    OR top-1 DBSF fused score below `thresholds.min_score` -> refuse
