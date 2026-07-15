@@ -1,0 +1,9 @@
+{
+ "66d808f5cf6de33fbd75505f": {
+  "faithfulness": 1.0,
+  "answer_relevance": 1.0,
+  "context_relevance": 1.0,
+  "hallucination": false,
+  "reasoning": "Câu trả lời hoàn toàn dựa trên thông tin từ ngữ cảnh, liệt kê đúng các điều kiện về số tín chỉ, điểm trung bình tích lũy, kỷ luật và các chứng chỉ ngoại ngữ/quốc phòng, dù còn thiếu chứng chỉ Công nghệ thông tin."
+ }
+}

@@ -54,6 +54,13 @@ observability = [
     "langfuse>=3.15,<4",
     "prometheus-client>=0.20",
 ]
+# Phase 12: biểu đồ trade-off cho báo cáo cuối — không có script vẽ biểu đồ
+# nào trong repo trước đây (11 hình có sẵn ở docs/figures/ đều làm ngoài
+# repo thủ công). matplotlib đơn giản, không phải hạ tầng nặng (không phải
+# service Docker), chỉ dev-time.
+reporting = [
+    "matplotlib>=3.9",
+]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

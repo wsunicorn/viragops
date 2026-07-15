@@ -1426,59 +1426,62 @@ Hoàn tất 6 nhóm thực nghiệm, tổng hợp kết quả, viết báo cáo 
 
 ### Task
 
-- [ ] Chạy Experiment 1: Chunking Ablation.
-- [ ] Chạy Experiment 2: Retrieval + Reranking.
-- [ ] Chạy Experiment 3: Prompt + Model/Provider.
-- [ ] Chạy Experiment 4: Quality Gate Effectiveness.
-- [ ] Chạy Experiment 5: Observability + Error Classification.
-- [ ] Chạy Experiment 6: Cost/Latency/Quality + Feedback.
-- [ ] Tạo bảng kết quả tổng hợp.
-- [ ] Tạo biểu đồ trade-off.
-- [ ] Viết error analysis.
-- [ ] Trả lời research questions.
-- [ ] Hoàn thiện demo script — **frontend Next.js bắt đầu sớm ở giữa Phase 8 (2026-07-12), theo yêu cầu trực tiếp user**, xem `modules/10_frontend_showcase.md`. Việc còn lại ở Phase 12 là hoàn thiện/polish cuối + nối đủ số liệu 6 experiment report (thay vì chỉ Phase 4/6/8 đã có lúc bắt đầu xây frontend).
-- [ ] Hoàn thiện README chạy demo (gồm cả `frontend/README.md` riêng — `npm install && npm run dev`).
-- [ ] Viết chương báo cáo liên quan.
-- [ ] Chuẩn bị slide bảo vệ.
+- [x] Chạy Experiment 1: Chunking Ablation — thật ra đã chạy ở Phase 4, tái dùng nguyên (`results_chunking_ablation.md`).
+- [x] Chạy Experiment 2: Retrieval + Reranking — đã chạy ở Phase 4, tái dùng nguyên (`results_retrieval_reranking.md`).
+- [x] Chạy Experiment 3: Prompt + Model/Provider — phần prompt đã có (Phase 6/8/11); phần model/provider MỚI chạy ở Phase 12 (`results_model_provider_comparison.md`), giới hạn thật: không có key OpenAI/Anthropic nên chỉ so sánh Gemini 2 tier + Ollama local.
+- [x] Chạy Experiment 4: Quality Gate Effectiveness — MỚI, `results_quality_gate_effectiveness.md` (16 kịch bản thật, Recall=Precision=1.000).
+- [x] Chạy Experiment 5: Observability + Error Classification — MỚI, `results_error_classification.md` (107 lỗi thật phân loại, self-review 25 mẫu, accuracy=40% + giải thích cấu trúc vì sao con số này không đại diện use case sản xuất thật).
+- [x] Chạy Experiment 6: Cost/Latency/Quality + Feedback — đã chạy ở Phase 11, tái dùng nguyên (`results_optimization_o1_o8.md`).
+- [x] Tạo bảng kết quả tổng hợp — `results_final_summary.md`.
+- [x] Tạo biểu đồ trade-off — `scripts/generate_tradeoff_charts.py` (matplotlib, dep mới `reporting`), 2 hình thật (`fig_retrieval_comparison_real.png`, `fig_o1_o8_tradeoff_real.png`) từ số liệu ĐÃ công bố, không đo mới.
+- [x] Viết error analysis — `results_error_analysis.md` (tổng hợp 5 mẫu hình lỗi xuyên suốt các phase, không phải báo cáo đo lại).
+- [x] Trả lời research questions — `results_research_questions.md` (RQ1/RQ3 đầy đủ; RQ2/RQ4/RQ5 có sắc thái/giới hạn, ghi rõ lý do).
+- [x] Hoàn thiện demo script — **frontend Next.js bắt đầu sớm ở giữa Phase 8 (2026-07-12), theo yêu cầu trực tiếp user**, xem `modules/10_frontend_showcase.md`. `frontend/README.md` đã đầy đủ từ trước; dashboard đọc số liệu Phase 4/6/8 — CHƯA nối thêm số liệu Phase 9-12 (xem "Chưa tốt").
+- [x] Hoàn thiện README chạy demo — `README.md` gốc viết lại hoàn toàn (bảng trạng thái cũ chỉ ghi Phase 1 xong dù Phase 2-11 đã xong thật; thêm chuỗi lệnh demo đầy đủ backend+frontend).
+- [ ] Viết chương báo cáo liên quan — **NGOÀI SCOPE phiên này, user chọn tường minh không làm** (AskUserQuestion khi bắt đầu Phase 12: chỉ chọn "hoàn tất 3 thực nghiệm còn thiếu" + "tổng hợp kỹ thuật cuối", không chọn viết chương báo cáo).
+- [ ] Chuẩn bị slide bảo vệ — **NGOÀI SCOPE phiên này**, cùng lý do trên.
 
 ### Đầu ra
 
-- 6 experiment reports.
-- Final metrics summary.
-- Error analysis.
-- Demo package.
-- Báo cáo khóa luận hoàn chỉnh.
+- 6 experiment reports — xong.
+- Final metrics summary — xong (`results_final_summary.md`).
+- Error analysis — xong (`results_error_analysis.md`).
+- Demo package — frontend/backend chạy được, README đầy đủ; chưa đóng gói thành 1 bundle riêng (docker compose là cơ chế đóng gói hiện tại).
+- Báo cáo khóa luận hoàn chỉnh — CHƯA (ngoài scope phiên này).
 
-### Kiểm tra dự kiến
+### Kiểm tra dự kiến — THẬT đã tạo, đã chạy
 
 ```bash
-python scripts/run_all_experiments.py
-python scripts/generate_final_report.py
-docker compose up
+python scripts/run_all_experiments.py              # index/status 6 experiment, --rerun để chạy lại có kiểm soát quota
+python scripts/generate_final_report.py             # gộp mọi eval-run summary JSON thật thành 1 file
+docker compose up -d qdrant postgres valkey litellm prometheus grafana && uvicorn src.api.main:app --port 8000
 ```
 
 ### Definition of Done
 
-- [ ] Có đủ 6 report.
-- [ ] Có bảng so sánh final config.
-- [ ] Có demo chạy được end-to-end.
-- [ ] Có dashboard minh họa.
-- [ ] Có báo cáo trả lời RQ1-RQ5.
-- [ ] Có danh sách hạn chế và hướng phát triển sau full-scope.
+- [x] Có đủ 6 report.
+- [x] Có bảng so sánh final config — `results_final_summary.md`.
+- [x] Có demo chạy được end-to-end — verify thật `docker compose up` + `uvicorn` + `npm run dev`, đã dùng xuyên suốt phiên này.
+- [x] Có dashboard minh họa — Grafana (Phase 10) + frontend `/dashboard` (Phase 8+).
+- [x] Có báo cáo trả lời RQ1-RQ5 — `results_research_questions.md`.
+- [x] Có danh sách hạn chế và hướng phát triển sau full-scope — rải trong "Chưa tốt" của từng report + phần dưới đây.
 
 ### Rủi ro
 
-- Không đủ thời gian chạy full nhiều lần: ưu tiên final full run và dùng smoke cho lặp nhanh.
-- Kết quả không đẹp: báo cáo trung thực, tập trung error analysis và bài học LLMOps.
+- Không đủ thời gian chạy full nhiều lần: ưu tiên final full run và dùng smoke cho lặp nhanh — ĐÚNG NHƯ DỰ ĐOÁN: Exp3/4/5/6 dùng n=10-15/16 kịch bản thay vì full 300, ghi rõ trade-off trong từng report.
+- Kết quả không đẹp: báo cáo trung thực, tập trung error analysis và bài học LLMOps — ĐÃ XẢY RA THẬT nhiều lần (p8 tệ hơn p7, classifier 40% accuracy, gemini-3-flash-preview quota contention) — đều ghi lại trung thực thay vì giấu, đúng tinh thần đã đặt ra.
+- **Rủi ro mới phát hiện khi thực hiện, không có trong dự đoán gốc**: Docker Desktop crash giữa phiên (không rõ nguyên nhân — process biến mất hoàn toàn) làm gián đoạn 1 lần chạy thật — phục hồi bằng cách khởi động lại Docker Desktop + `docker compose up -d`, không có cách nào phòng tránh trước ngoài theo dõi health định kỳ.
 
 ### Chưa tốt / cần cải thiện
 
-- Việc còn treo từ trước (ghi chú lại ở Phase 1, chưa xử lý — nhắc lại ở
-  đây vì đây là phase viết báo cáo cuối cùng): chưa verify các model ID
-  tham khảo trong blueprint (GPT-5.5, Gemma 4, Llama 4...) tồn tại thật
-  trước khi nộp; xóa tham chiếu file không tồn tại
-  `llmops_image_prompts.md`; đánh số lại caption ảnh cho khớp tên file
-  `figures/`; export lại `.docx` từ `.md` sau khi sửa các mục trên.
+- **Việc còn treo từ Phase 1, một phần đã rõ ràng hơn, một phần vẫn treo thật:**
+  - `llmops_image_prompts.md`: grep xác nhận KHÔNG còn tham chiếu nào trong blueprint — mục này thực ra đã được giải quyết ở đâu đó trước phiên này (không rõ khi nào), không cần làm nữa.
+  - Model ID (GPT-5.5, Claude Opus/Sonnet, Llama 4, Gemma 4...) trong blueprint (`docs/llmops_thesis_blueprint.md` dòng 9/100/223-230/1427-1538/2018-2020): grep xác nhận VẪN CÒN 11 chỗ tham chiếu — nhưng qua toàn bộ Phase 1-12 THẬT, dự án CHƯA BAO GIỜ dùng bất kỳ model nào trong số này (không có key OpenAI/Anthropic, không đủ GPU tự host Llama4/Gemma4) — runtime thật cuối cùng là Gemini (flash-lite/flash-preview) + Ollama (qwen2.5:7b/qwen3). Đây không còn là việc "verify ID tồn tại" nữa mà là **viết lại phần tech stack của blueprint cho khớp thực tế đã triển khai** — bản chất là công việc viết chương báo cáo (ngoài scope phiên này), không phải việc kỹ thuật — để lại cho phiên viết báo cáo khóa luận.
+  - Đánh số lại caption ảnh + export lại `.docx`: cùng lý do, gắn với công đoạn viết báo cáo — chưa làm.
+- **Dashboard frontend chưa nối số liệu Phase 9-12** (Quality Gate, Observability, Feedback Loop, Optimization, 3 experiment mới của Phase 12) — `src/lib/data/*.ts` vẫn dừng ở Phase 4/6/8 theo `frontend/README.md`'s ghi chú gốc.
+- **Chương báo cáo khóa luận (Chương 1-6) và slide bảo vệ CHƯA VIẾT** — chỉ có dàn ý (`docs/llmops_thesis_blueprint.md` PHẦN VI) — quyết định tường minh của user để lại cho phiên sau.
+- Exp3/4/5/6 dùng mẫu nhỏ (n=10-16, không phải 300) để kiểm soát quota trong 1 phiên — đủ để xác nhận CƠ CHẾ đúng, KHÔNG đủ để khẳng định chắc chắn magnitude ở quy mô production — đã ghi rõ trong từng report riêng.
+- `scripts/run_all_experiments.py` mặc định KHÔNG chạy lại gì (chỉ in trạng thái) — cần `--rerun` tường minh, tránh tốn quota ngoài ý muốn, nhưng nghĩa là "1 lệnh tái tạo toàn bộ 6 experiment" theo đúng nghĩa đen (không cần hỏi) chưa tồn tại — có chủ đích.
 
 ---
 
