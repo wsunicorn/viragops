@@ -84,39 +84,42 @@
 }
 
 .dark {
-  /* viRAGops brand: deep indigo/violet base + cyan-teal accent (AI/tech
-     showcase feel), dark-mode-first per design brief ("cinematic"). */
-  --background: oklch(0.145 0.02 275);
-  --foreground: oklch(0.97 0.005 275);
-  --card: oklch(0.19 0.025 275);
-  --card-foreground: oklch(0.97 0.005 275);
-  --popover: oklch(0.19 0.025 275);
-  --popover-foreground: oklch(0.97 0.005 275);
-  --primary: oklch(0.72 0.16 288);
-  --primary-foreground: oklch(0.145 0.02 275);
-  --secondary: oklch(0.26 0.03 275);
-  --secondary-foreground: oklch(0.97 0.005 275);
-  --muted: oklch(0.24 0.025 275);
-  --muted-foreground: oklch(0.66 0.03 275);
-  --accent: oklch(0.75 0.14 195);
-  --accent-foreground: oklch(0.145 0.02 275);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.72 0.16 288);
-  --chart-1: oklch(0.72 0.16 288);
-  --chart-2: oklch(0.75 0.14 195);
-  --chart-3: oklch(0.78 0.15 340);
-  --chart-4: oklch(0.8 0.15 90);
-  --chart-5: oklch(0.65 0.03 275);
-  --sidebar: oklch(0.17 0.025 275);
-  --sidebar-foreground: oklch(0.97 0.005 275);
-  --sidebar-primary: oklch(0.72 0.16 288);
-  --sidebar-primary-foreground: oklch(0.145 0.02 275);
-  --sidebar-accent: oklch(0.26 0.03 275);
-  --sidebar-accent-foreground: oklch(0.97 0.005 275);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.72 0.16 288);
+  /* viRAGops brand v2 (redesign 2026-07): nền charcoal trung tính (không
+     phải "AI purple" — bị cấm tường minh trong design-taste skill) + MỘT
+     accent duy nhất teal-emerald, khớp ngữ nghĩa brand "every change goes
+     through the gate" (màu của trạng thái PASS). primary = accent — một
+     accent cho toàn site, không pha 2 hệ màu. */
+  --background: oklch(0.135 0.006 250);
+  --foreground: oklch(0.96 0.004 250);
+  --card: oklch(0.175 0.007 250);
+  --card-foreground: oklch(0.96 0.004 250);
+  --popover: oklch(0.175 0.007 250);
+  --popover-foreground: oklch(0.96 0.004 250);
+  --primary: oklch(0.83 0.138 172);
+  --primary-foreground: oklch(0.14 0.01 250);
+  --secondary: oklch(0.24 0.008 250);
+  --secondary-foreground: oklch(0.96 0.004 250);
+  --muted: oklch(0.22 0.008 250);
+  --muted-foreground: oklch(0.68 0.012 250);
+  --accent: oklch(0.83 0.138 172);
+  --accent-foreground: oklch(0.14 0.01 250);
+  --destructive: oklch(0.7 0.185 25);
+  --border: oklch(1 0 0 / 9%);
+  --input: oklch(1 0 0 / 13%);
+  --ring: oklch(0.83 0.138 172);
+  --chart-1: oklch(0.83 0.138 172);
+  --chart-2: oklch(0.72 0.1 200);
+  --chart-3: oklch(0.85 0.12 95);
+  --chart-4: oklch(0.62 0.02 250);
+  --chart-5: oklch(0.45 0.015 250);
+  --sidebar: oklch(0.16 0.007 250);
+  --sidebar-foreground: oklch(0.96 0.004 250);
+  --sidebar-primary: oklch(0.83 0.138 172);
+  --sidebar-primary-foreground: oklch(0.14 0.01 250);
+  --sidebar-accent: oklch(0.24 0.008 250);
+  --sidebar-accent-foreground: oklch(0.96 0.004 250);
+  --sidebar-border: oklch(1 0 0 / 9%);
+  --sidebar-ring: oklch(0.83 0.138 172);
 }
 
 @layer base {
@@ -161,14 +164,10 @@ html.lenis body {
   background: oklch(0.45 0.05 275);
 }
 
-/* Reusable gradient text utility for hero/section headings */
+/* Reusable gradient text utility — foreground fading into the single
+   teal accent (không dùng gradient nhiều hue cho chữ lớn). */
 .text-gradient {
-  background: linear-gradient(
-    100deg,
-    oklch(0.85 0.14 288),
-    oklch(0.78 0.14 220) 45%,
-    oklch(0.78 0.14 195)
-  );
+  background: linear-gradient(105deg, oklch(0.97 0.004 250), oklch(0.86 0.12 172) 80%);
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
@@ -179,4 +178,80 @@ html.lenis body {
     linear-gradient(to right, oklch(1 0 0 / 4%) 1px, transparent 1px),
     linear-gradient(to bottom, oklch(1 0 0 / 4%) 1px, transparent 1px);
   background-size: 48px 48px;
+}
+
+/* Film-grain overlay — fixed + pointer-events-none (không đặt trên phần
+   tử cuộn để tránh GPU repaint liên tục, xem design skill §5). */
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Kinetic marquee — track nhân đôi nội dung, dịch -50% rồi lặp = vòng
+   lặp khép kín không khựng. */
+@keyframes marquee-x {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-x var(--marquee-duration, 40s) linear infinite;
+}
+.marquee-track.marquee-reverse {
+  animation-direction: reverse;
+}
+.marquee-mask {
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
+.marquee-mask:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Skeleton shimmer cho trạng thái loading (thay spinner chung chung). */
+@keyframes shimmer-x {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  animation: shimmer-x 1.6s ease-in-out infinite;
+  background: linear-gradient(90deg, transparent, oklch(1 0 0 / 7%), transparent);
+}
+
+/* Liquid-glass refraction edge (design skill §4): border trong 1px +
+   inner shadow mô phỏng khúc xạ cạnh kính. */
+.glass-edge {
+  border: 1px solid oklch(1 0 0 / 10%);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 10%),
+    0 20px 40px -15px oklch(0 0 0 / 35%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+  .shimmer::after {
+    animation: none;
+  }
 }

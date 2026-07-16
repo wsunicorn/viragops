@@ -1,5 +1,5 @@
 // Real phase status transcribed from docs/system/CHECKLIST_IMPLEMENTATION.md
-// (2026-07-12). Update this file by hand whenever the checklist changes —
+// (2026-07-15). Update this file by hand whenever the checklist changes —
 // intentionally not auto-parsed at build time to keep this simple, but
 // every number/claim here must trace back to that file.
 
@@ -89,22 +89,28 @@ export const PHASES: Phase[] = [
     n: 9,
     weeks: "Tuần 15-16",
     title: "CI/CD Quality Gate",
-    status: "planned",
-    summary: "Chặn regression trước deploy dựa trên kết quả Evaluation Engine.",
+    status: "done",
+    summary:
+      "Gate PASS/WARN/BLOCK thuần offline trên aggregate eval, kèm regression margin so baseline. Verify live trên GitHub Actions: CI đã BLOCK đúng 1 lần vì hallucination_rate vượt ngưỡng thật.",
+    highlight: "16 kịch bản: precision & recall = 1.000",
   },
   {
     n: 10,
     weeks: "Tuần 17-18",
     title: "Observability & Cost Monitoring",
-    status: "planned",
-    summary: "Trace, metric, dashboard vận hành (Langfuse/OpenTelemetry/Prometheus).",
+    status: "done",
+    summary:
+      "Langfuse Cloud tracing (verify trace landing qua REST API thật), Prometheus /metrics + Grafana dashboard 16 panel, 4 alert rule thật — panel nào không có dữ liệu real-time thì ghi rõ thay vì bịa.",
+    highlight: "16 panel Grafana, trace thật trên Langfuse",
   },
   {
     n: 11,
     weeks: "Tuần 19-20",
     title: "Feedback Loop & Optimization",
-    status: "planned",
-    summary: "Thu feedback người dùng thật, phân loại lỗi, backlog cải tiến có kiểm soát.",
+    status: "done",
+    summary:
+      "26 feedback thật seed từ eval failure thật → 2 cluster lỗi → 1 vòng cải tiến hoàn chỉnh (p8) với kết quả ÂM TÍNH được ghi lại trung thực. Semantic cache/compression/routing đo qua O1-O8.",
+    highlight: "1 vòng cải tiến thật, kết quả âm tính công bố",
   },
   {
     n: 12,
@@ -112,7 +118,8 @@ export const PHASES: Phase[] = [
     title: "Thực nghiệm, báo cáo, đóng gói demo",
     status: "in_progress",
     summary:
-      "Frontend showcase (trang này) bắt đầu sớm giữa Phase 8 theo yêu cầu trực tiếp — phần còn lại: 6 experiment report tổng hợp, báo cáo khóa luận.",
+      "6/6 experiment report đã xong (kể cả 3 report bù: model/provider, quality-gate effectiveness, error classification) + tổng hợp RQ1-RQ5. Còn lại: viết chương báo cáo khóa luận + slide bảo vệ.",
+    highlight: "6/6 experiment report hoàn tất",
   },
 ];
 

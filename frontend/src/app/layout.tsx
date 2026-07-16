@@ -38,6 +38,8 @@ export default function RootLayout({
           <Navbar />
           <main className="flex-1">{children}</main>
         </SmoothScrollProvider>
+        {/* film grain — fixed + pointer-events-none, không repaint khi cuộn */}
+        <div className="noise-overlay" aria-hidden />
       </body>
     </html>
   );

@@ -36,7 +36,7 @@ export default function DashboardPage() {
               title="So sánh 8 config retrieval/reranking"
               description={`${RETRIEVAL_META.nQuestions} câu có căn cứ · recall@${RETRIEVAL_META.evalK} · data_version=${RETRIEVAL_META.dataVersion}`}
             />
-            <div className="mt-8 rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-6">
+            <div className="mt-8 rounded-2xl border border-white/10 bg-white/2 p-4 sm:p-6">
               <RetrievalChart data={RETRIEVAL_RERANKING_RESULTS} />
             </div>
             <p className="mt-4 text-sm text-muted-foreground text-pretty">
@@ -51,7 +51,7 @@ export default function DashboardPage() {
               title="Chunking ablation"
               description="4 chiến lược chunk hoá cùng 1 bộ câu hỏi, cùng retrieval config."
             />
-            <div className="mt-8 rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-6">
+            <div className="mt-8 rounded-2xl border border-white/10 bg-white/2 p-4 sm:p-6">
               <RetrievalChart data={CHUNKING_ABLATION_RESULTS} />
             </div>
             <p className="mt-4 text-sm text-muted-foreground text-pretty">
@@ -67,7 +67,7 @@ export default function DashboardPage() {
               title="So sánh 6 prompt variant ban đầu (Phase 6)"
               description="12 câu smoke, đo refusal accuracy — p1_grounded_v1 thắng, trở thành baseline."
             />
-            <div className="mt-8 rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-6">
+            <div className="mt-8 rounded-2xl border border-white/10 bg-white/2 p-4 sm:p-6">
               <PromptChart data={PROMPT_COMPARISON_PHASE6} />
             </div>
           </section>
@@ -79,7 +79,7 @@ export default function DashboardPage() {
             />
             <ol className="mt-8 space-y-4">
               {PROMPT_EVOLUTION.map((step, i) => (
-                <li key={step.version} className="relative rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6">
+                <li key={step.version} className="relative rounded-2xl border border-white/10 bg-white/2 p-5 sm:p-6">
                   <div className="flex flex-wrap items-center gap-3">
                     <span className="flex size-7 items-center justify-center rounded-full bg-primary/15 font-mono text-xs text-primary">
                       {i + 1}
@@ -135,7 +135,7 @@ export default function DashboardPage() {
 
           <section>
             <SectionHeading title="Theo category (full eval)" />
-            <div className="mt-8 rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-6">
+            <div className="mt-8 rounded-2xl border border-white/10 bg-white/2 p-4 sm:p-6">
               <CategoryChart data={FULL_EVAL_BY_CATEGORY} />
             </div>
             <p className="mt-4 text-sm text-muted-foreground text-pretty">

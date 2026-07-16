@@ -1,31 +1,46 @@
-import { RevealGroup, RevealItem } from "@/components/reveal";
+// Tech stack — 2 dải marquee ngược chiều (kinetic), pill mono. Nội dung
+// là stack THẬT của repo (pyproject.toml, docker-compose.yml,
+// frontend/package.json), không liệt kê công nghệ không dùng.
 
-const STACK: { group: string; items: string[] }[] = [
-  { group: "Backend", items: ["FastAPI", "Python 3.11", "Pydantic"] },
-  { group: "Retrieval", items: ["Qdrant (hybrid dense+sparse)", "Gemini embedding-001", "BM25 tự viết"] },
-  { group: "Model Gateway", items: ["LiteLLM proxy", "Gemini 3.1 Flash-Lite / 3 Flash Preview", "Ollama (qwen2.5:7b)"] },
-  { group: "PromptOps", items: ["PostgreSQL registry", "8 prompt variant", "Activation policy có kiểm soát"] },
-  { group: "Storage", items: ["PostgreSQL", "Qdrant", "Valkey/Redis"] },
-  { group: "Frontend", items: ["Next.js (App Router)", "Tailwind CSS v4", "Motion + GSAP + Lenis"] },
+const ROW_A = [
+  "FastAPI", "Python 3.11", "Qdrant · hybrid dense+sparse", "Gemini embedding-001",
+  "BM25 tự viết", "LiteLLM gateway", "Gemini 3.1 Flash-Lite", "Gemini 3 Flash Preview",
+  "Ollama · qwen2.5:7b", "PostgreSQL", "Valkey",
 ];
+
+const ROW_B = [
+  "Langfuse Cloud", "Prometheus", "Grafana", "GitHub Actions CI",
+  "Docker Compose", "Next.js App Router", "React Three Fiber", "Tailwind CSS v4",
+  "Motion", "GSAP ScrollTrigger", "Lenis",
+];
+
+function MarqueeRow({ items, reverse, duration }: { items: string[]; reverse?: boolean; duration: string }) {
+  const doubled = [...items, ...items];
+  return (
+    <div className="marquee-mask overflow-hidden">
+      <div
+        className={`marquee-track items-center gap-3 py-2 ${reverse ? "marquee-reverse" : ""}`}
+        style={{ "--marquee-duration": duration } as React.CSSProperties}
+      >
+        {doubled.map((item, i) => (
+          <span
+            key={i}
+            aria-hidden={i >= items.length}
+            className="shrink-0 rounded-full border border-white/10 bg-white/3 px-4 py-2 font-mono text-sm whitespace-nowrap text-foreground/85"
+          >
+            {item}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function TechStack() {
   return (
-    <RevealGroup className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3" stagger={0.06}>
-      {STACK.map((s) => (
-        <RevealItem key={s.group}>
-          <div className="h-full rounded-xl border border-white/10 bg-white/[0.02] p-5">
-            <h4 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">{s.group}</h4>
-            <ul className="mt-3 space-y-1.5">
-              {s.items.map((item) => (
-                <li key={item} className="text-sm text-foreground/90">
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </RevealItem>
-      ))}
-    </RevealGroup>
+    <div className="space-y-3">
+      <MarqueeRow items={ROW_A} duration="56s" />
+      <MarqueeRow items={ROW_B} duration="48s" reverse />
+    </div>
   );
 }
