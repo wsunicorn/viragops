@@ -14,8 +14,8 @@ export function MetricGrid({ metrics }: { metrics: MetricRow[] }) {
               m.pass === undefined
                 ? "border-border bg-foreground/2"
                 : m.pass
-                  ? "border-accent/20 bg-accent/[0.04]"
-                  : "border-amber-500/25 bg-amber-500/[0.04]",
+                  ? "border-accent/20 bg-accent/4"
+                  : "border-amber-500/25 bg-amber-500/4",
             )}
           >
             <div className="flex items-start justify-between gap-2">

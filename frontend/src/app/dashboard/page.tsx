@@ -2,6 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Reveal } from "@/components/reveal";
 import { SectionHeading } from "@/components/section-heading";
 import { MetricGrid } from "@/components/metric-grid";
+import { CountUp } from "@/components/count-up";
 import { RetrievalChart } from "@/components/charts/retrieval-chart";
 import { PromptChart } from "@/components/charts/prompt-chart";
 import { CategoryChart } from "@/components/charts/category-chart";
@@ -10,6 +11,14 @@ import { RETRIEVAL_RERANKING_RESULTS, CHUNKING_ABLATION_RESULTS, RETRIEVAL_META 
 import { PROMPT_COMPARISON_PHASE6, PROMPT_EVOLUTION } from "@/lib/data/prompts";
 import { SMOKE_METRICS, FULL_METRICS, FULL_EVAL_BY_CATEGORY, CONTEXT_LIMIT_EXPERIMENT, EVAL_META } from "@/lib/data/eval";
 import { cn } from "@/lib/utils";
+
+// 4 con số chốt của toàn dự án — nguồn: results_final_summary.md
+const HERO_METRICS = [
+  { value: 0.932, decimals: 3, label: "recall@5 · hybrid DBSF" },
+  { value: 0.838, decimals: 3, label: "citation accuracy · p7" },
+  { value: 0.9, decimals: 2, label: "refusal accuracy · p7" },
+  { value: 1.0, decimals: 3, label: "gate precision & recall" },
+] as const;
 
 export default function DashboardPage() {
   return (
@@ -21,6 +30,20 @@ export default function DashboardPage() {
           <code className="rounded bg-foreground/10 px-1.5 py-0.5 font-mono text-xs">docs/system/experiments/</code>) —
           không tính lại bằng công thức khác.
         </p>
+      </Reveal>
+
+      <Reveal delay={0.1} className="mt-10">
+        <dl className="glass-edge grid grid-cols-2 divide-x divide-border rounded-3xl bg-card/50 backdrop-blur-sm sm:grid-cols-4">
+          {HERO_METRICS.map((m) => (
+            <div key={m.label} className="p-5 sm:p-6">
+              <dt className="sr-only">{m.label}</dt>
+              <dd className="font-mono text-2xl font-semibold tracking-tight text-accent sm:text-3xl">
+                <CountUp value={m.value} decimals={m.decimals} />
+              </dd>
+              <dd className="mt-1.5 text-xs leading-snug text-muted-foreground">{m.label}</dd>
+            </div>
+          ))}
+        </dl>
       </Reveal>
 
       <Tabs defaultValue="retrieval" className="mt-10">
@@ -96,8 +119,8 @@ export default function DashboardPage() {
                         className={cn(
                           "rounded-lg border px-2.5 py-1.5 font-mono text-[11px]",
                           "negative" in m && m.negative
-                            ? "border-amber-500/25 bg-amber-500/[0.06] text-amber-300"
-                            : "border-accent/20 bg-accent/[0.06] text-accent",
+                            ? "border-amber-500/25 bg-amber-500/6 text-amber-300"
+                            : "border-accent/20 bg-accent/6 text-accent",
                         )}
                       >
                         {m.label}: {m.value}
@@ -147,7 +170,7 @@ export default function DashboardPage() {
 
           <section>
             <SectionHeading eyebrow="Kết quả âm tính" title="Thử tăng context, rồi revert" />
-            <div className="mt-8 rounded-2xl border border-amber-500/20 bg-amber-500/[0.03] p-6">
+            <div className="mt-8 rounded-2xl border border-amber-500/20 bg-amber-500/3 p-6">
               <p className="text-sm font-medium">{CONTEXT_LIMIT_EXPERIMENT.question}</p>
               <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <div>

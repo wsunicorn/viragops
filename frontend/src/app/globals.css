@@ -286,3 +286,40 @@ html.lenis body {
     animation: none;
   }
 }
+
+/* ── Recharts theme ─────────────────────────────────────────────────────
+   SVG presentation attribute không nhận var(), nhưng CSS rule override
+   được attribute — nên màu trục/lưới/series đặt ở đây để tự đổi theme. */
+.recharts-text {
+  fill: var(--muted-foreground);
+}
+.recharts-cartesian-grid line {
+  stroke: var(--border);
+}
+.recharts-default-legend .recharts-legend-item-text {
+  color: var(--muted-foreground) !important;
+}
+.chart-fill-1 {
+  fill: var(--chart-1);
+}
+.chart-fill-2 {
+  fill: var(--chart-2);
+}
+.chart-fill-3 {
+  fill: var(--chart-3);
+}
+.chart-fill-dim {
+  fill: var(--chart-4);
+  fill-opacity: 0.55;
+}
+/* swatch màu của legend (category-chart: Recall@5, Citation Acc, Refusal
+   Acc — khớp thứ tự Bar trong component) */
+.recharts-default-legend .recharts-legend-item:nth-child(1) path {
+  fill: var(--chart-2);
+}
+.recharts-default-legend .recharts-legend-item:nth-child(2) path {
+  fill: var(--chart-3);
+}
+.recharts-default-legend .recharts-legend-item:nth-child(3) path {
+  fill: var(--chart-1);
+}
