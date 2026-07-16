@@ -1,20 +1,27 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Space_Grotesk, Manrope, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { SmoothScrollProvider } from "@/components/smooth-scroll-provider";
+import { ThemeProvider } from "@/components/theme-provider";
 import { Navbar } from "@/components/navbar";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  // Geist ships cyrillic/latin/latin-ext only (no dedicated "vietnamese"
-  // subset in next/font/google) — latin-ext covers Vietnamese combining
-  // diacritics well enough via fallback glyph composition.
-  subsets: ["latin", "latin-ext"],
+// Bộ phông hiện đại, CẢ 3 đều có subset "vietnamese" thật trên Google
+// Fonts (không dựa vào fallback glyph latin-ext như Geist trước đây):
+// Space Grotesk = display/heading (cá tính kỹ thuật), Manrope = body
+// (geometric, dễ đọc), JetBrains Mono = số liệu/code.
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
+  subsets: ["latin", "vietnamese"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const manrope = Manrope({
+  variable: "--font-manrope",
+  subsets: ["latin", "vietnamese"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin", "vietnamese"],
 });
 
 export const metadata: Metadata = {
@@ -29,17 +36,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    // suppressHydrationWarning: next-themes đổi class trên <html> trước
+    // hydration (và browser extension cũng có thể sửa attribute ở đây) —
+    // đây là mismatch có chủ đích ở đúng 1 phần tử này, không lan xuống con.
     <html
       lang="vi"
-      className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
+      suppressHydrationWarning
+      className={`${spaceGrotesk.variable} ${manrope.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-background text-foreground">
-        <SmoothScrollProvider>
-          <Navbar />
-          <main className="flex-1">{children}</main>
-        </SmoothScrollProvider>
-        {/* film grain — fixed + pointer-events-none, không repaint khi cuộn */}
-        <div className="noise-overlay" aria-hidden />
+        <ThemeProvider>
+          <SmoothScrollProvider>
+            <Navbar />
+            <main className="flex-1">{children}</main>
+          </SmoothScrollProvider>
+          {/* film grain — fixed + pointer-events-none, không repaint khi cuộn */}
+          <div className="noise-overlay" aria-hidden />
+        </ThemeProvider>
       </body>
     </html>
   );

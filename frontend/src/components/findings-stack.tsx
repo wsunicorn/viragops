@@ -43,7 +43,7 @@ function StackCard({ i, total }: { i: number; total: number }) {
         <p className="mt-4 max-w-[65ch] text-base leading-relaxed text-muted-foreground text-pretty">
           {f.story}
         </p>
-        <p className="mt-6 border-t border-white/8 pt-4 font-mono text-xs text-muted-foreground/70">
+        <p className="mt-6 border-t border-border pt-4 font-mono text-xs text-muted-foreground/70">
           {f.evidence}
         </p>
       </motion.article>

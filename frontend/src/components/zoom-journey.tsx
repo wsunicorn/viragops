@@ -210,7 +210,7 @@ export function ZoomJourney() {
 
         {/* HUD trái: tiến trình + nhãn lớp */}
         <div className="absolute top-1/2 left-6 z-10 flex -translate-y-1/2 items-stretch gap-4 lg:left-10">
-          <div className="relative w-px overflow-hidden rounded-full bg-white/10">
+          <div className="relative w-px overflow-hidden rounded-full bg-foreground/10">
             <div ref={barRef} className="absolute inset-x-0 top-0 h-full origin-top bg-accent" style={{ transform: "scaleY(0)" }} />
           </div>
           <ol className="flex flex-col justify-between gap-4 py-1">

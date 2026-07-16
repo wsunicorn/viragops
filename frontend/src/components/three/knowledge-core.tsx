@@ -5,22 +5,18 @@ import { useMemo, useRef } from "react";
 import * as THREE from "three";
 
 /**
- * "Lõi tri thức" — vật thể 3D thật (WebGL qua React Three Fiber), không
- * phải ảnh tĩnh: vỏ icosahedron wireframe (ranh giới hệ thống / "the
- * gate"), lõi phát sáng bên trong (tri thức đã index), đám hạt quanh lõi
- * (222 chunk thật của corpus) và 3 vành đai quỹ đạo (vòng đời data →
- * eval → feedback).
+ * "Cuốn sổ tay quy chế" — vật thể 3D thật (WebGL/R3F) gắn với đời sống
+ * sinh viên thay vì hình khối trừu tượng: một cuốn sách đang mở (chính
+ * là corpus 10 văn bản IUH của hệ thống), vài trang giấy bay lơ lửng
+ * phía trên và cột hạt tri thức bốc lên từ gáy sách.
  *
- * Tương tác: tự xoay chậm + nghiêng theo con trỏ (parallax). Toàn bộ
- * animation chạy trong useFrame (ngoài React render cycle) — không
- * setState mỗi frame.
+ * Theme-aware: nhận bảng màu theo light/dark từ HeroVisual. Toàn bộ
+ * animation trong useFrame (không setState mỗi frame).
  */
 
-const ACCENT = "#5eead4"; // xấp xỉ oklch(0.83 0.138 172) — teal accent duy nhất
-const ACCENT_DIM = "#2dd4bf";
+import { DARK_COLORS, type CoreColors } from "./core-colors";
 
 function seededRandom(seed: number) {
-  // LCG nhỏ gọn — kết quả ổn định giữa các lần render (tránh hydration lệch)
   let s = seed;
   return () => {
     s = (s * 1664525 + 1013904223) % 4294967296;
@@ -28,121 +24,170 @@ function seededRandom(seed: number) {
   };
 }
 
-function ChunkParticles({ count = 500 }: { count?: number }) {
+/** Cột hạt "tri thức" bốc lên từ gáy sách, lặp vô tận. */
+function RisingKnowledge({ color, count = 220 }: { color: string; count?: number }) {
   const ref = useRef<THREE.Points>(null);
-  const positions = useMemo(() => {
-    const rand = seededRandom(20260715);
-    const arr = new Float32Array(count * 3);
+  const data = useMemo(() => {
+    const rand = seededRandom(20260716);
+    const positions = new Float32Array(count * 3);
+    const speeds = new Float32Array(count);
     for (let i = 0; i < count; i++) {
-      // phân bố trong vỏ cầu bán kính 2.05–3.1 (ngoài lõi, quanh vỏ)
-      const r = 2.05 + rand() * 1.05;
+      const r = Math.sqrt(rand()) * 1.3;
       const theta = rand() * Math.PI * 2;
-      const phi = Math.acos(2 * rand() - 1);
-      arr[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-      arr[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-      arr[i * 3 + 2] = r * Math.cos(phi);
+      positions[i * 3] = Math.cos(theta) * r;
+      positions[i * 3 + 1] = rand() * 2.6 - 0.2; // từ mặt sách lên
+      positions[i * 3 + 2] = Math.sin(theta) * r * 0.7;
+      speeds[i] = 0.25 + rand() * 0.5;
     }
-    return arr;
+    return { positions, speeds };
   }, [count]);
 
   useFrame((_, delta) => {
-    if (ref.current) ref.current.rotation.y -= delta * 0.03;
+    const pts = ref.current;
+    if (!pts) return;
+    const pos = pts.geometry.attributes.position as THREE.BufferAttribute;
+    const arr = pos.array as Float32Array;
+    for (let i = 0; i < count; i++) {
+      arr[i * 3 + 1] += data.speeds[i] * delta;
+      if (arr[i * 3 + 1] > 2.4) arr[i * 3 + 1] = -0.2;
+    }
+    pos.needsUpdate = true;
   });
 
   return (
-    <points ref={ref}>
+    <points ref={ref} position={[0, 0.1, 0]}>
       <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+        <bufferAttribute attach="attributes-position" args={[data.positions, 3]} />
       </bufferGeometry>
-      <pointsMaterial size={0.02} color={ACCENT} transparent opacity={0.55} sizeAttenuation depthWrite={false} />
+      <pointsMaterial size={0.022} color={color} transparent opacity={0.5} sizeAttenuation depthWrite={false} />
     </points>
   );
 }
 
-function OrbitRing({ radius, tiltX, tiltZ, speed }: { radius: number; tiltX: number; tiltZ: number; speed: number }) {
-  const ref = useRef<THREE.Mesh>(null);
-  useFrame((_, delta) => {
-    if (ref.current) ref.current.rotation.y += delta * speed;
+/** Một trang giấy bay lơ lửng — nghiêng nhẹ, dập dềnh theo pha riêng. */
+function FloatingPage({
+  color,
+  position,
+  phase,
+  rotY,
+}: {
+  color: string;
+  position: [number, number, number];
+  phase: number;
+  rotY: number;
+}) {
+  const ref = useRef<THREE.Group>(null);
+  useFrame((state) => {
+    const g = ref.current;
+    if (!g) return;
+    const t = state.clock.elapsedTime;
+    g.position.y = position[1] + Math.sin(t * 0.9 + phase) * 0.12;
+    g.rotation.z = Math.sin(t * 0.7 + phase) * 0.1;
+    g.rotation.y = rotY + Math.sin(t * 0.5 + phase) * 0.15;
   });
   return (
-    <mesh ref={ref} rotation={[tiltX, 0, tiltZ]}>
-      <torusGeometry args={[radius, 0.006, 8, 128]} />
-      <meshBasicMaterial color={ACCENT_DIM} transparent opacity={0.28} />
-    </mesh>
+    <group ref={ref} position={position} rotation={[0.15, rotY, 0]}>
+      <mesh>
+        <planeGeometry args={[0.62, 0.84]} />
+        <meshStandardMaterial color={color} side={THREE.DoubleSide} roughness={0.9} metalness={0} />
+      </mesh>
+      {/* các "dòng chữ" trên trang — thanh mảnh tối màu */}
+      {[0.26, 0.14, 0.02, -0.1, -0.22].map((y, i) => (
+        <mesh key={i} position={[0, y, 0.002]}>
+          <planeGeometry args={[i % 3 === 2 ? 0.3 : 0.44, 0.025]} />
+          <meshBasicMaterial color="#94a3b8" transparent opacity={0.55} side={THREE.DoubleSide} />
+        </mesh>
+      ))}
+    </group>
   );
 }
 
-function CoreScene({ animate }: { animate: boolean }) {
+/** Nửa cuốn sách (bìa + chồng trang), hinge tại gáy (x=0). */
+function BookHalf({ side, colors }: { side: 1 | -1; colors: CoreColors }) {
+  const openAngle = 0.38; // rad
+  return (
+    <group rotation={[0, 0, side * openAngle]}>
+      {/* bìa */}
+      <mesh position={[side * 0.78, -0.07, 0]}>
+        <boxGeometry args={[1.56, 0.07, 2.15]} />
+        <meshStandardMaterial color={colors.cover} roughness={0.6} metalness={0.1} />
+      </mesh>
+      {/* chồng trang */}
+      <mesh position={[side * 0.75, 0.015, 0]}>
+        <boxGeometry args={[1.44, 0.1, 2.02]} />
+        <meshStandardMaterial color={colors.page} roughness={0.95} />
+      </mesh>
+    </group>
+  );
+}
+
+function BookScene({ animate, colors }: { animate: boolean; colors: CoreColors }) {
   const tilt = useRef<THREE.Group>(null);
   const spin = useRef<THREE.Group>(null);
-  const core = useRef<THREE.Mesh>(null);
-  const coreMat = useRef<THREE.MeshStandardMaterial>(null);
+  const glowMat = useRef<THREE.MeshBasicMaterial>(null);
 
   useFrame((state, delta) => {
     if (!animate) return;
     const t = state.clock.elapsedTime;
-    if (spin.current) spin.current.rotation.y += delta * 0.12;
+    if (spin.current) spin.current.rotation.y += delta * 0.16;
     if (tilt.current) {
-      // nghiêng nhẹ theo con trỏ, lerp cho mượt — không giật theo pixel
-      tilt.current.rotation.x = THREE.MathUtils.lerp(tilt.current.rotation.x, state.pointer.y * -0.22, 0.04);
-      tilt.current.rotation.z = THREE.MathUtils.lerp(tilt.current.rotation.z, state.pointer.x * 0.12, 0.04);
-      tilt.current.position.y = Math.sin(t * 0.6) * 0.08; // float chậm
+      tilt.current.rotation.x = THREE.MathUtils.lerp(tilt.current.rotation.x, 0.42 + state.pointer.y * -0.14, 0.04);
+      tilt.current.rotation.z = THREE.MathUtils.lerp(tilt.current.rotation.z, state.pointer.x * 0.08, 0.04);
+      tilt.current.position.y = Math.sin(t * 0.6) * 0.09 - 0.15;
     }
-    if (core.current) {
-      const pulse = 1 + Math.sin(t * 1.4) * 0.045;
-      core.current.scale.setScalar(pulse);
-    }
-    if (coreMat.current) {
-      coreMat.current.emissiveIntensity = 1.05 + Math.sin(t * 1.4) * 0.25;
+    if (glowMat.current) {
+      glowMat.current.opacity = 0.5 + Math.sin(t * 1.6) * 0.18;
     }
   });
 
   return (
-    <group ref={tilt}>
+    <group ref={tilt} rotation={[0.42, 0, 0]} position={[0, -0.15, 0]}>
       <group ref={spin}>
-        {/* Vỏ hệ thống — wireframe */}
-        <lineSegments>
-          <edgesGeometry args={[new THREE.IcosahedronGeometry(2, 1)]} />
-          <lineBasicMaterial color={ACCENT} transparent opacity={0.32} />
-        </lineSegments>
-
-        {/* Lõi phát sáng */}
-        <mesh ref={core}>
-          <icosahedronGeometry args={[0.85, 1]} />
-          <meshStandardMaterial
-            ref={coreMat}
-            color="#0a1614"
-            emissive={ACCENT_DIM}
-            emissiveIntensity={1.05}
-            roughness={0.35}
-            metalness={0.2}
-            flatShading
-          />
+        {/* thân sách mở */}
+        <BookHalf side={-1} colors={colors} />
+        <BookHalf side={1} colors={colors} />
+        {/* gáy sách */}
+        <mesh position={[0, -0.09, 0]}>
+          <boxGeometry args={[0.14, 0.09, 2.15]} />
+          <meshStandardMaterial color={colors.coverEdge} roughness={0.6} />
+        </mesh>
+        {/* vệt sáng tri thức dọc gáy */}
+        <mesh position={[0, 0.09, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[0.5, 2.0]} />
+          <meshBasicMaterial ref={glowMat} color={colors.glow} transparent opacity={0.5} depthWrite={false} />
         </mesh>
 
-        <ChunkParticles />
-        <OrbitRing radius={1.45} tiltX={Math.PI / 2.6} tiltZ={0.4} speed={0.35} />
-        <OrbitRing radius={1.75} tiltX={Math.PI / 1.9} tiltZ={-0.5} speed={-0.22} />
-        <OrbitRing radius={2.35} tiltX={Math.PI / 2.15} tiltZ={1.1} speed={0.14} />
+        {/* trang giấy bay lơ lửng */}
+        <FloatingPage color={colors.page} position={[-0.85, 1.15, 0.15]} phase={0} rotY={0.5} />
+        <FloatingPage color={colors.page} position={[0.15, 1.55, -0.25]} phase={2.1} rotY={-0.3} />
+        <FloatingPage color={colors.page} position={[0.95, 1.05, 0.3]} phase={4.2} rotY={0.9} />
+
+        <RisingKnowledge color={colors.particle} />
       </group>
     </group>
   );
 }
 
-export default function KnowledgeCore({ animate = true }: { animate?: boolean }) {
+export default function KnowledgeCore({
+  animate = true,
+  colors = DARK_COLORS,
+}: {
+  animate?: boolean;
+  colors?: CoreColors;
+}) {
   return (
     <Canvas
       dpr={[1, 1.75]}
-      camera={{ position: [0, 0, 6.4], fov: 42 }}
+      camera={{ position: [0, 0.7, 5.6], fov: 40 }}
       gl={{ antialias: true, alpha: true }}
       frameloop={animate ? "always" : "demand"}
       style={{ background: "transparent" }}
       aria-hidden
     >
-      <ambientLight intensity={0.5} />
-      <pointLight position={[4, 4, 5]} intensity={40} color={ACCENT} />
-      <pointLight position={[-4, -2, -4]} intensity={12} color="#ffffff" />
-      <CoreScene animate={animate} />
+      <ambientLight intensity={colors.ambient} />
+      <directionalLight position={[3, 5, 4]} intensity={2.2} />
+      <pointLight position={[0, 1.2, 0.5]} intensity={6} color={colors.glow} />
+      <BookScene animate={animate} colors={colors} />
     </Canvas>
   );
 }

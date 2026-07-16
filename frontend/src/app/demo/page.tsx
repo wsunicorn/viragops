@@ -47,7 +47,7 @@ export default function DemoPage() {
           <ApiStatusBadge status={apiUp} />
         </div>
         <p className="text-muted-foreground text-pretty">
-          Gọi trực tiếp <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-xs">/qa/query</code> của
+          Gọi trực tiếp <code className="rounded bg-foreground/10 px-1.5 py-0.5 font-mono text-xs">/qa/query</code> của
           FastAPI backend — retrieval Qdrant thật, sinh câu trả lời qua LiteLLM gateway thật, không mô phỏng.
           Câu trả lời có thể chậm (vài giây tới hơn chục giây) tuỳ tầng model đang phục vụ.
         </p>
@@ -62,7 +62,7 @@ export default function DemoPage() {
               handleSubmit(ex.question);
             }}
             disabled={loading}
-            className="rounded-full border border-white/10 bg-white/3 px-3.5 py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground disabled:opacity-40"
+            className="rounded-full border border-border bg-foreground/3 px-3.5 py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground disabled:opacity-40"
           >
             <span className="mr-1.5 font-mono text-accent">{ex.category}</span>
             {ex.question.length > 46 ? ex.question.slice(0, 46) + "…" : ex.question}
@@ -83,7 +83,7 @@ export default function DemoPage() {
             onChange={(e) => setQuestion(e.target.value)}
             placeholder="Nhập câu hỏi về quy chế đào tạo IUH..."
             rows={3}
-            className="resize-none rounded-2xl border-white/10 bg-white/3 pr-14 text-base"
+            className="resize-none rounded-2xl border-border bg-foreground/3 pr-14 text-base"
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -140,20 +140,20 @@ function LoadingCard() {
   // Skeleton shimmer ĐÚNG bố cục của ResponseCard (không dùng spinner
   // tròn chung chung) — không giật layout khi câu trả lời thật về.
   return (
-    <Card className="gap-4 border-white/10 bg-white/2 p-6" aria-busy>
+    <Card className="gap-4 border-border bg-foreground/2 p-6" aria-busy>
       <div className="flex items-center justify-between">
-        <div className="shimmer h-4 w-36 rounded-md bg-white/6" />
-        <div className="shimmer h-3 w-40 rounded-md bg-white/5" />
+        <div className="shimmer h-4 w-36 rounded-md bg-foreground/6" />
+        <div className="shimmer h-3 w-40 rounded-md bg-foreground/5" />
       </div>
       <div className="space-y-2.5">
-        <div className="shimmer h-4 w-full rounded-md bg-white/6" />
-        <div className="shimmer h-4 w-[92%] rounded-md bg-white/6" />
-        <div className="shimmer h-4 w-[78%] rounded-md bg-white/6" />
+        <div className="shimmer h-4 w-full rounded-md bg-foreground/6" />
+        <div className="shimmer h-4 w-[92%] rounded-md bg-foreground/6" />
+        <div className="shimmer h-4 w-[78%] rounded-md bg-foreground/6" />
       </div>
-      <div className="space-y-2 border-t border-white/10 pt-4">
-        <div className="shimmer h-3 w-24 rounded-md bg-white/5" />
-        <div className="shimmer h-14 w-full rounded-lg bg-white/4" />
-        <div className="shimmer h-14 w-full rounded-lg bg-white/4" />
+      <div className="space-y-2 border-t border-border pt-4">
+        <div className="shimmer h-3 w-24 rounded-md bg-foreground/5" />
+        <div className="shimmer h-14 w-full rounded-lg bg-foreground/4" />
+        <div className="shimmer h-14 w-full rounded-lg bg-foreground/4" />
       </div>
       <p className="flex items-center gap-2 text-xs text-muted-foreground">
         <Loader2 className="size-3.5 animate-spin text-accent" />
@@ -181,7 +181,7 @@ function ResponseCard({ response }: { response: QAResponse }) {
   return (
     <Card
       className={cn(
-        "gap-4 border-white/10 bg-white/3 p-6",
+        "gap-4 border-border bg-foreground/3 p-6",
         response.refusal && "border-amber-500/25 bg-amber-500/4",
       )}
     >
@@ -200,7 +200,7 @@ function ResponseCard({ response }: { response: QAResponse }) {
       <p className="text-base leading-relaxed text-pretty">{response.answer}</p>
 
       {response.citations.length > 0 ? (
-        <div className="space-y-2 border-t border-white/10 pt-4">
+        <div className="space-y-2 border-t border-border pt-4">
           <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
             Trích dẫn ({response.citations.length})
           </p>
@@ -210,7 +210,7 @@ function ResponseCard({ response }: { response: QAResponse }) {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ type: "spring", stiffness: 200, damping: 24, delay: 0.15 + i * 0.09 }}
-              className="flex items-start gap-2.5 rounded-lg bg-white/3 p-3"
+              className="flex items-start gap-2.5 rounded-lg bg-foreground/3 p-3"
             >
               <FileText className="mt-0.5 size-3.5 shrink-0 text-accent" />
               <div className="min-w-0 text-sm">
@@ -223,7 +223,7 @@ function ResponseCard({ response }: { response: QAResponse }) {
         </div>
       ) : null}
 
-      <div className="flex flex-wrap gap-x-5 gap-y-1.5 border-t border-white/10 pt-4 font-mono text-[11px] text-muted-foreground/70">
+      <div className="flex flex-wrap gap-x-5 gap-y-1.5 border-t border-border pt-4 font-mono text-[11px] text-muted-foreground/70">
         <span>model: {response.model.model}</span>
         <span>provider: {response.model.provider}</span>
         <span>tokens: {response.usage.input_tokens}→{response.usage.output_tokens}</span>

@@ -25,7 +25,7 @@ export function PhaseTimeline() {
 
   return (
     <div ref={ref} className="relative">
-      <div className="absolute top-0 bottom-0 left-[15px] w-px bg-white/10 sm:left-[19px]" />
+      <div className="absolute top-0 bottom-0 left-[15px] w-px bg-foreground/10 sm:left-[19px]" />
       <motion.div
         className="absolute top-0 left-[15px] w-px bg-linear-to-b from-primary to-accent sm:left-[19px]"
         style={{ height: lineHeight }}
@@ -47,12 +47,12 @@ export function PhaseTimeline() {
                   "relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full border sm:size-10",
                   phase.status === "done" && "border-accent/40 bg-accent/15 text-accent",
                   phase.status === "in_progress" && "border-primary/40 bg-primary/15 text-primary",
-                  phase.status === "planned" && "border-white/10 bg-white/5 text-muted-foreground",
+                  phase.status === "planned" && "border-border bg-foreground/5 text-muted-foreground",
                 )}
               >
                 <Icon className={cn("size-4", phase.status === "in_progress" && "animate-spin")} />
               </div>
-              <div className="min-w-0 flex-1 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+              <div className="min-w-0 flex-1 rounded-xl border border-border bg-foreground/2 p-4">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                   <span className="font-mono text-xs text-muted-foreground">Phase {phase.n}</span>
                   <span className="text-xs text-muted-foreground/70">{phase.weeks}</span>
@@ -61,7 +61,7 @@ export function PhaseTimeline() {
                       "ml-auto rounded-full px-2 py-0.5 text-[11px] font-medium",
                       phase.status === "done" && "bg-accent/15 text-accent",
                       phase.status === "in_progress" && "bg-primary/15 text-primary",
-                      phase.status === "planned" && "bg-white/5 text-muted-foreground",
+                      phase.status === "planned" && "bg-foreground/5 text-muted-foreground",
                     )}
                   >
                     {STATUS_LABEL[phase.status]}

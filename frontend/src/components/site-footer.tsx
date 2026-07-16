@@ -3,7 +3,7 @@ import { Hexagon } from "lucide-react";
 
 export function SiteFooter() {
   return (
-    <footer className="relative overflow-hidden border-t border-white/8 px-4 pt-14 pb-10">
+    <footer className="relative overflow-hidden border-t border-border px-4 pt-14 pb-10">
       <div className="mx-auto max-w-5xl">
         <div className="flex flex-col justify-between gap-8 sm:flex-row sm:items-end">
           <div className="max-w-md">
@@ -28,7 +28,7 @@ export function SiteFooter() {
             </Link>
           </nav>
         </div>
-        <p className="mt-10 border-t border-white/8 pt-5 font-mono text-[11px] text-muted-foreground/50">
+        <p className="mt-10 border-t border-border pt-5 font-mono text-[11px] text-muted-foreground/50">
           every change goes through the gate · 12 phase · 6 experiment · 300 câu golden set
         </p>
       </div>

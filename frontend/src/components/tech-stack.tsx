@@ -26,7 +26,7 @@ function MarqueeRow({ items, reverse, duration }: { items: string[]; reverse?: b
           <span
             key={i}
             aria-hidden={i >= items.length}
-            className="shrink-0 rounded-full border border-white/10 bg-white/3 px-4 py-2 font-mono text-sm whitespace-nowrap text-foreground/85"
+            className="shrink-0 rounded-full border border-border bg-foreground/3 px-4 py-2 font-mono text-sm whitespace-nowrap text-foreground/85"
           >
             {item}
           </span>

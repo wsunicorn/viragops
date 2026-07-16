@@ -29,7 +29,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: EASE }}
-            className="mb-7 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs text-muted-foreground"
+            className="mb-7 inline-flex items-center gap-2 rounded-full border border-border bg-foreground/5 px-4 py-1.5 text-xs text-muted-foreground"
           >
             <span className="relative flex size-1.5">
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-accent opacity-75" />
@@ -76,7 +76,7 @@ export function Hero() {
               href="/dashboard"
               className={cn(
                 buttonVariants({ size: "lg", variant: "outline" }),
-                "rounded-full border-white/15 px-6",
+                "rounded-full border-border px-6",
               )}
             >
               Số liệu thực nghiệm
@@ -88,7 +88,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.34, ease: EASE }}
-            className="mt-14 grid max-w-lg grid-cols-3 divide-x divide-white/10"
+            className="mt-14 grid max-w-lg grid-cols-3 divide-x divide-border"
           >
             {[
               { v: `${GOLDEN_SET_STATS.total}`, l: "câu golden set" },

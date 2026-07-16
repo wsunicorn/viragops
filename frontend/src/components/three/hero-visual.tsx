@@ -2,6 +2,8 @@
 
 import dynamic from "next/dynamic";
 import { useSyncExternalStore } from "react";
+import { useTheme } from "next-themes";
+import { DARK_COLORS, LIGHT_COLORS } from "./core-colors";
 
 /**
  * Client wrapper cho canvas 3D: dynamic import ssr:false (WebGL không
@@ -46,12 +48,15 @@ function useReducedMotion(): boolean {
 
 export function HeroVisual() {
   const reduced = useReducedMotion();
+  const { resolvedTheme } = useTheme();
+  const isLight = resolvedTheme === "light";
 
   return (
     <div className="relative size-full min-h-72 sm:min-h-96" aria-hidden>
       {/* quầng sáng accent phía sau vật thể — 1 màu duy nhất, không orb tím */}
       <div className="absolute inset-0 m-auto size-72 rounded-full bg-accent/10 blur-[110px]" />
-      <KnowledgeCore animate={!reduced} />
+      {/* key theo theme: remount canvas để material nhận bảng màu mới */}
+      <KnowledgeCore key={isLight ? "light" : "dark"} animate={!reduced} colors={isLight ? LIGHT_COLORS : DARK_COLORS} />
     </div>
   );
 }

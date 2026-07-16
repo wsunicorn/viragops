@@ -144,7 +144,7 @@ function BentoTile({ m }: { m: Module }) {
       onPointerMove={onPointerMove}
       onPointerLeave={onPointerLeave}
       style={{ rotateX: rx, rotateY: ry, transformPerspective: 900 }}
-      className="group relative h-full overflow-hidden rounded-3xl border border-white/9 bg-white/3 p-6 will-change-transform"
+      className="group relative h-full overflow-hidden rounded-3xl border border-border bg-foreground/3 p-6 will-change-transform"
     >
       {/* spotlight theo con trỏ */}
       <div
@@ -152,7 +152,7 @@ function BentoTile({ m }: { m: Module }) {
         className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{
           background:
-            "radial-gradient(340px circle at var(--spot-x, 50%) var(--spot-y, 50%), oklch(0.83 0.138 172 / 8%), transparent 65%)",
+            "radial-gradient(340px circle at var(--spot-x, 50%) var(--spot-y, 50%), color-mix(in oklab, var(--accent) 9%, transparent), transparent 65%)",
         }}
       />
       <div className="relative">
@@ -164,7 +164,7 @@ function BentoTile({ m }: { m: Module }) {
         </div>
         <h3 className="text-sm font-semibold tracking-tight">{m.title}</h3>
         <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{m.role}</p>
-        <div className="mt-4 flex min-h-6 items-center justify-between gap-2 border-t border-white/8 pt-3">
+        <div className="mt-4 flex min-h-6 items-center justify-between gap-2 border-t border-border pt-3">
           <p className="font-mono text-[11px] text-muted-foreground/70">{m.output}</p>
           {m.widget === "gate" ? <GateWidget /> : null}
           {m.widget === "qa" ? <QaWidget /> : null}

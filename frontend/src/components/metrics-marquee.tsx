@@ -19,7 +19,7 @@ const METRICS: { value: string; label: string }[] = [
 export function MetricsMarquee() {
   const items = [...METRICS, ...METRICS]; // nhân đôi cho vòng lặp khép kín
   return (
-    <div className="marquee-mask relative overflow-hidden border-y border-white/8 py-4">
+    <div className="marquee-mask relative overflow-hidden border-y border-border py-4">
       <div className="marquee-track gap-10" style={{ "--marquee-duration": "48s" } as React.CSSProperties}>
         {items.map((m, i) => (
           <div key={i} className="flex shrink-0 items-baseline gap-2.5" aria-hidden={i >= METRICS.length}>

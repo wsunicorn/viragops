@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { motion, useScroll, useSpring } from "motion/react";
 import { cn } from "@/lib/utils";
 import { Hexagon } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const LINKS = [
   { href: "/", label: "Tổng quan" },
@@ -35,7 +36,7 @@ export function Navbar() {
                 href={link.href}
                 className={cn(
                   "relative rounded-full px-3.5 py-1.5 text-sm transition-colors",
-                  active ? "text-accent" : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
+                  active ? "text-accent" : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground",
                 )}
               >
                 {active ? (
@@ -49,6 +50,8 @@ export function Navbar() {
               </Link>
             );
           })}
+          <span className="mx-1 h-4 w-px bg-border" aria-hidden />
+          <ThemeToggle />
         </div>
         {/* thanh tiến độ cuộn trang — nằm ở mép dưới pill */}
         <motion.span

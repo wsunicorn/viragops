@@ -12,7 +12,7 @@ export function MetricGrid({ metrics }: { metrics: MetricRow[] }) {
             className={cn(
               "h-full rounded-xl border p-4",
               m.pass === undefined
-                ? "border-white/10 bg-white/[0.02]"
+                ? "border-border bg-foreground/2"
                 : m.pass
                   ? "border-accent/20 bg-accent/[0.04]"
                   : "border-amber-500/25 bg-amber-500/[0.04]",
