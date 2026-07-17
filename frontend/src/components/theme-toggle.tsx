@@ -24,7 +24,9 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      aria-label={isDark ? "Chuyển sang nền sáng" : "Chuyển sang nền tối"}
+      // label chỉ đổi theo theme SAU khi mounted — server không biết theme
+      // (localStorage), label động lúc SSR chính là nguồn hydration mismatch
+      aria-label={mounted ? (isDark ? "Chuyển sang nền sáng" : "Chuyển sang nền tối") : "Chuyển giao diện sáng/tối"}
       className="relative flex size-8 cursor-pointer items-center justify-center overflow-hidden rounded-full text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-foreground active:scale-95"
     >
       {mounted ? (
