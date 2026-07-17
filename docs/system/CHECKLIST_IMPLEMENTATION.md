@@ -1308,7 +1308,12 @@ gây hiểu nhầm là đã đo được.
   gate. Hệ quả chấp nhận: job `quality-gate-live` sẽ đỏ/xanh THẬT theo
   từng run smoke (hallucination dao động 0.029→0.075→0.10 quanh ngưỡng
   0.05 với n_judged≈40, tức 1-2 câu chênh lệch là đổi quyết định) — đỏ
-  khi đó là tín hiệu đúng, không phải lỗi hạ tầng.
+  khi đó là tín hiệu đúng, không phải lỗi hạ tầng. Run live ngay sau
+  commit (c) (2026-07-17 04:01): **WARN → CI xanh** — toàn bộ critical
+  metric đạt THẬT trong run đó (kể cả hallucination_rate, ngưỡng 0.05
+  không hề được nới), chỉ còn warning `citation_accuracy=0.8356 < 0.85`
+  quen thuộc. Xanh nhờ (b)+(c) kết hợp: hết nhiễu transient + run này
+  hallucination rơi trong ngưỡng — KHÔNG phải nhờ nới ngưỡng chất lượng.
 
 ---
 
