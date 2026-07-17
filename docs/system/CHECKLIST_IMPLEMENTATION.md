@@ -1294,6 +1294,21 @@ gây hiểu nhầm là đã đo được.
   nhạy với n=50: chỉ 1 câu lỗi là error_rate 0.02 > 0.01), KHÔNG phải hồi
   quy do commit fix CI (commit chỉ đổi lệnh cài dependency;
   fallback_rate=0.000, prompt p7 đúng bản production).
+- **Xử lý tiếp theo của vụ gate BLOCK trên (2026-07-17, theo trình tự
+  user chốt: rerun → xem lại ngưỡng → chấp nhận):** (b) rerun job →
+  vẫn BLOCK nhưng chỉ còn 1 vi phạm critical `hallucination_rate=0.075`
+  (error_rate=0 và refusal_accuracy đạt lại → xác nhận 2 vi phạm đó của
+  run trước là nhiễu transient/n-nhỏ). (c) nới `error_rate` 0.01→0.02
+  đồng bộ 5 nơi (config/quality_gate.yaml, report.py, test_quality_gate.py,
+  contracts/config_schemas.md, contracts/metric_definitions.md) với lý do
+  đo được thật: ở smoke n=50, max 0.01 đồng nghĩa cấm tuyệt đối 1 câu lỗi
+  mạng transient (1/50=0.02). **CỐ Ý KHÔNG nới `hallucination_rate` (0.05)
+  và `refusal_accuracy` (0.90)** — đây là chỉ số chất lượng thật phản ánh
+  gap multi-hop đã biết; nới chúng để CI xanh là vô hiệu hoá chính quality
+  gate. Hệ quả chấp nhận: job `quality-gate-live` sẽ đỏ/xanh THẬT theo
+  từng run smoke (hallucination dao động 0.029→0.075→0.10 quanh ngưỡng
+  0.05 với n_judged≈40, tức 1-2 câu chênh lệch là đổi quyết định) — đỏ
+  khi đó là tín hiệu đúng, không phải lỗi hạ tầng.
 
 ---
 

@@ -29,8 +29,12 @@ critical_metrics:
     min: 0.90
   p95_latency_seconds:
     max: 6.0
+  # 0.01 -> 0.02 (2026-07-17): ở smoke n=50, max 0.01 nghĩa là KHÔNG cho
+  # phép bất kỳ 1 câu lỗi transient nào (1/50 = 0.02) — CI run 20260717_0301
+  # BLOCK vì đúng 1 câu lỗi mạng, rerun ngay sau đó 0 lỗi. 0.02 = chấp nhận
+  # đúng 1 lỗi transient ở smoke; full 300 câu vẫn chặn từ 7 câu lỗi trở lên.
   error_rate:
-    max: 0.01
+    max: 0.02
 warning_metrics:
   citation_accuracy:
     min: 0.85

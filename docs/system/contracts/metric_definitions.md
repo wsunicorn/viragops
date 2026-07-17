@@ -35,7 +35,7 @@
 | p50 latency | Trung vị thời gian phản hồi | <= 3 giây |
 | p95 latency | 95% request dưới ngưỡng này | <= 6 giây |
 | cost/request | Chi phí trung bình mỗi request | <= 0.005 USD |
-| error rate | Tỷ lệ lỗi runtime | <= 0.01 |
+| error rate | Tỷ lệ lỗi runtime | <= 0.02 (nới từ 0.01 ngày 2026-07-17: smoke n=50 nghĩa là 1 câu lỗi transient = 0.02, ngưỡng cũ không cho phép bất kỳ lỗi vặt nào) |
 | cache hit rate | Tỷ lệ request dùng semantic cache | theo dõi |
 | fallback success rate | Tỷ lệ fallback thành công khi provider lỗi | >= 0.90 |
 

@@ -109,7 +109,7 @@ critical_metrics:
   p95_latency_seconds:
     max: 6.0
   error_rate:
-    max: 0.01
+    max: 0.02
 warning_metrics:
   citation_accuracy:
     min: 0.85

@@ -220,8 +220,8 @@ def write_markdown(
         row("p95 latency (generation)", "p95_latency_ms", overall["p95_latency_ms"]),
         f"| Avg cost/req | ${overall['avg_cost_usd']:.6f} | <= $0.005 | "
         f"{'ĐẠT' if overall['avg_cost_usd'] <= 0.005 else 'CHƯA ĐẠT'} |",
-        f"| Error rate | {_fmt(overall['error_rate'])} | <= 0.01 | "
-        f"{'ĐẠT' if overall['error_rate'] <= 0.01 else 'CHƯA ĐẠT'} |",
+        f"| Error rate | {_fmt(overall['error_rate'])} | <= 0.02 | "
+        f"{'ĐẠT' if overall['error_rate'] <= 0.02 else 'CHƯA ĐẠT'} |",
         f"| Fallback rate | {_fmt(overall['fallback_rate'])} | (theo dõi) | |",
         "| Cache hit rate | n/a | (theo dõi) | semantic cache chưa implement trong RAG runtime |",
         "",
