@@ -54,7 +54,10 @@ jobs:
       - name: Install dependencies
         # dataops/ragops cần cho tests/unit/test_chunker.py, test_sparse_bm25.py
         # (tiktoken, mmh3) từ Phase 3 — .[dev] một mình không đủ nữa.
-        run: pip install -e ".[dev,dataops,ragops]"
+        # observability cần từ Phase 10: src/rag/service.py import cứng
+        # src/observability/metrics.py (prometheus_client) lúc load module,
+        # nên mọi test import RagService/app đều cần nhóm này.
+        run: pip install -e ".[dev,dataops,ragops,observability]"
 
       - name: Lint (ruff)
         run: ruff check src tests
@@ -110,7 +113,7 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install -e ".[dev,dataops,ragops]"
+        run: pip install -e ".[dev,dataops,ragops,observability]"
 
       - name: Start qdrant + postgres + litellm (docker compose, giống local dev)
         run: docker compose up -d qdrant postgres litellm
