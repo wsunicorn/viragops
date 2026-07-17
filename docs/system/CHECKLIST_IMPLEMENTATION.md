@@ -1278,6 +1278,22 @@ gây hiểu nhầm là đã đo được.
 - `generate_demo_traffic.py` chưa có chế độ `--mock` (dùng MockGateway,
   không tốn quota) — lần verify Phase 10 này dùng RagService trực tiếp
   với MockGateway trong Python thay vì qua script cho phần đó.
+- ~~Phase 10 làm gãy CI mà không ai phát hiện suốt 3 ngày~~ — **đã fix
+  2026-07-17** (`.github/workflows/ci.yml` cài thêm `observability`
+  extras). `src/rag/service.py` từ Phase 10 import cứng
+  `src/observability/metrics.py` (`prometheus_client`) lúc load module,
+  nhưng CI chỉ cài `.[dev,dataops,ragops]` → mọi run từ commit Phase 10
+  (14/07) tới 17/07 đều đỏ ngay bước collect pytest. Cùng lớp lỗi với vụ
+  "CI chưa cài dataops/ragops" hồi Phase 3 — bài học lặp lại: thêm
+  optional-dependency group mới mà code core import cứng thì PHẢI cập
+  nhật lệnh cài trong CI ngay trong cùng commit. Sau khi fix, `lint-test`
+  xanh trở lại; `quality-gate-live` chạy lại lần đầu sau 3 ngày và BLOCK
+  với số liệu thật (hallucination_rate=0.1026, refusal_accuracy=0.88,
+  error_rate=0.02 = 1/50 câu lỗi) — cùng bản chất với lần BLOCK
+  `20260714_0320` đã phân tích ở Phase 9 (gap multi-hop đã biết + ngưỡng
+  nhạy với n=50: chỉ 1 câu lỗi là error_rate 0.02 > 0.01), KHÔNG phải hồi
+  quy do commit fix CI (commit chỉ đổi lệnh cài dependency;
+  fallback_rate=0.000, prompt p7 đúng bản production).
 
 ---
 
